@@ -3,17 +3,17 @@ package cloud
 import (
 	"fmt"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
+	"cmdb/utils"
 )
-
 
 func SyncAliECS() {
 	ecsClient, err := ecs.NewClientWithAccessKey(
-		"cn-beijing",             // 地域ID
-		"LTAIeT4TFO30pcQp",         // 您的Access Key ID
-		"sn3h6qh3O7P7dHBlR7J8KlcprOp8V9")        // 您的Access Key Secret
+		"cn-beijing",    // 地域ID
+		utils.AccessKey,         // 您的Access Key ID
+		utils.SecretKey)        // 您的Access Key Secret
 	if err != nil {
 		// 异常处理
-		panic(err)
+		fmt.Println("认证错误",err)
 	}
 	// 创建API请求并设置参数
 	request := ecs.CreateDescribeInstancesRequest()

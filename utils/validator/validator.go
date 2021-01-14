@@ -2,7 +2,7 @@ package validator
 
 import (
 	"fmt"
-	"ginblog/utils/errmsg"
+	"cmdb/utils/errmsg"
 	"github.com/go-playground/locales/zh_Hans_CN"
 	unTrans "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"

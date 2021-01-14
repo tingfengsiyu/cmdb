@@ -8,7 +8,7 @@ create table engine_room (
     create_time DATETIME ,
     update_time DATETIME ,
     cabinet_number varchar(30) NOT NULL
-    )  ENGINE = InnoDB AUTO_INCREMENT = 574 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = DYNAMIC ;
+    )  ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = DYNAMIC ;
 
 create table server (
     id int  primary key AUTO_INCREMENT,
@@ -23,7 +23,7 @@ create table server (
     create_time DATETIME ,
     update_time DATETIME ,
     location    varchar(30) NOT NULL
-)  ENGINE = InnoDB AUTO_INCREMENT = 574 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = DYNAMIC   ;
+)  ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = DYNAMIC   ;
 
 create table switch  (
        id int primary key AUTO_INCREMENT,
@@ -34,7 +34,7 @@ create table switch  (
        create_time DATETIME ,
        update_time DATETIME ,
        cabinet_number varchar(30) NOT NULL
-)  ENGINE = InnoDB AUTO_INCREMENT = 574 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = DYNAMIC   ;
+)  ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = DYNAMIC   ;
 
 create table router (
     id int primary key AUTO_INCREMENT,
@@ -45,4 +45,4 @@ create table router (
     create_time DATETIME ,
     update_time DATETIME ,
     cabinet_number varchar(30) NOT NULL
-)  ENGINE = InnoDB AUTO_INCREMENT = 574 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = DYNAMIC ;
+)  ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = DYNAMIC ;

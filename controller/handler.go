@@ -1,12 +1,12 @@
 package controller
 
 import (
+	"cmdb/api/v1/cloud"
+	"cmdb/db"
+	Auth "cmdb/middleware"
+	"cmdb/middleware/config"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"instances/cloud"
-	"instances/db"
-	Auth "instances/middleware"
-	"instances/middleware/config"
 	"net/http"
 	"strconv"
 )

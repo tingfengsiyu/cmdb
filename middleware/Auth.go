@@ -4,7 +4,7 @@ import (
 	"errors"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
-	config "instances/middleware/config"
+	config "cmdb/middleware/config"
 	"net/http"
 	"strings"
 	"time"

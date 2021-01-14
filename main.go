@@ -1,10 +1,11 @@
 package main
 
 import (
-	"fmt"
 	"cmdb/router"
+	"cmdb/model"
 )
 
 func main() {
-	fmt.Println("test")
+	model.InitDb()
+	router.InitRouter()
 }
