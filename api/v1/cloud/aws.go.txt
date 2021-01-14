@@ -5,7 +5,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"instances/db"
+	_"cmdb/model"
 )
 
 func SyncAwsECS() {
@@ -36,7 +36,7 @@ func SyncAwsECS() {
 
 				 */
 				//fmt.Println(*v.ImageId,*v.InstanceId)
-				imageName:=GetImageName(svc,*v.ImageId)
+				imageName:= GetImageName(svc,*v.ImageId)
 				deletesql := "delete from ecs WHERE InstanceId =? 	"
 				_,err = db.DB.Exec(deletesql,*v.InstanceId)
 				sqlStr := "insert into ecs (InstanceId,Name,CreateTime,ExpiredTime,PublicIpAddress,PrivateIpAddress,OsName,InstanceType,State,Regions,AvailabilityZones,Disk,Arch,User,Cloud )values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
