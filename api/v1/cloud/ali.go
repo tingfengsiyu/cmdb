@@ -1,19 +1,22 @@
 package cloud
 
 import (
+	"cmdb/utils"
 	"fmt"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
-	"cmdb/utils"
+	"github.com/gin-gonic/gin"
+	"net/http"
+	"strconv"
 )
 
 func SyncAliECS() {
 	ecsClient, err := ecs.NewClientWithAccessKey(
 		"cn-beijing",    // 地域ID
-		utils.AccessKey,         // 您的Access Key ID
-		utils.SecretKey)        // 您的Access Key Secret
+		utils.AccessKey, // 您的Access Key ID
+		utils.SecretKey) // 您的Access Key Secret
 	if err != nil {
 		// 异常处理
-		fmt.Println("认证错误",err)
+		fmt.Println("认证错误", err)
 	}
 	// 创建API请求并设置参数
 	request := ecs.CreateDescribeInstancesRequest()
@@ -38,4 +41,36 @@ func SyncAliECS() {
 		tmp.PublicIpAddress,
 		tmp.InnerIpAddress,
 		tmp.InstanceType)
+}
+
+func SyncDB(c *gin.Context) {
+	//cloud.SyncAwsECS()
+	c.JSON(http.StatusOK, gin.H{
+		"msg": "ok",
+	})
+}
+func EcsListAllHandler(c *gin.Context) {
+	var (
+		pageNum  int
+		pageSize int
+	)
+	tmpPageNum, _ := strconv.ParseInt(c.DefaultQuery("pagenum", "0"), 10, 64)
+	pageNum = int(tmpPageNum)
+	tmpPageSize, _ := strconv.ParseInt(c.DefaultQuery("pageSize", "25"), 10, 64)
+	pageSize = int(tmpPageSize)
+	fmt.Println(pageNum, pageSize)
+
+	////data,err := db.QueryAllEcs()
+	//if err != nil{
+	//	c.JSON(http.StatusOK,gin.H{
+	//		"code":500,
+	//		"msg": err,
+	//	})
+	//	return
+	//}else {
+	//	c.JSON(http.StatusOK,gin.H{
+	//		"code":200,
+	//		"msg": data,
+	//	})
+	//}
 }
