@@ -5,11 +5,14 @@ import (
 	"github.com/gin-gonic/gin"
 	//"cmdb/api/v1/cloud"
 	"cmdb/api/v1/idc"
+	"cmdb/middleware"
 )
 
 func InitRouter() {
 	gin.SetMode(utils.AppMode)
 	r := gin.New()
+	r.Use(middleware.Log())
+	r.Use(gin.Recovery())
 	//auth :=  r.Group("api/v1")
 	router := r.Group("api/v1/idc")
 	{
