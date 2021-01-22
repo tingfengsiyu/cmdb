@@ -3,17 +3,18 @@ package idc
 import (
 	"cmdb/model"
 	"cmdb/utils/errmsg"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
 )
 
-func Hello(c *gin.Context){
+func Hello(c *gin.Context) {
 	c.JSON(
-		http.StatusOK,gin.H{
-			"status": 200,
+		http.StatusOK, gin.H{
+			"status":  200,
 			"message": "hello",
-		},)
+		})
 }
 
 // 添加服务器
@@ -37,7 +38,7 @@ func AddServer(c *gin.Context) {
 	)
 }
 
-func GetServers(c *gin.Context){
+func GetServers(c *gin.Context) {
 	pageSize, _ := strconv.Atoi(c.Query("pagesize"))
 	pageNum, _ := strconv.Atoi(c.Query("pagenum"))
 
@@ -62,4 +63,29 @@ func GetServers(c *gin.Context){
 			"message": errmsg.GetErrMsg(code),
 		},
 	)
+}
+
+func UpdateServers(c *gin.Context) {
+	var data model.Server
+	id, _ := strconv.Atoi(c.Param("id"))
+	_ = c.ShouldBindJSON(&data)
+	//fmt.Println(&data)
+	//fmt.Println(id)
+	code := model.EditServer(id, &data)
+
+	c.JSON(http.StatusOK, gin.H{
+		"status":  code,
+		"message": errmsg.GetErrMsg(code),
+	})
+}
+
+func DeleteServers(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+	//fmt.Println(id)
+	code := model.DeleteServer(id)
+
+	c.JSON(http.StatusOK, gin.H{
+		"status":  code,
+		"message": errmsg.GetErrMsg(code),
+	})
 }

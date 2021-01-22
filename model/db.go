@@ -3,11 +3,12 @@ package model
 import (
 	"cmdb/utils"
 	"fmt"
+	"time"
+
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 	"gorm.io/gorm/schema"
-	"time"
 )
 
 var db *gorm.DB
@@ -33,7 +34,7 @@ func InitDb() {
 		fmt.Println("连接数据库失败，请检查参数", err)
 		panic(err)
 	}
-	_ = db.AutoMigrate(&Router{}, &Switch{}, &Idc{}, &Server{}, AliServer{})
+	_ = db.AutoMigrate(&Router{}, &Switch{}, &Idc{}, &Server{}, AwsServer{})
 
 	sqlDB, _ := db.DB()
 	// SetMaxIdleCons 设置连接池中的最大闲置连接数。

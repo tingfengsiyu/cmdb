@@ -17,6 +17,9 @@ func InitRouter() {
 		router.POST("createserver", idc.AddServer)
 		router.POST("createidc", idc.AddIdc)
 		router.GET("getservers", idc.GetServers)
+		router.DELETE("deleteservers/:id", idc.DeleteServers)
+		router.PUT("editservers/:id", idc.UpdateServers)
+		router.PUT("editidc/:id", idc.UpdateIdc)
 	}
 	routers := r.Group("api/v1/cloud")
 	{
