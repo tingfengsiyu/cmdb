@@ -22,7 +22,7 @@ func Log() gin.HandlerFunc {
 	logger.Out = scr
 	logger.SetLevel(logrus.DebugLevel)
 	logWriter, _ := retalog.New(
-		FilePath+"%Y%m%d.log",
+		FilePath,
 		retalog.WithMaxAge(7*24*time.Hour),
 		retalog.WithRotationTime(24*time.Hour),
 	)

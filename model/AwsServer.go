@@ -36,7 +36,7 @@ func GetAws(pageSize int, pageNum int) ([]AwsServer, int64) {
 	return svc, total
 }
 
-func EditAws(id int, data *Server) int {
+func EditAws(id int, data *AwsServer) int {
 	var servers AwsServer
 	var maps = make(map[string]interface{})
 	maps["name"] = servers.InstanceId

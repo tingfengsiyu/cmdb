@@ -3,6 +3,7 @@ package idc
 import (
 	"cmdb/model"
 	"cmdb/utils/errmsg"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -55,6 +56,7 @@ func GetServers(c *gin.Context) {
 
 	data, total := model.GetServer(pageSize, pageNum)
 	code := errmsg.SUCCSE
+	fmt.Println(data)
 	c.JSON(
 		http.StatusOK, gin.H{
 			"status":  code,
@@ -81,7 +83,7 @@ func UpdateServers(c *gin.Context) {
 
 func DeleteServers(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
-	//fmt.Println(id)
+	fmt.Println(id)
 	code := model.DeleteServer(id)
 
 	c.JSON(http.StatusOK, gin.H{

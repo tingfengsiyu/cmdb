@@ -1,0 +1,33 @@
+time="2021-01-26T15:25:34+08:00" level=info Agent=PostmanRuntime/7.26.8 DataSize=71 Hostname=DESKTOP-U038NEI Ip=127.0.0.1 Method=POST Path=/api/v1/user/login SpendTime="1646 ms" status=200
+time="2021-01-26T15:25:39+08:00" level=info Agent=PostmanRuntime/7.26.8 DataSize=81 Hostname=DESKTOP-U038NEI Ip=127.0.0.1 Method=POST Path=/api/v1/user/login SpendTime="741 ms" status=200
+time="2021-01-26T15:27:46+08:00" level=info Agent=PostmanRuntime/7.26.8 DataSize=219 Hostname=DESKTOP-U038NEI Ip=127.0.0.1 Method=POST Path=/api/v1/user/login SpendTime="1900 ms" status=200
+time="2021-01-26T15:28:19+08:00" level=info Agent=PostmanRuntime/7.26.8 DataSize=40 Hostname=DESKTOP-U038NEI Ip=127.0.0.1 Method=GET Path=/api/v1/idc/getservers SpendTime="0 ms" status=200
+time="2021-01-26T15:29:51+08:00" level=info Agent=PostmanRuntime/7.26.8 DataSize=43 Hostname=DESKTOP-U038NEI Ip=127.0.0.1 Method=GET Path=/api/v1/idc/getservers SpendTime="0 ms" status=200
+time="2021-01-26T15:31:14+08:00" level=info Agent=PostmanRuntime/7.26.8 DataSize=43 Hostname=DESKTOP-U038NEI Ip=127.0.0.1 Method=GET Path=/api/v1/idc/getservers SpendTime="0 ms" status=200
+dTime="1346 ms" status=200
+time="2021-01-26T15:21:10+08:00" level=info Agent=PostmanRuntime/7.26.8 DataSize=49 Hostname=DESKTOP-U038NEI Ip=127.0.0.1 Method=POST Path=/api/v1/user/adduser SpendTime="414 ms" status=200
+time="2021-01-26T15:21:26+08:00" level=info Agent=PostmanRuntime/7.26.8 DataSize=29 Hostname=DESKTOP-U038NEI Ip=127.0.0.1 Method=DELETE Path=/api/v1/user/deleteuser/1 SpendTime="1285 ms" status=200
+time="2021-01-26T15:21:37+08:00" level=info Agent=PostmanRuntime/7.26.8 DataSize=49 Hostname=DESKTOP-U038NEI Ip=127.0.0.1 Method=POST Path=/api/v1/user/adduser SpendTime="1591 ms" status=200
+time="2021-01-26T15:21:42+08:00" level=info Agent=PostmanRuntime/7.26.8 DataSize=29 Hostname=DESKTOP-U038NEI Ip=127.0.0.1 Method=DELETE Path=/api/v1/user/deleteuser/1 SpendTime="680 ms" status=200
+time="2021-01-26T15:21:44+08:00" level=info Agent=PostmanRuntime/7.26.8 DataSize=29 Hostname=DESKTOP-U038NEI Ip=127.0.0.1 Method=DELETE Path=/api/v1/user/deleteuser/2 SpendTime="186 ms" status=200
+time="2021-01-26T15:21:46+08:00" level=info Agent=PostmanRuntime/7.26.8 DataSize=29 Hostname=DESKTOP-U038NEI Ip=127.0.0.1 Method=DELETE Path=/api/v1/user/deleteuser/3 SpendTime="104 ms" status=200
+time="2021-01-26T15:21:51+08:00" level=info Agent=PostmanRuntime/7.26.8 DataSize=29 Hostname=DESKTOP-U038NEI Ip=127.0.0.1 Method=DELETE Path=/api/v1/user/deleteuser/4 SpendTime="1247 ms" status=200
+time="2021-01-26T15:22:07+08:00" level=info Agent=PostmanRuntime/7.26.8 DataSize=49 Hostname=DESKTOP-U038NEI Ip=127.0.0.1 Method=GET Path=/api/v1/user/getusers SpendTime="1785 ms" status=200
+time="2021-01-26T15:22:13+08:00" level=info Agent=PostmanRuntime/7.26.8 DataSize=29 Hostname=DESKTOP-U038NEI Ip=127.0.0.1 Method=POST Path=/api/v1/user/adduser SpendTime="1488 ms" status=200
+time="2021-01-26T15:22:24+08:00" level=info Agent=PostmanRuntime/7.26.8 DataSize=188 Hostname=DESKTOP-U038NEI Ip=127.0.0.1 Method=GET Path=/api/v1/user/getusers SpendTime="1387 ms" status=200
+time="2021-01-26T15:22:40+08:00" level=info Agent=PostmanRuntime/7.26.8 DataSize=188 Hostname=DESKTOP-U038NEI Ip=127.0.0.1 Method=GET Path=/api/v1/user/getusers SpendTime="1578 ms" status=200
+ath=/api/v1/user/adduser SpendTime="1591 ms" status=200
+time="2021-01-26 15:21:42" level=info Agent=PostmanRuntime/7.26.8 DataSize=29 Hostname=DESKTOP-U038NEI Ip=127.0.0.1 Method=DELETE Path=/api/v1/user/deleteuser/1 SpendTime="680 ms" status=200
+time="2021-01-26 15:21:44" level=info Agent=PostmanRuntime/7.26.8 DataSize=29 Hostname=DESKTOP-U038NEI Ip=127.0.0.1 Method=DELETE Path=/api/v1/user/deleteuser/2 SpendTime="186 ms" status=200
+time="2021-01-26 15:21:46" level=info Agent=PostmanRuntime/7.26.8 DataSize=29 Hostname=DESKTOP-U038NEI Ip=127.0.0.1 Method=DELETE Path=/api/v1/user/deleteuser/3 SpendTime="104 ms" status=200
+time="2021-01-26 15:21:51" level=info Agent=PostmanRuntime/7.26.8 DataSize=29 Hostname=DESKTOP-U038NEI Ip=127.0.0.1 Method=DELETE Path=/api/v1/user/deleteuser/4 SpendTime="1247 ms" status=200
+time="2021-01-26 15:22:07" level=info Agent=PostmanRuntime/7.26.8 DataSize=49 Hostname=DESKTOP-U038NEI Ip=127.0.0.1 Method=GET Path=/api/v1/user/getusers SpendTime="1785 ms" status=200
+time="2021-01-26 15:22:13" level=info Agent=PostmanRuntime/7.26.8 DataSize=29 Hostname=DESKTOP-U038NEI Ip=127.0.0.1 Method=POST Path=/api/v1/user/adduser SpendTime="1488 ms" status=200
+time="2021-01-26 15:22:24" level=info Agent=PostmanRuntime/7.26.8 DataSize=188 Hostname=DESKTOP-U038NEI Ip=127.0.0.1 Method=GET Path=/api/v1/user/getusers SpendTime="1387 ms" status=200
+time="2021-01-26 15:22:40" level=info Agent=PostmanRuntime/7.26.8 DataSize=188 Hostname=DESKTOP-U038NEI Ip=127.0.0.1 Method=GET Path=/api/v1/user/getusers SpendTime="1578 ms" status=200
+time="2021-01-26 15:25:34" level=info Agent=PostmanRuntime/7.26.8 DataSize=71 Hostname=DESKTOP-U038NEI Ip=127.0.0.1 Method=POST Path=/api/v1/user/login SpendTime="1646 ms" status=200
+time="2021-01-26 15:25:39" level=info Agent=PostmanRuntime/7.26.8 DataSize=81 Hostname=DESKTOP-U038NEI Ip=127.0.0.1 Method=POST Path=/api/v1/user/login SpendTime="741 ms" status=200
+time="2021-01-26 15:27:46" level=info Agent=PostmanRuntime/7.26.8 DataSize=219 Hostname=DESKTOP-U038NEI Ip=127.0.0.1 Method=POST Path=/api/v1/user/login SpendTime="1900 ms" status=200
+time="2021-01-26 15:28:19" level=info Agent=PostmanRuntime/7.26.8 DataSize=40 Hostname=DESKTOP-U038NEI Ip=127.0.0.1 Method=GET Path=/api/v1/idc/getservers SpendTime="0 ms" status=200
+time="2021-01-26 15:29:51" level=info Agent=PostmanRuntime/7.26.8 DataSize=43 Hostname=DESKTOP-U038NEI Ip=127.0.0.1 Method=GET Path=/api/v1/idc/getservers SpendTime="0 ms" status=200
+time="2021-01-26 15:31:14" level=info Agent=PostmanRuntime/7.26.8 DataSize=43 Hostname=DESKTOP-U038NEI Ip=127.0.0.1 Method=GET Path=/api/v1/idc/getservers SpendTime="0 ms" status=200

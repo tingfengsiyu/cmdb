@@ -13,11 +13,11 @@ import (
 	"strconv"
 )
 
-func SyncAwsECS() {
+func SyncAwsECS(c *gin.Context) {
 	sess := session.Must(session.NewSessionWithOptions(session.Options{
 		SharedConfigState: session.SharedConfigEnable,
 	}))
-
+	var data model.AwsServer
 	// Create new EC2 client
 	svc := ec2.New(sess)
 	ss := &ec2.DescribeInstancesInput{}
@@ -40,14 +40,15 @@ func SyncAwsECS() {
 				"Regions",*v.Placement.AvailabilityZone,Disk,*v.Architecture,*v.NetworkInterfaces[0].OwnerId,"aws")
 				*/
 				//fmt.Println(*v.ImageId,*v.InstanceId)
-				imageName := GetImageName(svc, *v.ImageId)
-
-				_, err = db.DB.Exec(deletesql, *v.InstanceId)
-				sqlStr := "insert into ecs (InstanceId,Name,CreateTime,ExpiredTime,PublicIpAddress,PrivateIpAddress,OsName,InstanceType,State,Regions,AvailabilityZones,Disk,Arch,User,Cloud )values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
-				_, err = db.DB.Exec(sqlStr, *v.InstanceId,
-					*v.Tags[0].Value, *v.LaunchTime, "0",
-					*v.PublicIpAddress, *v.PrivateIpAddress, imageName, *v.InstanceType, *v.State.Name,
-					"Regions", *v.Placement.AvailabilityZone, Disk, *v.Architecture, *v.NetworkInterfaces[0].OwnerId, "aws")
+				//imageName := GetImageName(svc, *v.ImageId)
+				instanceid, _ := strconv.Atoi(c.Param("instanceid"))
+				code := model.EditAws(instanceid, &data)
+				fmt.Println(code)
+				//sqlStr := "insert into ecs (InstanceId,Name,CreateTime,ExpiredTime,PublicIpAddress,PrivateIpAddress,OsName,InstanceType,State,Regions,AvailabilityZones,Disk,Arch,User,Cloud )values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
+				//_, err = db.DB.Exec(sqlStr, *v.InstanceId,
+				//	*v.Tags[0].Value, *v.LaunchTime, "0",
+				//	*v.PublicIpAddress, *v.PrivateIpAddress, imageName, *v.InstanceType, *v.State.Name,
+				//	"Regions", *v.Placement.AvailabilityZone, Disk, *v.Architecture, *v.NetworkInterfaces[0].OwnerId, "aws")
 				if err != nil {
 					fmt.Println("插入ECS实例失败")
 					return
@@ -112,4 +113,18 @@ func EcsListAll(c *gin.Context) {
 			"message": errmsg.GetErrMsg(code),
 		},
 	)
+}
+
+func EditAws(c *gin.Context){
+	var data model.AwsServer
+	instanceid, _ := strconv.Atoi(c.Param("instanceid"))
+	_ = c.ShouldBindJSON(&data)
+	fmt.Println(&data)
+	fmt.Println(instanceid)
+	code := model.EditAws(instanceid, &data)
+
+	c.JSON(http.StatusOK, gin.H{
+		"status":  code,
+		"message": errmsg.GetErrMsg(code),
+	})
 }

@@ -2,9 +2,11 @@ package router
 
 import (
 	"cmdb/utils"
+
 	"github.com/gin-gonic/gin"
-	//"cmdb/api/v1/cloud"
+
 	"cmdb/api/v1/idc"
+	"cmdb/api/v1/user"
 	"cmdb/middleware"
 )
 
@@ -13,8 +15,8 @@ func InitRouter() {
 	r := gin.New()
 	r.Use(middleware.Log())
 	r.Use(gin.Recovery())
-	//auth :=  r.Group("api/v1")
 	router := r.Group("api/v1/idc")
+	router.Use(middleware.JwtToken())
 	{
 		router.GET("/", idc.Hello)
 		router.POST("createserver", idc.AddServer)
@@ -24,9 +26,17 @@ func InitRouter() {
 		router.PUT("editservers/:id", idc.UpdateServers)
 		router.PUT("editidc/:id", idc.UpdateIdc)
 	}
-	routers := r.Group("api/v1/cloud")
+	cloud := r.Group("api/v1/cloud")
 	{
-		routers.GET("/", idc.Hello)
+		cloud.GET("/", idc.Hello)
+	}
+	auser := r.Group("api/v1/user")
+	{
+		auser.POST("adduser", user.AddUser)
+		auser.GET("getusers", user.GetUsers)
+		auser.PUT("edituser/:id", user.EditUser)
+		auser.DELETE("deleteuser/:id", user.DeleteUser)
+		auser.POST("login", user.Login)
 	}
 	_ = r.Run(utils.HttpPort)
 }
