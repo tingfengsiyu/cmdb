@@ -3,10 +3,9 @@ package model
 import (
 	"cmdb/utils/errmsg"
 	"encoding/base64"
-	"log"
-
 	"golang.org/x/crypto/scrypt"
 	"gorm.io/gorm"
+	"log"
 )
 
 var code int

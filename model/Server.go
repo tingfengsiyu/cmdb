@@ -7,6 +7,9 @@ import (
 	"gorm.io/gorm"
 )
 
+type Servers struct {
+	Servers []Server `json:"servers"`
+}
 type Server struct {
 	ID        uint   `gorm:"primary_key;auto_increment;int" json:"id"`
 	Name      string `gorm:"type:varchar(30);not null" json:"name"`
@@ -24,6 +27,15 @@ type Server struct {
 
 func CreateServer(data *Server) int {
 	err := db.Create(&data).Error
+	if err != nil {
+		return errmsg.ERROR
+	}
+	return errmsg.SUCCSE
+}
+func (servers *Servers) BatchCreateServer() int {
+	//func BatchCreateServer(servers *Servers)  int {
+	fmt.Println(servers.Servers)
+	err := db.Create(&servers.Servers).Error
 	if err != nil {
 		return errmsg.ERROR
 	}

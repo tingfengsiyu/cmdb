@@ -4,10 +4,9 @@ import (
 	"cmdb/model"
 	"cmdb/utils/errmsg"
 	"fmt"
+	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
-
-	"github.com/gin-gonic/gin"
 )
 
 func Hello(c *gin.Context) {
@@ -22,6 +21,7 @@ func Hello(c *gin.Context) {
 func AddServer(c *gin.Context) {
 	var data model.Server
 	_ = c.ShouldBindJSON(&data)
+	fmt.Println(&data)
 	code := model.CheckServer(data.Name)
 	if code == errmsg.SUCCSE {
 		model.CreateServer(&data)
@@ -34,6 +34,19 @@ func AddServer(c *gin.Context) {
 		http.StatusOK, gin.H{
 			"status":  code,
 			"data":    data,
+			"message": errmsg.GetErrMsg(code),
+		},
+	)
+}
+
+func BatchAddServer(c *gin.Context) {
+	server := model.Servers{}
+	_ = c.ShouldBindJSON(&server)
+	fmt.Println(server)
+	code := server.BatchCreateServer()
+	c.JSON(
+		http.StatusOK, gin.H{
+			"status":  code,
 			"message": errmsg.GetErrMsg(code),
 		},
 	)

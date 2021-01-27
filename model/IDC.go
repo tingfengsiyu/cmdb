@@ -15,7 +15,7 @@ type Idc struct {
 	Cabinet_number string `gorm:"type:varchar(30);not null" json:"cabinet_number"`
 }
 
-// 查询服务器是否存在
+// 查询IDC是否存在
 func CheckIdc(name string) (code int) {
 	var sv Server
 	db.Select("id").Where("name = ?", name).First(&sv)

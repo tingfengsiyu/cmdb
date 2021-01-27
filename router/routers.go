@@ -20,6 +20,7 @@ func InitRouter() {
 	{
 		router.GET("/", idc.Hello)
 		router.POST("createserver", idc.AddServer)
+		router.POST("batchcreateserver", idc.BatchAddServer)
 		router.POST("createidc", idc.AddIdc)
 		router.GET("getservers", idc.GetServers)
 		router.DELETE("deleteservers/:id", idc.DeleteServers)
@@ -27,16 +28,20 @@ func InitRouter() {
 		router.PUT("editidc/:id", idc.UpdateIdc)
 	}
 	cloud := r.Group("api/v1/cloud")
+	cloud.Use(middleware.JwtToken())
 	{
 		cloud.GET("/", idc.Hello)
 	}
-	auser := r.Group("api/v1/user")
+	u := r.Group("api/v1/user")
+	router.Use(middleware.JwtToken())
 	{
-		auser.POST("adduser", user.AddUser)
-		auser.GET("getusers", user.GetUsers)
-		auser.PUT("edituser/:id", user.EditUser)
-		auser.DELETE("deleteuser/:id", user.DeleteUser)
-		auser.POST("login", user.Login)
+		u.POST("adduser", user.AddUser)
+		u.GET("getusers", user.GetUsers)
+		u.GET("getuser/:id", user.GetUserInfo)
+		u.PUT("edituser/:id", user.EditUser)
+		u.DELETE("deleteuser/:id", user.DeleteUser)
+		//u.POST("login", user.Login)
 	}
+	u.GET("api/v1/user/login", user.Login)
 	_ = r.Run(utils.HttpPort)
 }
