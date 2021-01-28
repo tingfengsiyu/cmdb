@@ -18,11 +18,11 @@ func InitRouter() {
 	router := r.Group("api/v1/idc")
 	router.Use(middleware.JwtToken())
 	{
-		router.GET("/", idc.Hello)
 		router.POST("createserver", idc.AddServer)
 		router.POST("batchcreateserver", idc.BatchAddServer)
 		router.POST("createidc", idc.AddIdc)
 		router.GET("getservers", idc.GetServers)
+		router.GET("getserver", idc.GetServerInfo)
 		router.DELETE("deleteservers/:id", idc.DeleteServers)
 		router.PUT("editservers/:id", idc.UpdateServers)
 		router.PUT("editidc/:id", idc.UpdateIdc)
@@ -30,7 +30,7 @@ func InitRouter() {
 	cloud := r.Group("api/v1/cloud")
 	cloud.Use(middleware.JwtToken())
 	{
-		cloud.GET("/", idc.Hello)
+		cloud.GET("/", idc.GetServers)
 	}
 	u := r.Group("api/v1/user")
 	router.Use(middleware.JwtToken())
@@ -42,6 +42,10 @@ func InitRouter() {
 		u.DELETE("deleteuser/:id", user.DeleteUser)
 		//u.POST("login", user.Login)
 	}
-	u.GET("api/v1/user/login", user.Login)
+	//k := r.Group("api/v1/k8s")
+	//{
+	//	//k.GET("listpod",k8s.InitConfig)
+	//}
+	r.GET("api/v1/user/login", user.Login)
 	_ = r.Run(utils.HttpPort)
 }

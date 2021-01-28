@@ -23,6 +23,7 @@ var (
 
 	LogFile  string
 	LogLevel string
+	KubeFile string
 )
 
 func init() {
@@ -35,6 +36,7 @@ func init() {
 	LoadData(file)
 	LoadAli(file)
 	LoadAws(file)
+	Loadk8s(file)
 }
 
 func LoadServer(file *ini.File) {
@@ -60,4 +62,7 @@ func LoadAli(file *ini.File) {
 func LoadAws(file *ini.File) {
 	AccessKey = file.Section("aws").Key("AccessKey").MustString("xxxxxxxxxx")
 	SecretKey = file.Section("aws").Key("SecretKey").MustString("xxxxxxxxxx")
+}
+func Loadk8s(file *ini.File) {
+	KubeFile = file.Section("k8s").Key("KubeFile").MustString("xxxxxxxxxx")
 }

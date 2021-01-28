@@ -9,19 +9,10 @@ import (
 	"strconv"
 )
 
-func Hello(c *gin.Context) {
-	c.JSON(
-		http.StatusOK, gin.H{
-			"status":  200,
-			"message": "hello",
-		})
-}
-
 // 添加服务器
 func AddServer(c *gin.Context) {
 	var data model.Server
 	_ = c.ShouldBindJSON(&data)
-	fmt.Println(&data)
 	code := model.CheckServer(data.Name)
 	if code == errmsg.SUCCSE {
 		model.CreateServer(&data)
@@ -42,11 +33,38 @@ func AddServer(c *gin.Context) {
 func BatchAddServer(c *gin.Context) {
 	server := model.Servers{}
 	_ = c.ShouldBindJSON(&server)
-	fmt.Println(server)
-	code := server.BatchCreateServer()
+	var tmp []string
+	for _, v := range server.Servers {
+		tmp = append(tmp, v.Name)
+	}
+	fmt.Println(tmp)
+	code := model.BatchCheckServer(tmp)
+	fmt.Println(code)
+	if code == errmsg.SUCCSE {
+		server.BatchCreateServer()
+	}
+	if code == errmsg.ERROR_DEVICE_EXIST {
+		code = errmsg.ERROR_DEVICE_EXIST
+	}
 	c.JSON(
 		http.StatusOK, gin.H{
 			"status":  code,
+			"message": errmsg.GetErrMsg(code),
+		},
+	)
+}
+
+func GetServerInfo(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+	var maps = make(map[string]interface{})
+	data, code := model.GetUser(id)
+	maps["username"] = data.Username
+	maps["role"] = data.Role
+	c.JSON(
+		http.StatusOK, gin.H{
+			"status":  code,
+			"data":    data,
+			"total":   1,
 			"message": errmsg.GetErrMsg(code),
 		},
 	)
@@ -67,7 +85,7 @@ func GetServers(c *gin.Context) {
 		pageNum = 1
 	}
 
-	data, total := model.GetServer(pageSize, pageNum)
+	data, total := model.GetServers(pageSize, pageNum)
 	code := errmsg.SUCCSE
 	fmt.Println(data)
 	c.JSON(

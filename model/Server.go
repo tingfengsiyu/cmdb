@@ -34,10 +34,19 @@ func CreateServer(data *Server) int {
 }
 func (servers *Servers) BatchCreateServer() int {
 	//func BatchCreateServer(servers *Servers)  int {
-	fmt.Println(servers.Servers)
+	//fmt.Println(servers.Servers)
 	err := db.Create(&servers.Servers).Error
 	if err != nil {
 		return errmsg.ERROR
+	}
+	return errmsg.SUCCSE
+}
+func BatchCheckServer(name []string) int {
+	var svc Server
+	db.Where("name = ?", name).Find(&svc)
+	//db.Where("name IN ?", []string{"jinzhu", "jinzhu 2"}).Find(&svc)
+	if svc.ID > 0 {
+		return errmsg.ERROR_DEVICE_EXIST //2001
 	}
 	return errmsg.SUCCSE
 }
@@ -52,7 +61,7 @@ func CheckServer(name string) (code int) {
 	return errmsg.SUCCSE
 }
 
-func GetServer(pageSize int, pageNum int) ([]Server, int64) {
+func GetServers(pageSize int, pageNum int) ([]Server, int64) {
 	var svc []Server
 	var total int64
 	err = db.Unscoped().Find(&svc).Limit(pageSize).Offset((pageNum - 1) * pageSize).Error
@@ -93,4 +102,14 @@ func DeleteServer(id int) int {
 		return errmsg.ERROR
 	}
 	return errmsg.SUCCSE
+}
+
+func GetServerInfo(id int) (Server, int) {
+	var svc []Server
+	var total int64
+	err := db.Where("ID = ?", id).First(&svc).Error
+	if err != nil {
+		return Server{}, errmsg.ERROR
+	}
+	return svc, errmsg.SUCCSE
 }
