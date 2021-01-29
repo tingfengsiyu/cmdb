@@ -48,3 +48,10 @@ func EditIdc(id int, data *Idc) int {
 	}
 	return errmsg.SUCCSE
 }
+
+func GetCity() {
+
+}
+func GetCabinet() {
+
+}

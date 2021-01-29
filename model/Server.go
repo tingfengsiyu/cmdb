@@ -10,6 +10,9 @@ import (
 type Servers struct {
 	Servers []Server `json:"servers"`
 }
+type Names struct {
+	Name string `json:"name"`
+}
 type Server struct {
 	ID        uint   `gorm:"primary_key;auto_increment;int" json:"id"`
 	Name      string `gorm:"type:varchar(30);not null" json:"name"`
@@ -41,12 +44,19 @@ func (servers *Servers) BatchCreateServer() int {
 	}
 	return errmsg.SUCCSE
 }
-func BatchCheckServer(name []string) int {
-	var svc Server
-	db.Where("name = ?", name).Find(&svc)
-	//db.Where("name IN ?", []string{"jinzhu", "jinzhu 2"}).Find(&svc)
-	if svc.ID > 0 {
-		return errmsg.ERROR_DEVICE_EXIST //2001
+func BatchCreateServer2(servers []Server) int {
+	err := db.Create(&servers).Error
+	if err != nil {
+		return errmsg.ERROR
+	}
+	return errmsg.SUCCSE
+}
+
+func BatchUpdateServer(servers []Server) int {
+	err := db.Debug().Model(&Server{}).Updates(&servers).Error
+	if err != nil {
+		fmt.Println(err)
+		return errmsg.ERROR
 	}
 	return errmsg.SUCCSE
 }
@@ -104,12 +114,12 @@ func DeleteServer(id int) int {
 	return errmsg.SUCCSE
 }
 
-func GetServerInfo(id int) (Server, int) {
+func GetServerInfo(id int) ([]Server, int64) {
 	var svc []Server
 	var total int64
 	err := db.Where("ID = ?", id).First(&svc).Error
 	if err != nil {
-		return Server{}, errmsg.ERROR
+		return nil, 0
 	}
-	return svc, errmsg.SUCCSE
+	return svc, total
 }

@@ -20,6 +20,7 @@ func InitRouter() {
 	{
 		router.POST("createserver", idc.AddServer)
 		router.POST("batchcreateserver", idc.BatchAddServer)
+		router.POST("batchupdateserver", idc.BatchUpdateServers)
 		router.POST("createidc", idc.AddIdc)
 		router.GET("getservers", idc.GetServers)
 		router.GET("getserver", idc.GetServerInfo)

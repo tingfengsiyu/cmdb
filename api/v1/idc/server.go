@@ -33,19 +33,18 @@ func AddServer(c *gin.Context) {
 func BatchAddServer(c *gin.Context) {
 	server := model.Servers{}
 	_ = c.ShouldBindJSON(&server)
-	var tmp []string
-	for _, v := range server.Servers {
-		tmp = append(tmp, v.Name)
-	}
-	fmt.Println(tmp)
-	code := model.BatchCheckServer(tmp)
-	fmt.Println(code)
+	servers := []model.Server{}
+	_ = c.ShouldBindJSON(&servers)
+
+	//code := model.BatchCheckServer()
+	code := 000
 	if code == errmsg.SUCCSE {
 		server.BatchCreateServer()
 	}
 	if code == errmsg.ERROR_DEVICE_EXIST {
 		code = errmsg.ERROR_DEVICE_EXIST
 	}
+	code = model.BatchCreateServer2(servers)
 	c.JSON(
 		http.StatusOK, gin.H{
 			"status":  code,
@@ -87,7 +86,6 @@ func GetServers(c *gin.Context) {
 
 	data, total := model.GetServers(pageSize, pageNum)
 	code := errmsg.SUCCSE
-	fmt.Println(data)
 	c.JSON(
 		http.StatusOK, gin.H{
 			"status":  code,
@@ -105,6 +103,17 @@ func UpdateServers(c *gin.Context) {
 	//fmt.Println(&data)
 	//fmt.Println(id)
 	code := model.EditServer(id, &data)
+
+	c.JSON(http.StatusOK, gin.H{
+		"status":  code,
+		"message": errmsg.GetErrMsg(code),
+	})
+}
+
+func BatchUpdateServers(c *gin.Context) {
+	data := []model.Server{}
+	_ = c.ShouldBindJSON(&data)
+	code := model.BatchUpdateServer(data)
 
 	c.JSON(http.StatusOK, gin.H{
 		"status":  code,
