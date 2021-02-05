@@ -5,13 +5,14 @@ import (
 	"cmdb/model"
 	"cmdb/utils"
 	"fmt"
+	"net/http"
+	"strconv"
+	"time"
+
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
-	"net/http"
-	"strconv"
-	"time"
 )
 
 func Sync(c *gin.Context) {
@@ -67,7 +68,7 @@ func Sync(c *gin.Context) {
 			ExpiredTime:            ExpiredTime.Local(),
 			InstanceCreationTime:   CreationTime.Local(),
 			LocalStorageCapacity:   tmp.LocalStorageCapacity,
-			InnerIpAddress:         tmp.NetworkInterfaces.NetworkInterface[0].PrimaryIpAddress,
+			PrivateIpAddress:       tmp.NetworkInterfaces.NetworkInterface[0].PrimaryIpAddress,
 			PublicIpAddress:        PublicIpAddress,
 			Cloud:                  "Ali",
 		})

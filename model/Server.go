@@ -13,20 +13,22 @@ type Servers struct {
 }
 
 type Server struct {
-	ID        int    `gorm:"primary_key;auto_increment;int" json:"id"`
-	Name      string `gorm:"type:varchar(30);not null" json:"name"`
-	Models    string `gorm:"type:varchar(30);not null" json:"models"`
-	Location  string `gorm:"type:varchar(30);not null" json:"location"`
-	Ipaddress string `gorm:"type:varchar(30);not null" json:"ipaddress"`
-	Label     string `gorm:"type:varchar(30);not null" json:"label"`
-	Cpu       string `gorm:"type:varchar(30);not null" json:"cpu"`
-	Memory    string `gorm:"type:varchar(30);not null" json:"memory"`
-	Disk      string `gorm:"type:varchar(30);not null" json:"disk"`
+	ID               int    `gorm:"primary_key;auto_increment;int" json:"id"`
+	Name             string `gorm:"type:varchar(30);not null" json:"name"`
+	Models           string `gorm:"type:varchar(30);not null" json:"models"`
+	Location         string `gorm:"type:varchar(30);not null" json:"location"`
+	PrivateIpAddress string `gorm:"type:varchar(30);not null" json:"private_ip_address"`
+	PublicIpAddress  string `gorm:"type:varchar(30);not null" json:"public_ip_address"`
+	Label            string `gorm:"type:varchar(30);not null" json:"label"`
+	Cpu              string `gorm:"type:varchar(30);not null" json:"cpu"`
+	Memory           string `gorm:"type:varchar(30);not null" json:"memory"`
+	Disk             string `gorm:"type:varchar(30);not null" json:"disk"`
 	gorm.Model
 	Cabinet_number string `gorm:"type:varchar(30);not null" json:"cabinet_number"`
 	Idc            string `gorm:"type:varchar(30);not null" json:"idc"`
 	User           string `gorm:"type:varchar(30);not null" json:"user"`
 	State          string `gorm:"type:varchar(10);not null" json:"state"`
+	ServerID       int    `gorm:"type:int;not null" json:"server_id"`
 }
 
 func CreateServer(data *Server) int {
@@ -117,7 +119,8 @@ func EditServer(id int, data *Server) int {
 	maps["name"] = data.Name
 	maps["models"] = data.Models
 	maps["location"] = data.Location
-	maps["ipaddress"] = data.Ipaddress
+	maps["private_ip_address"] = data.PrivateIpAddress
+	maps["public_ip_address"] = data.PublicIpAddress
 	maps["label"] = data.Label
 	maps["cpu"] = data.Cpu
 	maps["memory"] = data.Memory
