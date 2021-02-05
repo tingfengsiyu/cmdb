@@ -2,12 +2,12 @@ package router
 
 import (
 	"cmdb/utils"
-
 	"github.com/gin-gonic/gin"
 
 	"cmdb/api/v1/idc"
 	"cmdb/api/v1/user"
 	"cmdb/middleware"
+	"cmdb/api/v1/cloud"
 )
 
 func InitRouter() {
@@ -16,22 +16,31 @@ func InitRouter() {
 	r.Use(middleware.Log())
 	r.Use(gin.Recovery())
 	router := r.Group("api/v1/idc")
+
 	router.Use(middleware.JwtToken())
 	{
-		router.POST("createserver", idc.AddServer)
-		router.POST("batchcreateserver", idc.BatchAddServer)
-		router.POST("batchupdateserver", idc.BatchUpdateServers)
 		router.POST("createidc", idc.AddIdc)
-		router.GET("getservers", idc.GetServers)
-		router.GET("getserver", idc.GetServerInfo)
-		router.DELETE("deleteservers/:id", idc.DeleteServers)
-		router.PUT("editservers/:id", idc.UpdateServers)
+		router.GET("getidcs", idc.GetIDCs)
 		router.PUT("editidc/:id", idc.UpdateIdc)
+		router.DELETE("deleteidc/:id",idc.DeleteIdc)
+
+		router.POST("createserver", idc.AddServer)
+		router.POST("batchcreateserver", idc.BatchAddServers)
+		router.POST("batchupdateserver", idc.BatchUpdateServers)
+
+		router.GET("getservers", idc.GetServers)
+		router.GET("getserver/:id", idc.GetServer)
+		router.GET("getuser",idc.GetUser)
+		router.GET("getidcserver",idc.GetIdcServers)
+		router.GET("getcabinetserver",idc.GetCabinetServers)
+		router.DELETE("deleteserver/:id", idc.DeleteServer)
+		router.PUT("editservers/:id", idc.UpdateServer)
+		router.GET("network_topology",idc.Network_topology)
 	}
-	cloud := r.Group("api/v1/cloud")
-	cloud.Use(middleware.JwtToken())
+	clouds := r.Group("api/v1/cloud")
+	clouds.Use(middleware.JwtToken())
 	{
-		cloud.GET("/", idc.GetServers)
+		clouds.GET("/sync",cloud.Sync)
 	}
 	u := r.Group("api/v1/user")
 	router.Use(middleware.JwtToken())
@@ -41,7 +50,6 @@ func InitRouter() {
 		u.GET("getuser/:id", user.GetUserInfo)
 		u.PUT("edituser/:id", user.EditUser)
 		u.DELETE("deleteuser/:id", user.DeleteUser)
-		//u.POST("login", user.Login)
 	}
 	//k := r.Group("api/v1/k8s")
 	//{

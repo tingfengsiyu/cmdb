@@ -17,6 +17,7 @@ const (
     //设备相关信息
 	ERROR_DEVICE_NOT_EXIST = 4004
 	ERROR_DEVICE_EXIST     = 2001
+	ERROR_ALL_DEVICE_EXIST = 2002
 )
 
 var codeMsg = map[int]string{
@@ -33,6 +34,8 @@ var codeMsg = map[int]string{
 
 	ERROR_DEVICE_NOT_EXIST: "设备不存在",
 	ERROR_DEVICE_EXIST: "设备已存在",
+	ERROR_ALL_DEVICE_EXIST: "所有设备已存在",
+
 }
 
 func GetErrMsg(code int) string {

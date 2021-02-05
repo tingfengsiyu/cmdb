@@ -24,6 +24,10 @@ var (
 	LogFile  string
 	LogLevel string
 	KubeFile string
+	PrometheusConfDir string
+	NodeConf  string
+	ScriptConf string
+	ProcessConf string
 )
 
 func init() {
@@ -35,8 +39,9 @@ func init() {
 	LoadServer(file)
 	LoadData(file)
 	LoadAli(file)
-	LoadAws(file)
+//	LoadAws(file)
 	Loadk8s(file)
+	LoadPrometheus(file)
 }
 
 func LoadServer(file *ini.File) {
@@ -55,13 +60,21 @@ func LoadData(file *ini.File) {
 }
 
 func LoadAli(file *ini.File) {
-	AccessKey = file.Section("ali").Key("AccessKey").MustString("xxxxxxxxxx")
+	AccessKey = file.Section("ali").Key("AccessKey").MustString("12344x")
 	SecretKey = file.Section("ali").Key("SecretKey").MustString("xxxxxxxxxx")
 }
 
+func LoadPrometheus(file *ini.File) {
+	PrometheusConfDir = file.Section("prometheus").Key("prometheus_config_dir").MustString("12344x")
+	NodeConf = file.Section("prometheus").Key("nodeconf").MustString("12344x")
+	ProcessConf = file.Section("prometheus").Key("processconf").MustString("12344x")
+	ScriptConf = file.Section("prometheus").Key("scriptconf").MustString("12344x")
+}
 func LoadAws(file *ini.File) {
+
 	AccessKey = file.Section("aws").Key("AccessKey").MustString("xxxxxxxxxx")
 	SecretKey = file.Section("aws").Key("SecretKey").MustString("xxxxxxxxxx")
+
 }
 func Loadk8s(file *ini.File) {
 	KubeFile = file.Section("k8s").Key("KubeFile").MustString("xxxxxxxxxx")

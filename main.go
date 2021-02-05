@@ -1,11 +1,16 @@
 package main
 
 import (
-	"cmdb/router"
+	"cmdb/middleware"
 	"cmdb/model"
+	"cmdb/router"
 )
 
 func main() {
 	model.InitDb()
+	err := middleware.InitLog()
+	if err != nil {
+		panic(err)
+	}
 	router.InitRouter()
 }

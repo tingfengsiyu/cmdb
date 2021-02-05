@@ -1,6 +1,7 @@
 package model
 
 import (
+	"cmdb/middleware"
 	"cmdb/utils"
 	"fmt"
 	"time"
@@ -31,10 +32,10 @@ func InitDb() {
 		},
 	})
 	if err != nil {
-		fmt.Println("连接数据库失败，请检查参数", err)
+		middleware.SugarLogger.Infof("连接数据库失败，请检查参数%s", err)
 		panic(err)
 	}
-	_ = db.AutoMigrate(&Router{}, &Switch{}, &Idc{}, &Server{}, &User{}, AwsServer{})
+	_ = db.AutoMigrate(&CloudInstance{},&Router{}, &Switch{}, &Idc{}, &Server{}, &User{}, AwsServer{})
 
 	sqlDB, _ := db.DB()
 	// SetMaxIdleCons 设置连接池中的最大闲置连接数。
