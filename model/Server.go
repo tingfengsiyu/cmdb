@@ -8,35 +8,28 @@ import (
 	"gorm.io/gorm"
 )
 
-type Servers struct {
-	Servers []Server `json:"servers"`
-}
-
-type Server struct {
-	ID               int    `gorm:"primary_key;auto_increment;int" json:"id"`
-	Name             string `gorm:"type:varchar(30);not null" json:"name"`
-	Models           string `gorm:"type:varchar(30);not null" json:"models"`
-	Location         string `gorm:"type:varchar(30);not null" json:"location"`
-	PrivateIpAddress string `gorm:"type:varchar(30);not null" json:"private_ip_address"`
-	PublicIpAddress  string `gorm:"type:varchar(30);not null" json:"public_ip_address"`
-	Label            string `gorm:"type:varchar(30);not null" json:"label"`
-	Cpu              string `gorm:"type:varchar(30);not null" json:"cpu"`
-	Memory           string `gorm:"type:varchar(30);not null" json:"memory"`
-	Disk             string `gorm:"type:varchar(30);not null" json:"disk"`
-	gorm.Model
-	Cabinet_number string `gorm:"type:varchar(30);not null" json:"cabinet_number"`
-	Idc            string `gorm:"type:varchar(30);not null" json:"idc"`
-	User           string `gorm:"type:varchar(30);not null" json:"user"`
-	State          string `gorm:"type:varchar(10);not null" json:"state"`
-	ServerID       int    `gorm:"type:int;not null" json:"server_id"`
-}
-
 func CreateServer(data *Server) int {
 	err := db.Create(&data).Error
 	if err != nil {
 		return errmsg.ERROR
 	}
 	return errmsg.SUCCSE
+}
+func LastCabintID() int {
+	var data = Cabinet{}
+	db.Last(&data)
+	return int(data.ID)
+}
+
+func LastIdcID() int {
+	var data = Idc{}
+	db.Last(&data)
+	return int(data.ID)
+}
+func LastServeID() int {
+	var data = Idc{}
+	db.Last(&data)
+	return int(data.ID)
 }
 
 func (servers *Servers) BatchCreateServer() int {
@@ -53,6 +46,7 @@ func (servers *Servers) BatchCreateServer() int {
 func BatchCreateServer2(servers *[]Server) int {
 	err := db.Create(&servers).Error
 	if err != nil {
+		middleware.SugarLogger.Errorf("创建错误%s", err)
 		fmt.Println(err)
 		return errmsg.ERROR
 	}
@@ -69,13 +63,13 @@ func BatchUpdateServer(servers *[]Server) int {
 }
 
 // 查询服务器是否存在
-func CheckServer(name string) (code int) {
+func CheckServer(name string) (int, int) {
 	var svc Server
 	db.Select("id").Where("name = ?", name).First(&svc)
 	if svc.ID > 0 {
-		return errmsg.ERROR_DEVICE_EXIST //2001
+		return svc.ServerID, errmsg.ERROR_DEVICE_EXIST //2001
 	}
-	return errmsg.SUCCSE
+	return svc.ServerID, errmsg.SUCCSE
 }
 
 //批量检查服务器名是否存在BatchCheckServer(data []model.Names)
@@ -125,8 +119,6 @@ func EditServer(id int, data *Server) int {
 	maps["cpu"] = data.Cpu
 	maps["memory"] = data.Memory
 	maps["disk"] = data.Disk
-	maps["cabinet_number"] = data.Cabinet_number
-	maps["idc"] = data.Idc
 	maps["user"] = data.User
 	maps["state"] = data.State
 	//fmt.Println(maps)
@@ -193,4 +185,55 @@ func GetCabinetServers(pageSize, pageNum int, name, cabinet_number string) ([]Se
 		return nil, 0
 	}
 	return svc, total
+}
+
+func UpdateID(idc_name, city_name, cabinet_number, name string, idc_id, server_id, cabinet_number_id int) int {
+	var idc = Idc{}
+	var cabinet = Cabinet{}
+	var server = Server{}
+
+	var servers = make(map[string]interface{})
+	servers["server_id"] = server_id
+	servers["cabinet_number_id"] = cabinet_number_id
+	servers["idc_id"] = idc_id
+
+	var idcs = make(map[string]interface{})
+	idcs["cabinet_number_id"] = cabinet_number_id
+	idcs["idc_id"] = idc_id
+	idcs["city"] = city_name
+
+	var cabinets = make(map[string]interface{})
+	cabinets["cabinet_number_id"] = cabinet_number_id
+	cabinets["idc_id"] = idc_id
+
+	db.Model(&idc).Where("idc_name =?", idc_name).Updates(idcs)
+	db.Model(&cabinet).Where("cabinet_number =?", cabinet_number).Updates(cabinets)
+	db.Model(&server).Where("name =?", name).Updates(servers)
+	return errmsg.SUCCSE
+}
+
+func InsertID(idc_name, city_name, cabinet_number, name string, idc_id, server_id, cabinet_number_id int) {
+	var idc = Idc{}
+	var cabinet = Cabinet{}
+	var server = Server{}
+
+	var servers = make(map[string]interface{})
+	servers["server_id"] = server_id
+	servers["cabinet_number_id"] = cabinet_number_id
+	servers["idc_id"] = idc_id
+
+	var idcs = make(map[string]interface{})
+	idcs["cabinet_number_id"] = cabinet_number_id
+	idcs["idc_id"] = idc_id
+	idcs["city"] = city_name
+	idcs["idc_name"] = idc_name
+
+	var cabinets = make(map[string]interface{})
+	cabinets["cabinet_number_id"] = cabinet_number_id
+	cabinets["idc_id"] = idc_id
+	cabinets["cabinet_number"] = cabinet_number
+
+	db.Model(&idc).Create(idcs)
+	db.Model(&cabinet).Create(cabinets)
+	db.Model(&server).Where("name =?", name).Updates(servers)
 }

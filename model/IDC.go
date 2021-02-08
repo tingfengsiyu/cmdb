@@ -1,22 +1,16 @@
 package model
 
 import (
+	"cmdb/middleware"
 	"cmdb/utils/errmsg"
 	"fmt"
+
 	"gorm.io/gorm"
 )
 
-type Idc struct {
-	City    string `gorm:"type:varchar(30);not null" json:"city"`
-	Name    string `gorm:"type:varchar(30);not null" json:"name"`
-	Cabinet string `gorm:"type:varchar(30);not null" json:"cabinet"`
-	gorm.Model
-	Cabinet_number string `gorm:"type:varchar(30);not null" json:"cabinet_number"`
-}
-
 // 查询IDC是否存在
 func CheckIdc(name string) (code int) {
-	var idc Server
+	var idc Idc
 	db.Select("id").Where("name = ?", name).First(&idc)
 	if idc.ID > 0 {
 		return errmsg.ERROR_DEVICE_EXIST //2001
@@ -24,9 +18,32 @@ func CheckIdc(name string) (code int) {
 	return errmsg.SUCCSE
 }
 
+func Check_Cabinet_Number(cabinet_number string) (int, int) {
+
+	var data = Cabinet{}
+	err := db.Select("cabinet_number_id").Find(&data).Where("cabinet_number = ?", cabinet_number).First(&data).Error
+	if err != nil {
+		middleware.SugarLogger.Errorf("sql查询错误%s", err)
+		return data.Cabinet_NumberID, errmsg.ERROR
+	}
+
+	return data.Cabinet_NumberID, errmsg.SUCCSE
+}
+
+//检查idc name是否存在
+func Check_Idc_Name(idc_name string) (int, int) {
+	var data = Idc{}
+	err := db.Select("idc_id").Find(&data).Where("idc_name = ?", idc_name).First(&data).Error
+	if err != nil {
+		fmt.Println(err)
+		middleware.SugarLogger.Errorf("sql查询错误%s", err)
+		return data.IDC_ID, errmsg.ERROR
+	}
+	return data.IDC_ID, errmsg.SUCCSE
+}
+
 func CreateIdc(data *Idc) int {
 	err := db.Create(&data).Error
-	fmt.Println(data)
 	if err != nil {
 		return errmsg.ERROR
 	}
@@ -36,10 +53,8 @@ func CreateIdc(data *Idc) int {
 func EditIdc(id int, data *Idc) int {
 	var idc Idc
 	var maps = make(map[string]interface{})
-	maps["name"] = data.Name
+	maps["name"] = data.IDC_Name
 	maps["city"] = data.City
-	maps["cabinet"] = data.Cabinet
-	maps["cabinet_number"] = data.Cabinet_number
 	fmt.Println(maps)
 	err = db.Model(&idc).Where("id=?", id).Updates(maps).Error
 	if err != nil {
@@ -48,7 +63,7 @@ func EditIdc(id int, data *Idc) int {
 	return errmsg.SUCCSE
 }
 
-func GetIDC(name string ) int64{
+func GetIDC(name string) int64 {
 	var idc Server
 	db.Select("id").Where("name = ?", name).First(&idc)
 	if idc.ID > 0 {
@@ -67,17 +82,23 @@ func GetIDCs(pageSize int, pageNum int) ([]Idc, int64) {
 	}
 	return svc, total
 }
+
+type result struct {
+	Name  string `json:"name"`
+	Label string `json:"label"`
+}
+
 //网络拓扑展示
 //根据机房名查询name和机柜号查询对应服务器名中对应的idc和机柜号和所属用户，形成网络拓扑
-func Network_topology(id int, name,cabinet_number,user string ) int {
+func Network_topology(id int, name, cabinet_number, user string) ([]result, int) {
 	//
-	var idc Idc
-	db.Where("id =?",id).First(Idc{})
+
+	var svc []result
+	errs := db.Debug().Unscoped().Model(&Server{}).Select("server.name,label,ipaddress,server.cabinet_number").Joins("left join idc on server.idc=idc.name").Scan(&svc)
+	//select server.name,label,ipaddress ,idc.name  from server  left join idc  on  server.idc=idc.name;
 	// 多连接及参数
-	db.Model(&Server{}).Select("idc.name,idc.cabinet_number,server.name,user,location,label,cpu,memory,disk,state").Joins("left join server on server.idc = idc.name").Scan(&idc)
-	db.Joins("JOIN server ON server.idc = idc.name AND server.cabinet_number = ?",cabinet_number ).Find(&idc)
-	//select server.name,idc.name,server.user from server,idc where server.idc=idc.name and idc.cabinet_number=server.cabinet_number and server.user="汪洋";
-	return errmsg.SUCCSE
+	middleware.SugarLogger.Errorf("查询错误%s", errs)
+	return svc, errmsg.SUCCSE
 }
 
 func DeleteIDC(id int) int {

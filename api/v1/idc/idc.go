@@ -3,9 +3,10 @@ package idc
 import (
 	"cmdb/model"
 	"cmdb/utils/errmsg"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
 )
 
 // 添加IDC
@@ -45,7 +46,7 @@ func DeleteIdc(c *gin.Context) {
 	code := model.DeleteIDC(id)
 	c.JSON(http.StatusOK, gin.H{
 		"status":  code,
-		"data": data,
+		"data":    data,
 		"message": errmsg.GetErrMsg(code),
 	})
 }
@@ -76,16 +77,16 @@ func GetIDCs(c *gin.Context) {
 	)
 }
 
-func Network_topology(c *gin.Context){
-	var data model.Idc
-	id ,_ := strconv.Atoi(c.Param("id"))
+func Network_topology(c *gin.Context) {
+	//var data []model.Server
+	id, _ := strconv.Atoi(c.Param("id"))
 	name := c.Param("name")
 	cabinet_number := c.Param("cabinet_number")
-	user  := c.Param("user")
-	code := model.Network_topology(id,name,cabinet_number,user)
-	c.JSON(http.StatusOK,gin.H{
-		"status":code,
-		"data": data,
+	user := c.Param("user")
+	data, code := model.Network_topology(id, name, cabinet_number, user)
+	c.JSON(http.StatusOK, gin.H{
+		"status":  code,
+		"data":    data,
 		"message": errmsg.GetErrMsg(code),
 	})
 }

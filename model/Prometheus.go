@@ -4,8 +4,6 @@ import (
 	"cmdb/middleware"
 	"encoding/json"
 	"os"
-
-	"gorm.io/gorm"
 )
 
 //prometheus json配置文件格式
@@ -18,16 +16,8 @@ type Labels struct {
 	Idc string `json:"idc"`
 }
 
-type MonitorPrometheus struct {
-	gorm.Model
-	ServerID int `gorm:"type:int;not null" json:"server_id"`
-	//PrivateIpAddress    string `gorm:"type:varchar(30);not null" json:"private_ip_address"`
-	NodeExportPort      int `gorm:"type:int;not null" json:"NodeExportPort"`
-	ProcessExportPort   int `gorm:"type:int;not null" json:"ProcessExportPort"`
-	ScriptExportPort    int `gorm:"type:int;not null" json:"ScriptExportPort"`
-	NodeExportStatus    int `gorm:"type:int;not null" json:"NodeExportStatus"`
-	ProcessExportStatus int `gorm:"type:int;not null" json:"ProcessExportStatus"`
-	ScriptExportStatus  int `gorm:"type:int;not null" json:"ScriptExportStatus"`
+func CheckAgentStatus() {
+
 }
 
 func ReadPrometheus() {
@@ -41,6 +31,7 @@ func WritePrometheus() {
 func DeletePrometheus() {
 
 }
+
 func InstallAgent() {
 
 }

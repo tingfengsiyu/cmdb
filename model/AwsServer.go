@@ -2,28 +2,9 @@ package model
 
 import (
 	"cmdb/utils/errmsg"
-	"gorm.io/gorm"
-	"time"
-)
 
-type AwsServer struct {
-	gorm.Model
-	InstanceId       string    `gorm:"type:varchar(30);not null" json:"instanceid"`
-	Name             string    `gorm:"type:varchar(30);not null" json:"label"`
-	LaunchTime       time.Time `gorm:"type:datetime;" json:"launchtime"`
-	ExpiredTime      time.Time `gorm:"type:datetime;" json:"expiredtime"`
-	PublicIpAddress  string    `gorm:"type:varchar(30);not null" json:"publicip"`
-	PrivateIpAddress string    `gorm:"type:varchar(30);not null" json:"privateip"`
-	ImageName        string    `gorm:"type:varchar(30);not null" json:"imagename"`
-	InstanceType     string    `gorm:"type:varchar(30);not null" json:"instancetype"`
-	State            string    `gorm:"type:varchar(30);not null" json:"state"`
-	Region           string    `gorm:"type:varchar(30);not null" json:"region"`
-	AvailabilityZone string    `gorm:"type:varchar(30);not null" json:"availabilityZone"`
-	Disk             string    `gorm:"type:varchar(30);not null" json:"disk"`
-	Architecture     string    `gorm:"type:varchar(30);not null" json:"architecture"`
-	Owner            string    `gorm:"type:varchar(30);not null" json:"owner"`
-	Cloud            string    `gorm:"type:varchar(30);not null" json:"cloud"`
-}
+	"gorm.io/gorm"
+)
 
 func GetAws(pageSize int, pageNum int) ([]AwsServer, int64) {
 	var svc []AwsServer

@@ -4,16 +4,17 @@ import (
 	"cmdb/model"
 	"cmdb/utils/errmsg"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
 )
 
 // 添加服务器
 func AddServer(c *gin.Context) {
 	var data model.Server
 	_ = c.ShouldBindJSON(&data)
-	code := model.CheckServer(data.Name)
+	_, code := model.CheckServer(data.Name)
 	if code == errmsg.SUCCSE {
 		model.CreateServer(&data)
 	}
@@ -31,23 +32,71 @@ func AddServer(c *gin.Context) {
 }
 
 func BatchAddServers(c *gin.Context) {
-	//server := model.Servers{}
-	//_ = c.ShouldBindJSON(&server)
-	servers := []model.Server{}
-	_ = c.ShouldBindJSON(&servers)
-	//var serverNames = make([]model.Names,0)
-	var serverNames = make([]string,0)
-	for _,v := range servers {
-		//serverNames = append(serverNames, model.Names{v.Name})
-		serverNames = append(serverNames, v.Name)
+
+	var cabinet_number_ids, idc_ids, server_ids []int
+	var number, cabinet_number_id, idc_id, server_id, code int
+	var hostNames = make([]string, 0)
+	assets := model.Assets{}
+	_ = c.ShouldBindJSON(&assets)
+	for _, v := range assets.Asset.Servers {
+		hostNames = append(hostNames, v.Name)
 	}
-	code := model.BatchCheckServer(serverNames)
+	idcNames := assets.Asset.Idcs.Idc_name
+	cabinetNumbers := assets.Asset.Idcs.Cabinet_Number
+	citys := assets.Asset.Idcs.City
+
+	for _, v := range idcNames {
+		idc_id, code = model.Check_Idc_Name(v)
+		if idc_id == 0 {
+			id := model.LastIdcID()
+			number = number + id + 1
+			idc_ids = append(idc_ids, number)
+		} else {
+			idc_ids = append(idc_ids, idc_id)
+		}
+	}
+	number = 0
+	for _, v := range cabinetNumbers {
+		cabinet_number_id, code = model.Check_Cabinet_Number(v)
+		if cabinet_number_id == 0 {
+			id := model.LastCabintID()
+			number = number + id + 1
+			cabinet_number_ids = append(cabinet_number_ids, number)
+		} else {
+			cabinet_number_ids = append(cabinet_number_ids, cabinet_number_id)
+		}
+	}
+	number = 0
+	for _, v := range hostNames {
+		server_id, code = model.CheckServer(v)
+		if server_id == 0 {
+			id := model.LastServeID()
+			number = number + id + 1
+			server_ids = append(server_ids, number)
+		} else {
+			server_ids = append(server_ids, server_id)
+		}
+	}
+	code = model.BatchCheckServer(hostNames)
 	if code == errmsg.SUCCSE {
-		//servers.BatchCreateServer()
-		code = model.BatchCreateServer2(&servers)
-	}else if code == errmsg.ERROR_DEVICE_EXIST {
+		code = model.BatchCreateServer2(&assets.Asset.Servers)
+		for k, _ := range server_ids {
+			if len(idcNames)-1 < k {
+				idcNames = append(idcNames, idcNames[0])
+			}
+			if len(citys)-1 < k {
+				citys = append(citys, citys[0])
+			}
+			if len(cabinetNumbers)-1 < k {
+				cabinetNumbers = append(cabinetNumbers, cabinetNumbers[0])
+			}
+			fmt.Println(idcNames[k], citys[k], cabinetNumbers[k], hostNames[k], idc_ids[k], server_ids[k], cabinet_number_ids[k])
+			fmt.Println(idcNames, citys, cabinetNumbers)
+			model.InsertID(idcNames[k], citys[k], cabinetNumbers[k], hostNames[k], idc_ids[k], server_ids[k], cabinet_number_ids[k])
+		}
+	} else if code == errmsg.ERROR_DEVICE_EXIST {
 		code = errmsg.ERROR_DEVICE_EXIST
-	}else if code == errmsg.ERROR_ALL_DEVICE_EXIST {
+	} else if code == errmsg.ERROR_ALL_DEVICE_EXIST {
 		code = errmsg.ERROR_ALL_DEVICE_EXIST
 	}
 
@@ -61,7 +110,9 @@ func BatchAddServers(c *gin.Context) {
 
 func GetServer(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
+
 	data, code := model.GetServerInfo(id)
+
 	c.JSON(
 		http.StatusOK, gin.H{
 			"status":  code,
@@ -116,14 +167,14 @@ func UpdateServer(c *gin.Context) {
 func BatchUpdateServers(c *gin.Context) {
 	servers := []model.Server{}
 	_ = c.ShouldBindJSON(&servers)
-	var IDS = make([]int,0)
-	for _,v := range servers {
+	var IDS = make([]int, 0)
+	for _, v := range servers {
 		IDS = append(IDS, v.ID)
 	}
 	code := model.BatchCheckServerID(IDS)
 	if code == errmsg.ERROR_DEVICE_EXIST {
 		code = errmsg.ERROR_DEVICE_EXIST
-	}else if code == errmsg.ERROR_ALL_DEVICE_EXIST {
+	} else if code == errmsg.ERROR_ALL_DEVICE_EXIST {
 		code = model.BatchUpdateServer(&servers)
 	}
 	c.JSON(http.StatusOK, gin.H{
@@ -142,7 +193,7 @@ func DeleteServer(c *gin.Context) {
 	})
 }
 
-func GetIdcServers(c *gin.Context){
+func GetIdcServers(c *gin.Context) {
 	pageSize, _ := strconv.Atoi(c.Query("pagesize"))
 	pageNum, _ := strconv.Atoi(c.Query("pagenum"))
 	idcname := c.Query("idcname")
@@ -157,7 +208,7 @@ func GetIdcServers(c *gin.Context){
 		pageNum = 1
 	}
 
-	data, total := model.GetIdcServers(pageSize, pageNum,idcname)
+	data, total := model.GetIdcServers(pageSize, pageNum, idcname)
 	code := errmsg.SUCCSE
 	c.JSON(
 		http.StatusOK, gin.H{
@@ -169,7 +220,7 @@ func GetIdcServers(c *gin.Context){
 	)
 }
 
-func GetCabinetServers(c *gin.Context){
+func GetCabinetServers(c *gin.Context) {
 	pageSize, _ := strconv.Atoi(c.Query("pagesize"))
 	pageNum, _ := strconv.Atoi(c.Query("pagenum"))
 	idcname := c.Query("idcname")
@@ -184,7 +235,7 @@ func GetCabinetServers(c *gin.Context){
 		pageNum = 1
 	}
 
-	data, total := model.GetCabinetServers(pageSize, pageNum,idcname,cabinet_number)
+	data, total := model.GetCabinetServers(pageSize, pageNum, idcname, cabinet_number)
 	code := errmsg.SUCCSE
 	c.JSON(
 		http.StatusOK, gin.H{
@@ -196,14 +247,10 @@ func GetCabinetServers(c *gin.Context){
 	)
 }
 
-func GetUser(c *gin.Context){
+func GetUser(c *gin.Context) {
 	data, total := model.GetOwnedUser()
-	//type User struct {
-	//	User  string `json:"user"`
-	//}
-	//var Users = make([]User,0)
-	var Users = make([]string,0)
-	for _,v :=range data{
+	var Users = make([]string, 0)
+	for _, v := range data {
 		Users = append(Users, v.User)
 	}
 
