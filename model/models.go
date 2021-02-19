@@ -45,7 +45,7 @@ type Server struct {
 	gorm.Model
 	User             string `gorm:"type:varchar(30);not null" json:"user" validate:"required,min=4"`
 	State            string `gorm:"type:varchar(10);not null" json:"state" validate:"required,min=4"`
-	ServerID         int    `gorm:"auto_increment;type:int;not null" json:"server_id" validate:"required,min=1"`
+	ServerID         int    `gorm:"type:int;not null" json:"server_id" validate:"required,min=1"`
 	IDC_ID           int    `gorm:"type:int;not null" json:"idc_id" validate:"required,min=4"`
 	Cabinet_NumberID int    `gorm:"type:int;not null" json:"cabinet_number_id" validate:"required,min=4"`
 }

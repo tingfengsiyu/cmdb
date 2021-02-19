@@ -2,12 +2,13 @@ package router
 
 import (
 	"cmdb/utils"
+
 	"github.com/gin-gonic/gin"
 
+	"cmdb/api/v1/cloud"
 	"cmdb/api/v1/idc"
 	"cmdb/api/v1/user"
 	"cmdb/middleware"
-	"cmdb/api/v1/cloud"
 )
 
 func InitRouter() {
@@ -22,7 +23,7 @@ func InitRouter() {
 		router.POST("createidc", idc.AddIdc)
 		router.GET("getidcs", idc.GetIDCs)
 		router.PUT("editidc/:id", idc.UpdateIdc)
-		router.DELETE("deleteidc/:id",idc.DeleteIdc)
+		router.DELETE("deleteidc/:id", idc.DeleteIdc)
 
 		router.POST("createserver", idc.AddServer)
 		router.POST("batchcreateserver", idc.BatchAddServers)
@@ -30,17 +31,17 @@ func InitRouter() {
 
 		router.GET("getservers", idc.GetServers)
 		router.GET("getserver/:id", idc.GetServer)
-		router.GET("getuser",idc.GetUser)
-		router.GET("getidcserver",idc.GetIdcServers)
-		router.GET("getcabinetserver",idc.GetCabinetServers)
+		router.GET("getuser", idc.GetUser)
+		router.GET("getidcserver", idc.GetIdcServers)
+		router.GET("getcabinetserver", idc.GetCabinetServers)
 		router.DELETE("deleteserver/:id", idc.DeleteServer)
 		router.PUT("editservers/:id", idc.UpdateServer)
-		router.GET("network_topology",idc.Network_topology)
+		router.GET("getnetwork_topology", idc.Network_topology)
 	}
 	clouds := r.Group("api/v1/cloud")
 	clouds.Use(middleware.JwtToken())
 	{
-		clouds.GET("/sync",cloud.Sync)
+		clouds.GET("/sync", cloud.Sync)
 	}
 	u := r.Group("api/v1/user")
 	router.Use(middleware.JwtToken())

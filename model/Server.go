@@ -3,8 +3,6 @@ package model
 import (
 	"cmdb/middleware"
 	"cmdb/utils/errmsg"
-	"fmt"
-
 	"gorm.io/gorm"
 )
 
@@ -17,24 +15,22 @@ func CreateServer(data *Server) int {
 }
 func LastCabintID() int {
 	var data = Cabinet{}
-	db.Last(&data)
-	return int(data.ID)
+	db.Order("cabinet_number_id desc").Find(&data).Limit(1)
+	return int(data.Cabinet_NumberID)
 }
 
 func LastIdcID() int {
 	var data = Idc{}
-	db.Last(&data)
-	return int(data.ID)
+	db.Order("idc_id desc").Find(&data).Limit(1)
+	return int(data.IDC_ID)
 }
 func LastServeID() int {
-	var data = Idc{}
-	db.Last(&data)
-	return int(data.ID)
+	var data = Server{}
+	db.Unscoped().Debug().Order("server_id desc").Find(&data).Limit(1)
+	return int(data.ServerID)
 }
 
 func (servers *Servers) BatchCreateServer() int {
-	//func BatchCreateServer(servers *Servers)  int {
-	//fmt.Println(servers.Servers)
 	err := db.Create(&servers.Servers).Error
 	if err != nil {
 		return errmsg.ERROR
@@ -47,7 +43,6 @@ func BatchCreateServer2(servers *[]Server) int {
 	err := db.Create(&servers).Error
 	if err != nil {
 		middleware.SugarLogger.Errorf("创建错误%s", err)
-		fmt.Println(err)
 		return errmsg.ERROR
 	}
 	return errmsg.SUCCSE
@@ -56,7 +51,6 @@ func BatchCreateServer2(servers *[]Server) int {
 func BatchUpdateServer(servers *[]Server) int {
 	err := db.Debug().Model(Server{}).Updates(servers).Error
 	if err != nil {
-		fmt.Println(err)
 		return errmsg.ERROR
 	}
 	return errmsg.SUCCSE
@@ -67,7 +61,7 @@ func CheckServer(name string) (int, int) {
 	var svc Server
 	db.Select("id").Where("name = ?", name).First(&svc)
 	if svc.ID > 0 {
-		return svc.ServerID, errmsg.ERROR_DEVICE_EXIST //2001
+		return svc.ID, errmsg.ERROR_DEVICE_EXIST //2001
 	}
 	return svc.ServerID, errmsg.SUCCSE
 }
@@ -88,7 +82,6 @@ func BatchCheckServerID(data []int) (code int) {
 	var svc Server
 	db.Find(&svc, data)
 	if svc.ID >= len(data) {
-		fmt.Println(svc.ID)
 		return errmsg.ERROR_ALL_DEVICE_EXIST
 	} else if svc.ID > 0 {
 		return errmsg.ERROR_DEVICE_EXIST
@@ -121,7 +114,6 @@ func EditServer(id int, data *Server) int {
 	maps["disk"] = data.Disk
 	maps["user"] = data.User
 	maps["state"] = data.State
-	//fmt.Println(maps)
 	err = db.Model(&servers).Where("id=?", id).Updates(maps).Error
 	if err != nil {
 		middleware.SugarLogger.Errorf("插入错误%s", err)
@@ -134,7 +126,7 @@ func DeleteServer(id int) int {
 	var servers Server
 	err = db.Debug().Unscoped().Where("id = ? ", id).Delete(&servers).Error
 	if err != nil {
-		fmt.Println(err)
+		middleware.SugarLogger.Errorf("删除错误%s", err)
 		return errmsg.ERROR
 	}
 	return errmsg.SUCCSE
@@ -209,6 +201,7 @@ func UpdateID(idc_name, city_name, cabinet_number, name string, idc_id, server_i
 	db.Model(&idc).Where("idc_name =?", idc_name).Updates(idcs)
 	db.Model(&cabinet).Where("cabinet_number =?", cabinet_number).Updates(cabinets)
 	db.Model(&server).Where("name =?", name).Updates(servers)
+
 	return errmsg.SUCCSE
 }
 
@@ -232,8 +225,22 @@ func InsertID(idc_name, city_name, cabinet_number, name string, idc_id, server_i
 	cabinets["cabinet_number_id"] = cabinet_number_id
 	cabinets["idc_id"] = idc_id
 	cabinets["cabinet_number"] = cabinet_number
+	//code := CheckIdc(idc_name)
+	//检查 cabinet_number_id 是否已存在，存在相同则不创建
+	err = db.Unscoped().Debug().Where("idc_name = ? AND  cabinet_number_id = ?", idc_name, cabinet_number_id).Find(&idc).Error
+	if err != nil {
+		middleware.SugarLogger.Errorf("查询错误%s", err)
+	}
+	if idc.Cabinet_NumberID == 0 {
+		db.Model(&idc).Create(idcs)
+	}
 
-	db.Model(&idc).Create(idcs)
-	db.Model(&cabinet).Create(cabinets)
+	err = db.Where("idc_id = ? AND  cabinet_number_id = ?", idc_id, cabinet_number_id).Find(&cabinet).Error
+	if err != nil {
+		middleware.SugarLogger.Errorf("查询cabinet错误%s", err)
+	}
+	if cabinet.Cabinet_NumberID == 0 {
+		db.Model(&cabinet).Create(cabinets)
+	}
 	db.Model(&server).Where("name =?", name).Updates(servers)
 }

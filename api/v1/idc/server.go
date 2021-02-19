@@ -32,9 +32,8 @@ func AddServer(c *gin.Context) {
 }
 
 func BatchAddServers(c *gin.Context) {
-
 	var cabinet_number_ids, idc_ids, server_ids []int
-	var number, cabinet_number_id, idc_id, server_id, code int
+	var cabinet_number_id, idc_id, code int
 	var hostNames = make([]string, 0)
 	assets := model.Assets{}
 	_ = c.ShouldBindJSON(&assets)
@@ -44,42 +43,60 @@ func BatchAddServers(c *gin.Context) {
 	idcNames := assets.Asset.Idcs.Idc_name
 	cabinetNumbers := assets.Asset.Idcs.Cabinet_Number
 	citys := assets.Asset.Idcs.City
-
-	for _, v := range idcNames {
-		idc_id, code = model.Check_Idc_Name(v)
-		if idc_id == 0 {
-			id := model.LastIdcID()
-			number = number + id + 1
-			idc_ids = append(idc_ids, number)
-		} else {
-			idc_ids = append(idc_ids, idc_id)
-		}
-	}
-	number = 0
-	for _, v := range cabinetNumbers {
-		cabinet_number_id, code = model.Check_Cabinet_Number(v)
-		if cabinet_number_id == 0 {
-			id := model.LastCabintID()
-			number = number + id + 1
-			cabinet_number_ids = append(cabinet_number_ids, number)
-		} else {
-			cabinet_number_ids = append(cabinet_number_ids, cabinet_number_id)
-		}
-	}
-	number = 0
-	for _, v := range hostNames {
-		server_id, code = model.CheckServer(v)
-		if server_id == 0 {
-			id := model.LastServeID()
-			number = number + id + 1
-			server_ids = append(server_ids, number)
-		} else {
-			server_ids = append(server_ids, server_id)
-		}
-	}
 	code = model.BatchCheckServer(hostNames)
 	if code == errmsg.SUCCSE {
 		code = model.BatchCreateServer2(&assets.Asset.Servers)
+		//检查不存在后执行
+		number := 0
+		for k, v := range idcNames {
+			idc_id, code = model.Check_Idc_Name(v)
+			if idc_id == 0 {
+				if k == 0 {
+					id := model.LastIdcID()
+					number = id + 1
+				} else {
+					number = number + 1
+				}
+				idc_ids = append(idc_ids, number)
+			} else {
+				idc_ids = append(idc_ids, idc_id)
+			}
+		}
+		number = 0
+		for k, v := range cabinetNumbers {
+			if len(idc_ids)-1 < k {
+				idc_ids = append(idc_ids, idc_ids[0])
+			}
+			cabinet_number_id, code = model.Check_Cabinet_Number(v, idc_ids[k])
+			if cabinet_number_id == 0 {
+				if k == 0 {
+					id := model.LastCabintID()
+					number = id + 1
+				} else {
+					number = number + 1
+				}
+				cabinet_number_ids = append(cabinet_number_ids, number)
+			} else {
+				cabinet_number_ids = append(cabinet_number_ids, cabinet_number_id)
+			}
+		}
+		number = 0
+		for k, v := range hostNames {
+			server_id, _ := model.CheckServer(v)
+			if server_id == 0 {
+				if k == 0 {
+					id := model.LastServeID()
+					fmt.Println(id, number)
+					number = id + 1
+				} else {
+					number = number + 1
+				}
+				server_ids = append(server_ids, number)
+			} else {
+				server_ids = append(server_ids, server_id)
+			}
+
+		}
 		for k, _ := range server_ids {
 			if len(idcNames)-1 < k {
 				idcNames = append(idcNames, idcNames[0])
@@ -90,8 +107,6 @@ func BatchAddServers(c *gin.Context) {
 			if len(cabinetNumbers)-1 < k {
 				cabinetNumbers = append(cabinetNumbers, cabinetNumbers[0])
 			}
-			fmt.Println(idcNames[k], citys[k], cabinetNumbers[k], hostNames[k], idc_ids[k], server_ids[k], cabinet_number_ids[k])
-			fmt.Println(idcNames, citys, cabinetNumbers)
 			model.InsertID(idcNames[k], citys[k], cabinetNumbers[k], hostNames[k], idc_ids[k], server_ids[k], cabinet_number_ids[k])
 		}
 	} else if code == errmsg.ERROR_DEVICE_EXIST {
@@ -154,8 +169,6 @@ func UpdateServer(c *gin.Context) {
 	var data model.Server
 	id, _ := strconv.Atoi(c.Param("id"))
 	_ = c.ShouldBindJSON(&data)
-	//fmt.Println(&data)
-	//fmt.Println(id)
 	code := model.EditServer(id, &data)
 
 	c.JSON(http.StatusOK, gin.H{
@@ -185,7 +198,6 @@ func BatchUpdateServers(c *gin.Context) {
 
 func DeleteServer(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
-	fmt.Println(id)
 	code := model.DeleteServer(id)
 	c.JSON(http.StatusOK, gin.H{
 		"status":  code,

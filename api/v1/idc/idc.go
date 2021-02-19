@@ -13,7 +13,7 @@ import (
 func AddIdc(c *gin.Context) {
 	var data model.Idc
 	_ = c.ShouldBindJSON(&data)
-	code := model.CreateIdc(&data)
+	_, code := model.Check_Idc_Name("test")
 	if code == errmsg.SUCCSE {
 		model.CreateIdc(&data)
 	}

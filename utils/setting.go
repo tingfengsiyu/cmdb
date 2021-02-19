@@ -2,6 +2,7 @@ package utils
 
 import (
 	"fmt"
+
 	"gopkg.in/ini.v1"
 	//"github.com/sirupsen/logrus"
 )
@@ -21,13 +22,14 @@ var (
 	AccessKey string
 	SecretKey string
 
-	LogFile  string
-	LogLevel string
-	KubeFile string
+	LogFile           string
+	LogLevel          string
+	ErrorLogFile      string
+	KubeFile          string
 	PrometheusConfDir string
-	NodeConf  string
-	ScriptConf string
-	ProcessConf string
+	NodeConf          string
+	ScriptConf        string
+	ProcessConf       string
 )
 
 func init() {
@@ -39,7 +41,7 @@ func init() {
 	LoadServer(file)
 	LoadData(file)
 	LoadAli(file)
-//	LoadAws(file)
+	//	LoadAws(file)
 	Loadk8s(file)
 	LoadPrometheus(file)
 }
@@ -48,11 +50,13 @@ func LoadServer(file *ini.File) {
 	AppMode = file.Section("server").Key("AppMode").MustString("debug")
 	HttpPort = file.Section("server").Key("HttpPort").MustString(":3000")
 	JwtKey = file.Section("server").Key("JwtKey").MustString("89js82js72")
-	LogFile = file.Section("server").Key("logfile").MustString("xxxx/cmdb")
+	LogFile = file.Section("server").Key("Logfile").MustString("xxxx/cmdb")
+	ErrorLogFile = file.Section("server").Key("ErrorLogFile").MustString("xxxx/cmdb")
+
 }
 func LoadData(file *ini.File) {
 	Db = file.Section("database").Key("Db").MustString("debug")
-	DbHost = file.Section("database").Key("DbHost").MustString("47.104.197.46")
+	DbHost = file.Section("database").Key("DbHost").MustString("47.s.197.46")
 	DbPort = file.Section("database").Key("DbPort").MustString("3306")
 	DbUser = file.Section("database").Key("DbUser").MustString("root")
 	DbPassWord = file.Section("database").Key("DbPassWord").MustString("caichangen")

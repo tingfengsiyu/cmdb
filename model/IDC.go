@@ -4,27 +4,26 @@ import (
 	"cmdb/middleware"
 	"cmdb/utils/errmsg"
 	"fmt"
-
 	"gorm.io/gorm"
 )
 
 // 查询IDC是否存在
-func CheckIdc(name string) (code int) {
+func CheckIdc(idc_name string) (code int) {
 	var idc Idc
-	db.Select("id").Where("name = ?", name).First(&idc)
+	db.Select("id").Where("idc_name = ?", idc_name).First(&idc)
 	if idc.ID > 0 {
 		return errmsg.ERROR_DEVICE_EXIST //2001
 	}
 	return errmsg.SUCCSE
 }
 
-func Check_Cabinet_Number(cabinet_number string) (int, int) {
+func Check_Cabinet_Number(cabinet_number string, idc_id int) (int, int) {
 
 	var data = Cabinet{}
-	err := db.Select("cabinet_number_id").Find(&data).Where("cabinet_number = ?", cabinet_number).First(&data).Error
+	err := db.Unscoped().Debug().Select("cabinet_number_id").Where("idc_id = ? and cabinet_number = ? ", idc_id, cabinet_number).First(&data).Error
 	if err != nil {
 		middleware.SugarLogger.Errorf("sql查询错误%s", err)
-		return data.Cabinet_NumberID, errmsg.ERROR
+		return int(data.ID), errmsg.ERROR
 	}
 
 	return data.Cabinet_NumberID, errmsg.SUCCSE
@@ -33,9 +32,9 @@ func Check_Cabinet_Number(cabinet_number string) (int, int) {
 //检查idc name是否存在
 func Check_Idc_Name(idc_name string) (int, int) {
 	var data = Idc{}
-	err := db.Select("idc_id").Find(&data).Where("idc_name = ?", idc_name).First(&data).Error
+	err := db.Unscoped().Debug().Select("idc_id").Where("idc_name = ?", idc_name).First(&data).Error
+	fmt.Println(data.IDC_ID, data.ID)
 	if err != nil {
-		fmt.Println(err)
 		middleware.SugarLogger.Errorf("sql查询错误%s", err)
 		return data.IDC_ID, errmsg.ERROR
 	}
@@ -55,7 +54,6 @@ func EditIdc(id int, data *Idc) int {
 	var maps = make(map[string]interface{})
 	maps["name"] = data.IDC_Name
 	maps["city"] = data.City
-	fmt.Println(maps)
 	err = db.Model(&idc).Where("id=?", id).Updates(maps).Error
 	if err != nil {
 		return errmsg.ERROR
@@ -91,8 +89,6 @@ type result struct {
 //网络拓扑展示
 //根据机房名查询name和机柜号查询对应服务器名中对应的idc和机柜号和所属用户，形成网络拓扑
 func Network_topology(id int, name, cabinet_number, user string) ([]result, int) {
-	//
-
 	var svc []result
 	errs := db.Debug().Unscoped().Model(&Server{}).Select("server.name,label,ipaddress,server.cabinet_number").Joins("left join idc on server.idc=idc.name").Scan(&svc)
 	//select server.name,label,ipaddress ,idc.name  from server  left join idc  on  server.idc=idc.name;
@@ -105,7 +101,6 @@ func DeleteIDC(id int) int {
 	var idc Idc
 	err = db.Debug().Unscoped().Where("id = ? ", id).Delete(&idc).Error
 	if err != nil {
-		fmt.Println(err)
 		return errmsg.ERROR
 	}
 	return errmsg.SUCCSE
