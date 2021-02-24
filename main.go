@@ -12,5 +12,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	model.Croninit()
 	router.InitRouter()
 }

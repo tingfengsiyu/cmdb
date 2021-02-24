@@ -30,6 +30,14 @@ var (
 	NodeConf          string
 	ScriptConf        string
 	ProcessConf       string
+	WorkerUser        string
+	WorkerPass        string
+	WorkerSudoPass    string
+	StorageUser       string
+	StoragePass       string
+	StorageSudoPass   string
+	RootPass          string
+	RootPub           string
 )
 
 func init() {
@@ -50,9 +58,16 @@ func LoadServer(file *ini.File) {
 	AppMode = file.Section("server").Key("AppMode").MustString("debug")
 	HttpPort = file.Section("server").Key("HttpPort").MustString(":3000")
 	JwtKey = file.Section("server").Key("JwtKey").MustString("89js82js72")
-	LogFile = file.Section("server").Key("Logfile").MustString("xxxx/cmdb")
+	LogFile = file.Section("server").Key("LogFile").MustString("xxxx/cmdb")
 	ErrorLogFile = file.Section("server").Key("ErrorLogFile").MustString("xxxx/cmdb")
-
+	WorkerUser = file.Section("server").Key("WorkerUser").MustString("xxxx/cmdb")
+	WorkerPass = file.Section("server").Key("WorkerPass").MustString("xxxx/cmdb")
+	WorkerSudoPass = file.Section("server").Key("WorkerSudoPass").MustString("xxxx/cmdb")
+	StorageUser = file.Section("server").Key("StorageUser").MustString("xxxx/cmdb")
+	StoragePass = file.Section("server").Key("StoragePass").MustString("xxxx/cmdb")
+	StorageSudoPass = file.Section("server").Key("StorageSudoPass").MustString("xxxx/cmdb")
+	RootPass = file.Section("server").Key("RootPass").MustString("xxxx/cmdb")
+	RootPub = file.Section("server").Key("RootPub").MustString("xxxx/cmdb")
 }
 func LoadData(file *ini.File) {
 	Db = file.Section("database").Key("Db").MustString("debug")

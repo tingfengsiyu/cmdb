@@ -13,6 +13,7 @@ func CreateServer(data *Server) int {
 	}
 	return errmsg.SUCCSE
 }
+
 func LastCabintID() int {
 	var data = Cabinet{}
 	db.Order("cabinet_number_id desc").Find(&data).Limit(1)
@@ -225,11 +226,11 @@ func InsertID(idc_name, city_name, cabinet_number, name string, idc_id, server_i
 	cabinets["cabinet_number_id"] = cabinet_number_id
 	cabinets["idc_id"] = idc_id
 	cabinets["cabinet_number"] = cabinet_number
-	//code := CheckIdc(idc_name)
+
 	//检查 cabinet_number_id 是否已存在，存在相同则不创建
 	err = db.Unscoped().Debug().Where("idc_name = ? AND  cabinet_number_id = ?", idc_name, cabinet_number_id).Find(&idc).Error
 	if err != nil {
-		middleware.SugarLogger.Errorf("查询错误%s", err)
+		middleware.SugarLogger.Errorf("查询idc错误%s", err)
 	}
 	if idc.Cabinet_NumberID == 0 {
 		db.Model(&idc).Create(idcs)
@@ -243,4 +244,17 @@ func InsertID(idc_name, city_name, cabinet_number, name string, idc_id, server_i
 		db.Model(&cabinet).Create(cabinets)
 	}
 	db.Model(&server).Where("name =?", name).Updates(servers)
+
+	//更新数据到监控表,  监控状态 0 未安装 ；1 已安装 ；2 已运行；3 已被监控
+	var prometheustarget = MonitorPrometheus{}
+	var prometheus = make(map[string]interface{})
+	prometheus["server_id"] = server_id
+	prometheus["node_export_port"] = 9100
+	prometheus["process_export_port"] = 9256
+	prometheus["script_export_port"] = 9172
+	prometheus["node_export_status"] = 0
+	prometheus["process_export_status"] = 0
+	prometheus["script_export_status"] = 0
+
+	db.Model(&prometheustarget).Create(prometheus)
 }

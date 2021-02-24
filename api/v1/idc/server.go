@@ -33,7 +33,7 @@ func AddServer(c *gin.Context) {
 
 func BatchAddServers(c *gin.Context) {
 	var cabinet_number_ids, idc_ids, server_ids []int
-	var cabinet_number_id, idc_id, code int
+	var code int
 	var hostNames = make([]string, 0)
 	assets := model.Assets{}
 	_ = c.ShouldBindJSON(&assets)
@@ -48,8 +48,10 @@ func BatchAddServers(c *gin.Context) {
 		code = model.BatchCreateServer2(&assets.Asset.Servers)
 		//检查不存在后执行
 		number := 0
+
+		//生成idc_id
 		for k, v := range idcNames {
-			idc_id, code = model.Check_Idc_Name(v)
+			idc_id, _ := model.Check_Idc_Name(v)
 			if idc_id == 0 {
 				if k == 0 {
 					id := model.LastIdcID()
@@ -62,12 +64,14 @@ func BatchAddServers(c *gin.Context) {
 				idc_ids = append(idc_ids, idc_id)
 			}
 		}
+
+		//生成cabinet_number_id
 		number = 0
 		for k, v := range cabinetNumbers {
 			if len(idc_ids)-1 < k {
 				idc_ids = append(idc_ids, idc_ids[0])
 			}
-			cabinet_number_id, code = model.Check_Cabinet_Number(v, idc_ids[k])
+			cabinet_number_id, _ := model.Check_Cabinet_Number(v, idc_ids[k])
 			if cabinet_number_id == 0 {
 				if k == 0 {
 					id := model.LastCabintID()
@@ -80,6 +84,8 @@ func BatchAddServers(c *gin.Context) {
 				cabinet_number_ids = append(cabinet_number_ids, cabinet_number_id)
 			}
 		}
+
+		//server_id
 		number = 0
 		for k, v := range hostNames {
 			server_id, _ := model.CheckServer(v)
@@ -97,6 +103,7 @@ func BatchAddServers(c *gin.Context) {
 			}
 
 		}
+		//插入对应id
 		for k, _ := range server_ids {
 			if len(idcNames)-1 < k {
 				idcNames = append(idcNames, idcNames[0])
@@ -134,6 +141,28 @@ func GetServer(c *gin.Context) {
 			"data":    data,
 			"total":   1,
 			"message": errmsg.GetErrMsg(code),
+		},
+	)
+}
+
+func Cron(c *gin.Context) {
+	c.Copy()
+	go model.CheckAgentStatus()
+	c.JSON(
+		http.StatusOK, gin.H{
+			"status": 200,
+			"total":  1,
+		},
+	)
+}
+
+func OsInit(c *gin.Context) {
+	c.Copy()
+	go model.OsInit()
+	c.JSON(
+		http.StatusOK, gin.H{
+			"status": 200,
+			"total":  1,
 		},
 	)
 }
