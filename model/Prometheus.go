@@ -45,31 +45,27 @@ func Croninit() {
 //并发检测监控agent运行状态
 func CheckAgentStatus() {
 	monitorPrometheus := Prometheus_server()
-	var msgChan = make(chan []ScanMonitorPrometheus, len(monitorPrometheus))
-	msgChan <- monitorPrometheus
 	client := &http.Client{Timeout: 200 * time.Millisecond}
-	wg.Add(1)
-	go HHH(client, msgChan)
-	wg.Wait()
-}
-
-func HHH(client *http.Client, msgChan chan []ScanMonitorPrometheus) {
-	defer wg.Done()
-	var monitorPrometheus, _ = <-msgChan
 	for _, v := range monitorPrometheus {
-		nodeExporterUrl := fmt.Sprintf("http://%s:%s", "172.22.0.20", v.NodeExportPort)
-		processExporterUrl := fmt.Sprintf("http://%s:%s", "172.22.0.20", v.ProcessExportPort)
-		scriptExporterUrl := fmt.Sprintf("http://%s:%s", "172.22.0.20", v.ScriptExportPort)
-		nodeStatusCode := HttpCheckExporter(client, nodeExporterUrl)
-		processStatusCode := HttpCheckExporter(client, processExporterUrl)
-		scriptStatusCode := HttpCheckExporter(client, scriptExporterUrl)
-		var monitor = make(map[string]interface{})
-		monitor["node_export_status"] = nodeStatusCode
-		monitor["process_export_status"] = processStatusCode
-		monitor["script_export_status"] = scriptStatusCode
-		db.Model(&MonitorPrometheus{}).Where("server_id =?", v.ServerID).Updates(monitor)
+		go func(client *http.Client, tmp ScanMonitorPrometheus) {
+			for _, v := range monitorPrometheus {
+				nodeExporterUrl := fmt.Sprintf("http://%s:%s", "172.22.0.20", v.NodeExportPort)
+				processExporterUrl := fmt.Sprintf("http://%s:%s", "172.22.0.20", v.ProcessExportPort)
+				scriptExporterUrl := fmt.Sprintf("http://%s:%s", "172.22.0.20", v.ScriptExportPort)
+				nodeStatusCode := HttpCheckExporter(client, nodeExporterUrl)
+				processStatusCode := HttpCheckExporter(client, processExporterUrl)
+				scriptStatusCode := HttpCheckExporter(client, scriptExporterUrl)
+				var monitor = make(map[string]interface{})
+				monitor["node_export_status"] = nodeStatusCode
+				monitor["process_export_status"] = processStatusCode
+				monitor["script_export_status"] = scriptStatusCode
+				db.Model(&MonitorPrometheus{}).Where("server_id =?", v.ServerID).Updates(monitor)
+			}
+		}(client, v)
+
 	}
 }
+
 func HttpCheckExporter(client *http.Client, url string) int {
 	resp, err := client.Get(url)
 	if err != nil {

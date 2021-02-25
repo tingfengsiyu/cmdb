@@ -3,13 +3,10 @@ package model
 import (
 	"bufio"
 	"cmdb/middleware"
-	"cmdb/utils"
-	"fmt"
 	"golang.org/x/crypto/ssh"
 	"io"
 	"net"
 	"strings"
-	"time"
 )
 
 type Connection struct {
@@ -18,7 +15,7 @@ type Connection struct {
 	sudopass string
 }
 
-func Connect(addr, user, password, sudopass string) (*Connection, error) {
+func SshCommands(user, password, addr, sudopass string, cmds ...string) ([]byte, error) {
 	sshConfig := &ssh.ClientConfig{
 		User: user,
 		Auth: []ssh.AuthMethod{
@@ -26,17 +23,11 @@ func Connect(addr, user, password, sudopass string) (*Connection, error) {
 		},
 		HostKeyCallback: ssh.HostKeyCallback(func(hostname string, remote net.Addr, key ssh.PublicKey) error { return nil }),
 	}
-
 	conn, err := ssh.Dial("tcp", addr, sshConfig)
 	if err != nil {
+		middleware.SugarLogger.Errorf("sshconnection %s", err)
 		return nil, err
 	}
-
-	return &Connection{conn, password, sudopass}, nil
-
-}
-
-func (conn *Connection) SendCommands(cmds ...string) ([]byte, error) {
 	session, err := conn.NewSession()
 	if err != nil {
 		middleware.SugarLogger.Errorf("%s", err)
@@ -87,7 +78,7 @@ func (conn *Connection) SendCommands(cmds ...string) ([]byte, error) {
 			line += string(b)
 
 			if strings.HasPrefix(line, "[sudo] password for ") && strings.HasSuffix(line, ": ") {
-				_, err = in.Write([]byte(conn.password + "\n"))
+				_, err = in.Write([]byte(sudopass + "\n"))
 				if err != nil {
 					break
 				}
@@ -102,77 +93,4 @@ func (conn *Connection) SendCommands(cmds ...string) ([]byte, error) {
 	}
 
 	return output, nil
-}
-
-func BatchSsh(msg chan []ScanMonitorPrometheus) {
-	defer wg.Done()
-	tmp, _ := <-msg
-	for _, v := range tmp {
-		var user, passwd, sudopasswd string
-		if v.Label == "lotus-miner" || v.Label == "lotus-worker" {
-			user = utils.WorkerUser
-			passwd = utils.WorkerPass
-			sudopasswd = utils.WorkerPass
-		} else if v.Label == "lotus-storage" {
-			user = utils.StorageUser
-			passwd = utils.StoragePass
-			sudopasswd = utils.StorageSudoPass
-		} else {
-			user = utils.WorkerUser
-			passwd = utils.WorkerPass
-			sudopasswd = utils.WorkerPass
-		}
-		conn, err := Connect("172.22.0.20:22", user, passwd, sudopasswd)
-		if err != nil {
-			middleware.SugarLogger.Errorf("%s", err)
-		}
-		sshdConfig := "sudo sed -i 's@PasswordAuthentication no@PasswordAuthentication yes@g' /etc/ssh/sshd_config"
-		updatePass := fmt.Sprintf("sudo echo root:%s | chpasswd", utils.RootPass)
-		updatePubKey := fmt.Sprintf("sudo grep ops /root/.ssh/authorized_keys || sudo sed -i '1i %s' /root/.ssh/authorized_keys ", utils.RootPub)
-		_, err = conn.SendCommands(sshdConfig, updatePass, updatePubKey)
-		if err != nil {
-			middleware.SugarLogger.Errorf("ssh commands  %s ", err)
-		}
-		fmt.Println(time.Now())
-	}
-}
-func BatchSsh2(v ScanMonitorPrometheus) {
-	fmt.Println(time.Now())
-	defer wg.Done()
-	var user, passwd, sudopasswd string
-	if v.Label == "lotus-miner" || v.Label == "lotus-worker" {
-		user = utils.WorkerUser
-		passwd = utils.WorkerPass
-		sudopasswd = utils.WorkerPass
-	} else if v.Label == "lotus-storage" {
-		user = utils.StorageUser
-		passwd = utils.StoragePass
-		sudopasswd = utils.StorageSudoPass
-	} else {
-		user = utils.WorkerUser
-		passwd = utils.WorkerPass
-		sudopasswd = utils.WorkerPass
-	}
-	conn, err := Connect("172.22.0.20:22", user, passwd, sudopasswd)
-	if err != nil {
-		middleware.SugarLogger.Errorf("%s", err)
-	}
-	sshdConfig := "sudo sed -i 's@PasswordAuthentication no@PasswordAuthentication yes@g' /etc/ssh/sshd_config"
-	updatePass := fmt.Sprintf("sudo echo root:%s | chpasswd", utils.RootPass)
-	updatePubKey := fmt.Sprintf("sudo grep ops /root/.ssh/authorized_keys || sudo sed -i '1i %s' /root/.ssh/authorized_keys ", utils.RootPub)
-	_, err = conn.SendCommands(sshdConfig, updatePass, updatePubKey)
-	if err != nil {
-		middleware.SugarLogger.Errorf("ssh commands  %s ", err)
-	}
-	fmt.Println(time.Now())
-
-}
-
-func OsInit() {
-	monitorPrometheus := Prometheus_server()
-	for _, v := range monitorPrometheus {
-		go BatchSsh2(v)
-		wg.Add(1)
-		wg.Wait()
-	}
 }

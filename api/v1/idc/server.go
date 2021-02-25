@@ -146,19 +146,9 @@ func GetServer(c *gin.Context) {
 }
 
 func Cron(c *gin.Context) {
+	fmt.Println("test")
 	c.Copy()
 	go model.CheckAgentStatus()
-	c.JSON(
-		http.StatusOK, gin.H{
-			"status": 200,
-			"total":  1,
-		},
-	)
-}
-
-func OsInit(c *gin.Context) {
-	c.Copy()
-	go model.OsInit()
 	c.JSON(
 		http.StatusOK, gin.H{
 			"status": 200,

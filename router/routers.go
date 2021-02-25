@@ -7,6 +7,7 @@ import (
 
 	"cmdb/api/v1/cloud"
 	"cmdb/api/v1/idc"
+	"cmdb/api/v1/script"
 	"cmdb/api/v1/user"
 	"cmdb/middleware"
 )
@@ -29,7 +30,7 @@ func InitRouter() {
 		router.POST("batchcreateserver", idc.BatchAddServers)
 		router.POST("batchupdateserver", idc.BatchUpdateServers)
 		router.POST("cron", idc.Cron)
-		router.POST("osinit", idc.OsInit)
+		router.POST("osinit", script.OsInit)
 
 		router.GET("getservers", idc.GetServers)
 		router.GET("getserver/:id", idc.GetServer)
