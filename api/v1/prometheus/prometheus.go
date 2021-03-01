@@ -3,6 +3,7 @@ package prometheus
 import (
 	"cmdb/model"
 	"github.com/gin-gonic/gin"
+	"net/http"
 )
 
 func Listtargets() {
@@ -21,6 +22,12 @@ func Deletetargets() {
 
 }
 
-func CheckAgentStatus(c *gin.Context) {
-	go model.CheckAgentStatus()
+func WritePrometheus(c *gin.Context) {
+	model.WritePrometheus()
+	c.JSON(
+		http.StatusOK, gin.H{
+			"status":  200,
+			"message": "write ok!!!",
+		},
+	)
 }

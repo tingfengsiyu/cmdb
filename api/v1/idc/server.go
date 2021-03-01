@@ -146,7 +146,6 @@ func GetServer(c *gin.Context) {
 }
 
 func Cron(c *gin.Context) {
-	fmt.Println("test")
 	c.Copy()
 	go model.CheckAgentStatus()
 	c.JSON(

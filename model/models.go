@@ -53,13 +53,18 @@ type Server struct {
 //监控表
 type MonitorPrometheus struct {
 	gorm.Model
-	ServerID            int `gorm:"unique;type:int;not null" json:"server_id" validate:"required,min=1"`
-	NodeExportPort      int `gorm:"type:int;not null" json:"node_export_port" validate:"required,min=4"`
-	ProcessExportPort   int `gorm:"type:int;not null" json:"process_export_port" validate:"required,min=4"`
-	ScriptExportPort    int `gorm:"type:int;not null" json:"script_export_port" validate:"required,min=4"`
-	NodeExportStatus    int `gorm:"type:int;not null" json:"node_export_status" validate:"required,min=1"`
-	ProcessExportStatus int `gorm:"type:int;not null" json:"process_export_status" validate:"required,min=1"`
-	ScriptExportStatus  int `gorm:"type:int;not null" json:"script_export_status" validate:"required,min=1"`
+	ServerID             int `gorm:"unique;type:int;not null" json:"server_id" validate:"required,min=1"`
+	NodeExportPort       int `gorm:"type:int;DEFAULT:9100" json:"node_export_port" validate:"required,min=4"`
+	ProcessExportPort    int `gorm:"type:int;DEFAULT:9256" json:"process_export_port" validate:"required,min=4"`
+	ScriptExportPort     int `gorm:"type:int;DEFAULT:9172" json:"script_export_port" validate:"required,min=4"`
+	NodeExportStatus     int `gorm:"type:int;DEFAULT:0" json:"node_export_status" validate:"required,min=1"`
+	ProcessExportStatus  int `gorm:"type:int;DEFAULT:0" json:"process_export_status" validate:"required,min=1"`
+	ScriptExportStatus   int `gorm:"type:int;DEFAULT:0" json:"script_export_status" validate:"required,min=1"`
+	DisableNodeExport    int `gorm:"type:int;DEFAULT:1" json:"disable_node_export" `
+	DisableProcessExport int `gorm:"type:int;DEFAULT:1" json:"disable_process_export"`
+	DisableScriptExport  int `gorm:"type:int;DEFAULT:1" json:"disable_script_export"`
+
+	//监控状态 0 未安装 ；1 已安装 ；2 已运行；3 已被监控,disable 0 禁用监控 1 启用监控
 }
 
 type Servers struct {

@@ -1,6 +1,7 @@
 package router
 
 import (
+	"cmdb/api/v1/prometheus"
 	"cmdb/utils"
 
 	"github.com/gin-gonic/gin"
@@ -32,6 +33,7 @@ func InitRouter() {
 		router.POST("cron", idc.Cron)
 		router.POST("osinit", script.OsInit)
 
+		router.GET("WritePrometheus", prometheus.WritePrometheus)
 		router.GET("getservers", idc.GetServers)
 		router.GET("getserver/:id", idc.GetServer)
 		router.GET("getuser", idc.GetUser)

@@ -31,7 +31,7 @@ func OsInit(c *gin.Context) {
 			sshdConfig := "sudo sed -i 's@PasswordAuthentication no@PasswordAuthentication yes@g' /etc/ssh/sshd_config"
 			updatePass := fmt.Sprintf("sudo echo root:%s | chpasswd", utils.RootPass)
 			updatePubKey := fmt.Sprintf("sudo grep ops /root/.ssh/authorized_keys || sudo sed -i '1i %s' /root/.ssh/authorized_keys ", utils.RootPub)
-			outs, err := model.SshCommands(user, passwd, "172.22.0.20:22", sudopasswd, sshdConfig, updatePass, updatePubKey)
+			outs, err := model.SshCommands(user, passwd, v.PrivateIpAddress, sudopasswd, sshdConfig, updatePass, updatePubKey)
 			if err != nil {
 				middleware.SugarLogger.Errorf("ssh commands  %s ", err)
 			}
@@ -42,7 +42,7 @@ func OsInit(c *gin.Context) {
 	c.JSON(
 		http.StatusOK, gin.H{
 			"status": 200,
-			"data":   "async",
+			"data":   "系统初始化中",
 		},
 	)
 }

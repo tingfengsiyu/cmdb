@@ -249,12 +249,5 @@ func InsertID(idc_name, city_name, cabinet_number, name string, idc_id, server_i
 	var prometheustarget = MonitorPrometheus{}
 	var prometheus = make(map[string]interface{})
 	prometheus["server_id"] = server_id
-	prometheus["node_export_port"] = 9100
-	prometheus["process_export_port"] = 9256
-	prometheus["script_export_port"] = 9172
-	prometheus["node_export_status"] = 0
-	prometheus["process_export_status"] = 0
-	prometheus["script_export_status"] = 0
-
 	db.Model(&prometheustarget).Create(prometheus)
 }
