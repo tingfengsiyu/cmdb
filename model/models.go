@@ -39,6 +39,8 @@ type Server struct {
 	PrivateIpAddress string `gorm:"type:varchar(30);not null" json:"private_ip_address" validate:"required,min=16"`
 	PublicIpAddress  string `gorm:"type:varchar(30);not null" json:"public_ip_address" `
 	Label            string `gorm:"type:varchar(30);not null" json:"label" validate:"required,min=4"`
+	Cluster          string `gorm:"type:varchar(30);not null" json:"cluster" validate:"required,min=4"`
+	LabelIpAddress   string `gorm:"type:varchar(30);not null" json:"label_ip_address" validate:"required,min=4"`
 	Cpu              string `gorm:"type:varchar(30);not null" json:"cpu" validate:"required,min=3"`
 	Memory           string `gorm:"type:varchar(30);not null" json:"memory" validate:"required,min=3"`
 	Disk             string `gorm:"type:varchar(30);not null" json:"disk" validate:"required,min=3"`

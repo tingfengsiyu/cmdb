@@ -39,6 +39,7 @@ func Croninit() {
 	go func() {
 		crontab := cron.New()
 		crontab.AddFunc("0 */3 * * * *", CheckAgentStatus) // 每隔3分钟 定时执行 CheckAgentStatus 函数
+		crontab.AddFunc("0 */4 * * * * ", WritePrometheus)
 		crontab.Start()
 	}()
 }
@@ -48,12 +49,12 @@ func CheckAgentStatus() {
 
 	monitorPrometheus := Prometheus_server()
 	client := &http.Client{Timeout: 200 * time.Millisecond}
-	nodefile, err := os.Open(utils.PrometheusConfDir + "/" + utils.NodeConf)
-	defer nodefile.Close()
-	processfile, err := os.Open(utils.PrometheusConfDir + "/" + utils.ProcessConf)
-	defer processfile.Close()
-	scriptfile, err := os.Open(utils.PrometheusConfDir + "/" + utils.ScriptConf)
-	defer scriptfile.Close()
+	//nodefile, err := os.Open(utils.PrometheusConfDir + "/" + utils.NodeConf)
+	//defer nodefile.Close()
+	//processfile, err := os.Open(utils.PrometheusConfDir + "/" + utils.ProcessConf)
+	//defer processfile.Close()
+	//scriptfile, err := os.Open(utils.PrometheusConfDir + "/" + utils.ScriptConf)
+	//defer scriptfile.Close()
 	if err != nil {
 		middleware.SugarLogger.Errorf("Open file failed [Err:%s]", err.Error())
 	}
@@ -66,31 +67,31 @@ func CheckAgentStatus() {
 				nodeStatusCode := HttpCheckExporter(client, nodeExporterUrl)
 				processStatusCode := HttpCheckExporter(client, processExporterUrl)
 				scriptStatusCode := HttpCheckExporter(client, scriptExporterUrl)
-				if nodeStatusCode == 2 && v.DisableNodeExport == 1 {
-					targets := fmt.Sprintf("%s:%s", v.PrivateIpAddress, v.NodeExportPort)
-					code, err := ReadJsonfile(nodefile, targets)
-					if err != nil && code == 0 {
-						middleware.SugarLogger.Errorf("read %s", err)
-					} else {
-						nodeStatusCode += 1
-					}
-				}
-				if processStatusCode == 2 && v.DisableProcessExport == 1 {
-					code, err = ReadJsonfile(processfile, v.PrivateIpAddress+":"+v.ProcessExportPort)
-					if err != nil && code == 0 {
-						middleware.SugarLogger.Errorf("read %s", err)
-					} else {
-						processStatusCode += 1
-					}
-				}
-				if scriptStatusCode == 2 && v.DisableScriptExport == 1 {
-					code, err = ReadJsonfile(scriptfile, v.PrivateIpAddress+":"+v.ScriptExportPort)
-					if err != nil && code == 0 {
-						middleware.SugarLogger.Errorf("read %s", err)
-					} else {
-						scriptStatusCode += 1
-					}
-				}
+				//if nodeStatusCode == 2 && v.DisableNodeExport == 1 {
+				//	targets := fmt.Sprintf("%s:%s", v.PrivateIpAddress, v.NodeExportPort)
+				//	code, err := ReadJsonfile(nodefile, targets)
+				//	if err != nil && code == 0 {
+				//		middleware.SugarLogger.Errorf("read %s", err)
+				//	} else {
+				//		nodeStatusCode += 1
+				//	}
+				//}
+				//if processStatusCode == 2 && v.DisableProcessExport == 1 {
+				//	code, err = ReadJsonfile(processfile, v.PrivateIpAddress+":"+v.ProcessExportPort)
+				//	if err != nil && code == 0 {
+				//		middleware.SugarLogger.Errorf("read %s", err)
+				//	} else {
+				//		processStatusCode += 1
+				//	}
+				//}
+				//if scriptStatusCode == 2 && v.DisableScriptExport == 1 {
+				//	code, err = ReadJsonfile(scriptfile, v.PrivateIpAddress+":"+v.ScriptExportPort)
+				//	if err != nil && code == 0 {
+				//		middleware.SugarLogger.Errorf("read %s", err)
+				//	} else {
+				//		scriptStatusCode += 1
+				//	}
+				//}
 				var monitor = make(map[string]interface{})
 				monitor["node_export_status"] = nodeStatusCode
 				monitor["process_export_status"] = processStatusCode
@@ -126,10 +127,6 @@ func Prometheus_server() []ScanMonitorPrometheus {
 	return svc
 }
 
-func ReadPrometheus() {
-
-}
-
 func WritePrometheus() {
 	monitorPrometheus := Prometheus_server()
 	var node = make([]string, 0)
@@ -160,8 +157,12 @@ func WritePrometheus() {
 
 }
 
-func DeletePrometheus() {
-
+func InsertPrometheusID(server_id int) {
+	//更新数据到监控表,  监控状态 0 未安装 ；1 已安装 ；2 已运行；3 已被监控
+	var prometheustarget = MonitorPrometheus{}
+	var prometheus = make(map[string]interface{})
+	prometheus["server_id"] = server_id
+	db.Model(&prometheustarget).Create(prometheus)
 }
 
 func InstallAgent() {
@@ -189,11 +190,10 @@ func ReadJsonfile(filePtr *os.File, targets string) (int, error) {
 
 func WriteJsonfile(file string, targets []string) error {
 	var tmp = make([]PrometheusTarget, 0)
-	var label = Labels{}
-	label = Labels{
-		Idc: "成都郫县"}
 	tmp = append(tmp, PrometheusTarget{Targets: targets,
-		Labels: label,
+		Labels: Labels{
+			Idc: "成都郫县",
+		},
 	})
 	filePtr, err := os.Create(file)
 	if err != nil {
@@ -204,6 +204,7 @@ func WriteJsonfile(file string, targets []string) error {
 	datas, err := json.MarshalIndent(tmp, "", "  ")
 	if err != nil {
 		middleware.SugarLogger.Errorf("Encoder failed", err.Error())
+		return err
 	}
 	filePtr.Write(datas)
 	defer filePtr.Close()

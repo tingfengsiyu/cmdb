@@ -31,16 +31,38 @@ func LastServeID() int {
 	return int(data.ServerID)
 }
 
-func (servers *Servers) BatchCreateServer() int {
-	err := db.Create(&servers.Servers).Error
-	if err != nil {
-		return errmsg.ERROR
-	}
-	return errmsg.SUCCSE
+//func (servers *Servers) BatchCreateServer() int {
+//	err := db.Create(&servers.Servers).Error
+//	if err != nil {
+//		return errmsg.ERROR
+//	}
+//	return errmsg.SUCCSE
+//}
+
+type ScanServers struct {
+	ID               int    `gorm:"primary_key;auto_increment;int" json:"id"`
+	City             string `gorm:"type:varchar(30);not null" json:"city" validate:"required,min=4"`
+	IDC_Name         string `gorm:"type:varchar(30);not null" json:"idc_name" validate:"required,min=4"`
+	Cabinet_Number   string `gorm:"type:varchar(30);not null" json:"cabinet_number"`
+	Name             string `gorm:"type:varchar(30);not null" json:"name" validate:"required,min=4"`
+	Models           string `gorm:"type:varchar(30);not null" json:"models" validate:"required,min=4"`
+	Location         string `gorm:"type:varchar(30);not null" json:"location" validate:"required,min=4"`
+	PrivateIpAddress string `gorm:"type:varchar(30);not null" json:"private_ip_address" validate:"required,min=16"`
+	PublicIpAddress  string `gorm:"type:varchar(30);not null" json:"public_ip_address" `
+	Label            string `gorm:"type:varchar(30);not null" json:"label" validate:"required,min=4"`
+	Cluster          string `gorm:"type:varchar(30);not null" json:"cluster" validate:"required,min=4"`
+	LabelIpAddress   string `gorm:"type:varchar(30);not null" json:"label_ip_address" validate:"required,min=4"`
+	Cpu              string `gorm:"type:varchar(30);not null" json:"cpu" validate:"required,min=3"`
+	Memory           string `gorm:"type:varchar(30);not null" json:"memory" validate:"required,min=3"`
+	Disk             string `gorm:"type:varchar(30);not null" json:"disk" validate:"required,min=3"`
+	User             string `gorm:"type:varchar(30);not null" json:"user" validate:"required,min=4"`
+	State            string `gorm:"type:varchar(10);not null" json:"state" validate:"required,min=4"`
+	IDC_ID           int    `gorm:"type:int;not null" json:"idc_id" validate:"required,min=4"`
+	Cabinet_NumberID int    `gorm:"type:int;not null" json:"cabinet_number_id" validate:"required,min=4"`
 }
 
 //批量创建
-func BatchCreateServer2(servers *[]Server) int {
+func BatchCreateServer(servers *[]Server) int {
 	err := db.Create(&servers).Error
 	if err != nil {
 		middleware.SugarLogger.Errorf("创建错误%s", err)
@@ -49,7 +71,7 @@ func BatchCreateServer2(servers *[]Server) int {
 	return errmsg.SUCCSE
 }
 
-func BatchUpdateServer(servers *[]Server) int {
+func BatchUpdateServer(servers map[string]interface{}) int {
 	err := db.Debug().Model(Server{}).Updates(servers).Error
 	if err != nil {
 		return errmsg.ERROR
@@ -180,74 +202,32 @@ func GetCabinetServers(pageSize, pageNum int, name, cabinet_number string) ([]Se
 	return svc, total
 }
 
-func UpdateID(idc_name, city_name, cabinet_number, name string, idc_id, server_id, cabinet_number_id int) int {
-	var idc = Idc{}
-	var cabinet = Cabinet{}
+func InsertServerID(name string, idc_id, server_id, cabinet_number_id int) {
 	var server = Server{}
-
 	var servers = make(map[string]interface{})
 	servers["server_id"] = server_id
 	servers["cabinet_number_id"] = cabinet_number_id
 	servers["idc_id"] = idc_id
-
-	var idcs = make(map[string]interface{})
-	idcs["cabinet_number_id"] = cabinet_number_id
-	idcs["idc_id"] = idc_id
-	idcs["city"] = city_name
-
-	var cabinets = make(map[string]interface{})
-	cabinets["cabinet_number_id"] = cabinet_number_id
-	cabinets["idc_id"] = idc_id
-
-	db.Model(&idc).Where("idc_name =?", idc_name).Updates(idcs)
-	db.Model(&cabinet).Where("cabinet_number =?", cabinet_number).Updates(cabinets)
 	db.Model(&server).Where("name =?", name).Updates(servers)
-
-	return errmsg.SUCCSE
 }
 
-func InsertID(idc_name, city_name, cabinet_number, name string, idc_id, server_id, cabinet_number_id int) {
-	var idc = Idc{}
-	var cabinet = Cabinet{}
-	var server = Server{}
-
-	var servers = make(map[string]interface{})
-	servers["server_id"] = server_id
-	servers["cabinet_number_id"] = cabinet_number_id
-	servers["idc_id"] = idc_id
-
-	var idcs = make(map[string]interface{})
-	idcs["cabinet_number_id"] = cabinet_number_id
-	idcs["idc_id"] = idc_id
-	idcs["city"] = city_name
-	idcs["idc_name"] = idc_name
-
-	var cabinets = make(map[string]interface{})
-	cabinets["cabinet_number_id"] = cabinet_number_id
-	cabinets["idc_id"] = idc_id
-	cabinets["cabinet_number"] = cabinet_number
-
-	//检查 cabinet_number_id 是否已存在，存在相同则不创建
-	err = db.Unscoped().Debug().Where("idc_name = ? AND  cabinet_number_id = ?", idc_name, cabinet_number_id).Find(&idc).Error
-	if err != nil {
-		middleware.SugarLogger.Errorf("查询idc错误%s", err)
+func GenerateServerID(hostNames []string) []int {
+	//server_id
+	var server_ids = make([]int, 0)
+	number := 0
+	for k, v := range hostNames {
+		server_id, _ := CheckServer(v)
+		if server_id == 0 {
+			if k == 0 {
+				id := LastServeID()
+				number = id + 1
+			} else {
+				number = number + 1
+			}
+			server_ids = append(server_ids, number)
+		} else {
+			server_ids = append(server_ids, server_id)
+		}
 	}
-	if idc.Cabinet_NumberID == 0 {
-		db.Model(&idc).Create(idcs)
-	}
-
-	err = db.Where("idc_id = ? AND  cabinet_number_id = ?", idc_id, cabinet_number_id).Find(&cabinet).Error
-	if err != nil {
-		middleware.SugarLogger.Errorf("查询cabinet错误%s", err)
-	}
-	if cabinet.Cabinet_NumberID == 0 {
-		db.Model(&cabinet).Create(cabinets)
-	}
-	db.Model(&server).Where("name =?", name).Updates(servers)
-
-	//更新数据到监控表,  监控状态 0 未安装 ；1 已安装 ；2 已运行；3 已被监控
-	var prometheustarget = MonitorPrometheus{}
-	var prometheus = make(map[string]interface{})
-	prometheus["server_id"] = server_id
-	db.Model(&prometheustarget).Create(prometheus)
+	return server_ids
 }

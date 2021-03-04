@@ -105,3 +105,114 @@ func DeleteIDC(id int) int {
 	}
 	return errmsg.SUCCSE
 }
+
+func GenerateIDCID(idcNames []string) []int {
+	number := 0
+	var idc_ids = make([]int, 0)
+	for k, v := range idcNames {
+		idc_id, _ := Check_Idc_Name(v)
+		if idc_id == 0 {
+			if k == 0 {
+				id := LastIdcID()
+				number = id + 1
+			} else {
+				number = number + 1
+			}
+			idc_ids = append(idc_ids, number)
+		} else {
+			idc_ids = append(idc_ids, idc_id)
+		}
+	}
+	return idc_ids
+}
+
+func GenerateCabinetID(cabinetNumbers []string, idc_ids []int) []int {
+	number := 0
+	var cabinet_number_ids = make([]int, 0)
+	for k, v := range cabinetNumbers {
+		if len(idc_ids)-1 < k {
+			idc_ids = append(idc_ids, idc_ids[0])
+		}
+		cabinet_number_id, _ := Check_Cabinet_Number(v, idc_ids[k])
+		if cabinet_number_id == 0 {
+			if k == 0 {
+				id := LastCabintID()
+				number = id + 1
+			} else {
+				number = number + 1
+			}
+			cabinet_number_ids = append(cabinet_number_ids, number)
+		} else {
+			cabinet_number_ids = append(cabinet_number_ids, cabinet_number_id)
+		}
+	}
+	return cabinet_number_ids
+}
+
+func InsertIdcID(idc_name, city_name string, idc_id, cabinet_number_id int) {
+	var idc = Idc{}
+	var idcs = make(map[string]interface{})
+	idcs["cabinet_number_id"] = cabinet_number_id
+	idcs["idc_id"] = idc_id
+	idcs["city"] = city_name
+	idcs["idc_name"] = idc_name
+	//检查 cabinet_number_id 是否已存在，存在相同则不创建
+	err = db.Unscoped().Debug().Where("idc_name = ? AND  cabinet_number_id = ?", idc_name, cabinet_number_id).Find(&idc).Error
+	if err != nil {
+		middleware.SugarLogger.Errorf("查询idc错误%s", err)
+	}
+	if idc.Cabinet_NumberID == 0 {
+		db.Model(&idc).Create(idcs)
+	}
+}
+
+func InsertCabinetID(cabinet_number string, idc_id, cabinet_number_id int) {
+	var cabinet = Cabinet{}
+	var cabinets = make(map[string]interface{})
+	cabinets["cabinet_number_id"] = cabinet_number_id
+	cabinets["idc_id"] = idc_id
+	cabinets["cabinet_number"] = cabinet_number
+
+	err = db.Where("idc_id = ? AND  cabinet_number_id = ?", idc_id, cabinet_number_id).Find(&cabinet).Error
+	if err != nil {
+		middleware.SugarLogger.Errorf("查询cabinet错误%s", err)
+	}
+	if cabinet.Cabinet_NumberID == 0 {
+		db.Model(&cabinet).Create(cabinets)
+	}
+
+}
+
+func UpdateIdcID(idc_name, city_name string, idc_id, cabinet_number_id, ID int) {
+	var idc = Idc{}
+	var idcs = make(map[string]interface{})
+	idcs["cabinet_number_id"] = cabinet_number_id
+	idcs["idc_id"] = idc_id
+	idcs["city"] = city_name
+	idcs["idc_name"] = idc_name
+	//检查 cabinet_number_id 是否已存在，存在相同则不创建
+	err = db.Unscoped().Debug().Where("idc_name = ? AND  cabinet_number_id = ?", idc_name, cabinet_number_id).Find(&idc).Error
+	if err != nil {
+		middleware.SugarLogger.Errorf("查询idc错误%s", err)
+	}
+	if idc.Cabinet_NumberID == 0 {
+		db.Model(&idc).Where("ID =?", ID).Updates(idcs)
+	}
+}
+
+func UpdateCabinetID(cabinet_number string, idc_id, cabinet_number_id, ID int) {
+	var cabinet = Cabinet{}
+	var cabinets = make(map[string]interface{})
+	cabinets["cabinet_number_id"] = cabinet_number_id
+	cabinets["idc_id"] = idc_id
+	cabinets["cabinet_number"] = cabinet_number
+
+	err = db.Where("idc_id = ? AND  cabinet_number_id = ?", idc_id, cabinet_number_id).Find(&cabinet).Error
+	if err != nil {
+		middleware.SugarLogger.Errorf("查询cabinet错误%s", err)
+	}
+	if cabinet.Cabinet_NumberID == 0 {
+		db.Model(&cabinet).Where("ID=?", ID).Updates(cabinets)
+	}
+
+}

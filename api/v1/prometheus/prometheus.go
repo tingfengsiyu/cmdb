@@ -6,10 +6,6 @@ import (
 	"net/http"
 )
 
-func Listtargets() {
-
-}
-
 func Checktargets() {
 
 }

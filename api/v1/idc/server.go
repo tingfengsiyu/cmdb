@@ -3,7 +3,6 @@ package idc
 import (
 	"cmdb/model"
 	"cmdb/utils/errmsg"
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -32,7 +31,6 @@ func AddServer(c *gin.Context) {
 }
 
 func BatchAddServers(c *gin.Context) {
-	var cabinet_number_ids, idc_ids, server_ids []int
 	var code int
 	var hostNames = make([]string, 0)
 	assets := model.Assets{}
@@ -45,64 +43,17 @@ func BatchAddServers(c *gin.Context) {
 	citys := assets.Asset.Idcs.City
 	code = model.BatchCheckServer(hostNames)
 	if code == errmsg.SUCCSE {
-		code = model.BatchCreateServer2(&assets.Asset.Servers)
+		code = model.BatchCreateServer(&assets.Asset.Servers)
 		//检查不存在后执行
-		number := 0
-
 		//生成idc_id
-		for k, v := range idcNames {
-			idc_id, _ := model.Check_Idc_Name(v)
-			if idc_id == 0 {
-				if k == 0 {
-					id := model.LastIdcID()
-					number = id + 1
-				} else {
-					number = number + 1
-				}
-				idc_ids = append(idc_ids, number)
-			} else {
-				idc_ids = append(idc_ids, idc_id)
-			}
-		}
+		idc_ids := model.GenerateIDCID(idcNames)
 
 		//生成cabinet_number_id
-		number = 0
-		for k, v := range cabinetNumbers {
-			if len(idc_ids)-1 < k {
-				idc_ids = append(idc_ids, idc_ids[0])
-			}
-			cabinet_number_id, _ := model.Check_Cabinet_Number(v, idc_ids[k])
-			if cabinet_number_id == 0 {
-				if k == 0 {
-					id := model.LastCabintID()
-					number = id + 1
-				} else {
-					number = number + 1
-				}
-				cabinet_number_ids = append(cabinet_number_ids, number)
-			} else {
-				cabinet_number_ids = append(cabinet_number_ids, cabinet_number_id)
-			}
-		}
+		cabinet_number_ids := model.GenerateCabinetID(cabinetNumbers, idc_ids)
 
-		//server_id
-		number = 0
-		for k, v := range hostNames {
-			server_id, _ := model.CheckServer(v)
-			if server_id == 0 {
-				if k == 0 {
-					id := model.LastServeID()
-					fmt.Println(id, number)
-					number = id + 1
-				} else {
-					number = number + 1
-				}
-				server_ids = append(server_ids, number)
-			} else {
-				server_ids = append(server_ids, server_id)
-			}
+		//生成server_id
+		server_ids := model.GenerateServerID(hostNames)
 
-		}
 		//插入对应id
 		for k, _ := range server_ids {
 			if len(idcNames)-1 < k {
@@ -114,14 +65,19 @@ func BatchAddServers(c *gin.Context) {
 			if len(cabinetNumbers)-1 < k {
 				cabinetNumbers = append(cabinetNumbers, cabinetNumbers[0])
 			}
-			model.InsertID(idcNames[k], citys[k], cabinetNumbers[k], hostNames[k], idc_ids[k], server_ids[k], cabinet_number_ids[k])
+			if len(idc_ids)-1 < k {
+				idc_ids = append(idc_ids, idc_ids[0])
+			}
+			model.InsertIdcID(idcNames[k], citys[k], idc_ids[k], cabinet_number_ids[k])
+			model.InsertServerID(hostNames[k], idc_ids[k], server_ids[k], cabinet_number_ids[k])
+			model.InsertCabinetID(cabinetNumbers[k], idc_ids[k], cabinet_number_ids[k])
+			model.InsertPrometheusID(server_ids[k])
 		}
 	} else if code == errmsg.ERROR_DEVICE_EXIST {
 		code = errmsg.ERROR_DEVICE_EXIST
 	} else if code == errmsg.ERROR_ALL_DEVICE_EXIST {
 		code = errmsg.ERROR_ALL_DEVICE_EXIST
 	}
-
 	c.JSON(
 		http.StatusOK, gin.H{
 			"status":  code,
@@ -196,22 +152,79 @@ func UpdateServer(c *gin.Context) {
 }
 
 func BatchUpdateServers(c *gin.Context) {
-	servers := []model.Server{}
-	_ = c.ShouldBindJSON(&servers)
-	var IDS = make([]int, 0)
-	for _, v := range servers {
+	var code int
+	assets := []model.ScanServers{}
+	var idcNames = make([]string, 0)
+	var citys = make([]string, 0)
+	var cabinetNumbers = make([]string, 0)
+	var hostNames = make([]string, 0)
+	var IDCID []int
+	var CabinetID []int
+	_ = c.ShouldBindJSON(&assets)
+	var IDS []int
+	for _, v := range assets {
 		IDS = append(IDS, v.ID)
 	}
-	code := model.BatchCheckServerID(IDS)
+	code = model.BatchCheckServerID(IDS)
 	if code == errmsg.ERROR_DEVICE_EXIST {
 		code = errmsg.ERROR_DEVICE_EXIST
 	} else if code == errmsg.ERROR_ALL_DEVICE_EXIST {
-		code = model.BatchUpdateServer(&servers)
+
+		for _, v := range assets {
+			idcNames = append(idcNames, v.IDC_Name)
+			citys = append(citys, v.City)
+			cabinetNumbers = append(cabinetNumbers, v.Cabinet_Number)
+			hostNames = append(hostNames, v.Name)
+			CabinetID = append(CabinetID, v.Cabinet_NumberID)
+			IDCID = append(CabinetID, v.IDC_ID)
+			var maps = make(map[string]interface{})
+			maps["name"] = v.Name
+			maps["models"] = v.Models
+			maps["location"] = v.Location
+			maps["private_ip_address"] = v.PrivateIpAddress
+			maps["public_ip_address"] = v.PublicIpAddress
+			maps["label_ip_address"] = v.LabelIpAddress
+			maps["label"] = v.Label
+			maps["cluster"] = v.Cluster
+			maps["cpu"] = v.Cpu
+			maps["memory"] = v.Memory
+			maps["disk"] = v.Disk
+			maps["user"] = v.User
+			maps["state"] = v.State
+			code = model.BatchUpdateServer(maps)
+		}
+
+		idc_ids := model.GenerateIDCID(idcNames)
+
+		//生成cabinet_number_id
+		cabinet_number_ids := model.GenerateCabinetID(cabinetNumbers, idc_ids)
+
+		//生成server_id
+		server_ids := model.GenerateServerID(hostNames)
+		//插入对应id
+		for k, _ := range server_ids {
+			if len(idcNames)-1 < k {
+				idcNames = append(idcNames, idcNames[0])
+			}
+			if len(citys)-1 < k {
+				citys = append(citys, citys[0])
+			}
+			if len(cabinetNumbers)-1 < k {
+				cabinetNumbers = append(cabinetNumbers, cabinetNumbers[0])
+			}
+			if len(idc_ids)-1 < k {
+				idc_ids = append(idc_ids, idc_ids[0])
+			}
+			model.UpdateIdcID(idcNames[k], citys[k], idc_ids[k], cabinet_number_ids[k], IDCID[k])
+			model.UpdateCabinetID(cabinetNumbers[k], idc_ids[k], cabinet_number_ids[k], CabinetID[k])
+		}
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"status":  code,
-		"message": errmsg.GetErrMsg(code),
-	})
+	c.JSON(
+		http.StatusOK, gin.H{
+			"status":  code,
+			"message": errmsg.GetErrMsg(code),
+		},
+	)
 }
 
 func DeleteServer(c *gin.Context) {

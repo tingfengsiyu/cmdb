@@ -22,7 +22,6 @@ func InitRouter() {
 
 	router.Use(middleware.JwtToken())
 	{
-		router.POST("createidc", idc.AddIdc)
 		router.GET("getidcs", idc.GetIDCs)
 		router.PUT("editidc/:id", idc.UpdateIdc)
 		router.DELETE("deleteidc/:id", idc.DeleteIdc)
@@ -42,6 +41,7 @@ func InitRouter() {
 		router.DELETE("deleteserver/:id", idc.DeleteServer)
 		router.PUT("editservers/:id", idc.UpdateServer)
 		router.GET("getnetwork_topology", idc.Network_topology)
+		//router.POST("excelassetsupload",idc.ExcelUpload)
 	}
 	clouds := r.Group("api/v1/cloud")
 	clouds.Use(middleware.JwtToken())

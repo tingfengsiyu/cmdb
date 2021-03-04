@@ -94,3 +94,7 @@ func SshCommands(user, password, addr, sudopass string, cmds ...string) ([]byte,
 
 	return output, nil
 }
+
+func Execshell() {
+
+}

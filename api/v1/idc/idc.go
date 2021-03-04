@@ -3,32 +3,10 @@ package idc
 import (
 	"cmdb/model"
 	"cmdb/utils/errmsg"
+	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
-
-	"github.com/gin-gonic/gin"
 )
-
-// 添加IDC
-func AddIdc(c *gin.Context) {
-	var data model.Idc
-	_ = c.ShouldBindJSON(&data)
-	_, code := model.Check_Idc_Name("test")
-	if code == errmsg.SUCCSE {
-		model.CreateIdc(&data)
-	}
-	if code == errmsg.ERROR_DEVICE_EXIST {
-		code = errmsg.ERROR_DEVICE_EXIST
-	}
-
-	c.JSON(
-		http.StatusOK, gin.H{
-			"status":  code,
-			"data":    data,
-			"message": errmsg.GetErrMsg(code),
-		},
-	)
-}
 
 func UpdateIdc(c *gin.Context) {
 	var data model.Idc

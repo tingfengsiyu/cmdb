@@ -3,6 +3,7 @@ module cmdb
 go 1.15
 
 require (
+	github.com/360EntSecGroup-Skylar/excelize v1.4.1
 	github.com/aliyun/alibaba-cloud-sdk-go v1.61.836
 	github.com/aws/aws-sdk-go v1.36.23
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
