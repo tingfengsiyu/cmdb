@@ -154,12 +154,8 @@ func UpdateServer(c *gin.Context) {
 func BatchUpdateServers(c *gin.Context) {
 	var code int
 	assets := []model.ScanServers{}
-	var idcNames = make([]string, 0)
-	var citys = make([]string, 0)
-	var cabinetNumbers = make([]string, 0)
-	var hostNames = make([]string, 0)
-	var IDCID []int
-	var CabinetID []int
+	var idcNames, citys, cabinetNumbers, hostNames []string
+	var IDCID, CabinetID []int
 	_ = c.ShouldBindJSON(&assets)
 	var IDS []int
 	for _, v := range assets {
