@@ -3,7 +3,6 @@ package model
 import (
 	"cmdb/middleware"
 	"cmdb/utils/errmsg"
-	"fmt"
 	"gorm.io/gorm"
 )
 
@@ -33,7 +32,6 @@ func Check_Cabinet_Number(cabinet_number string, idc_id int) (int, int) {
 func Check_Idc_Name(idc_name string) (int, int) {
 	var data = Idc{}
 	err := db.Unscoped().Debug().Select("idc_id").Where("idc_name = ?", idc_name).First(&data).Error
-	fmt.Println(data.IDC_ID, data.ID)
 	if err != nil {
 		middleware.SugarLogger.Errorf("sql查询错误%s", err)
 		return data.IDC_ID, errmsg.ERROR
@@ -88,13 +86,15 @@ type result struct {
 
 //网络拓扑展示
 //根据机房名查询name和机柜号查询对应服务器名中对应的idc和机柜号和所属用户，形成网络拓扑
-func Network_topology(id int, name, cabinet_number, user string) ([]result, int) {
-	var svc []result
-	errs := db.Debug().Unscoped().Model(&Server{}).Select("server.name,label,ipaddress,server.cabinet_number").Joins("left join idc on server.idc=idc.name").Scan(&svc)
-	//select server.name,label,ipaddress ,idc.name  from server  left join idc  on  server.idc=idc.name;
-	// 多连接及参数
-	middleware.SugarLogger.Errorf("查询错误%s", errs)
-	return svc, errmsg.SUCCSE
+func Network_topology(id int, name, cabinet_number, user string) ([]ScanServers, int) {
+	var scan []ScanServers
+	err := db.Unscoped().Debug().Raw("select distinct server.id, city,idc_name,cabinet_number,name,models,location,private_ip_address,public_ip_address,label,cluster,label_ip_address,cpu," +
+		"memory,disk,user,state,server.idc_id,server.cabinet_number_id from  server  left join cabinet on  cabinet.cabinet_number_id=server.cabinet_number_id left join idc on idc.idc_id =server.idc_id").Scan(&scan).Error
+	if err != nil {
+		middleware.SugarLogger.Errorf("查询错误%s", err)
+	}
+
+	return scan, errmsg.SUCCSE
 }
 
 func DeleteIDC(id int) int {

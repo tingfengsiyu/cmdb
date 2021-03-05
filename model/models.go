@@ -38,8 +38,8 @@ type Server struct {
 	Location         string `gorm:"type:varchar(30);not null" json:"location" validate:"required,min=4"`
 	PrivateIpAddress string `gorm:"type:varchar(30);not null" json:"private_ip_address" validate:"required,min=16"`
 	PublicIpAddress  string `gorm:"type:varchar(30);not null" json:"public_ip_address" `
-	Label            string `gorm:"type:varchar(30);not null" json:"label" validate:"required,min=4"`
-	Cluster          string `gorm:"type:varchar(30);not null" json:"cluster" validate:"required,min=4"`
+	Label            string `gorm:"type:varchar(30);not null" json:"label" 	binding:"required" validate:"required,min=4"`
+	Cluster          string `gorm:"type:varchar(30);not null" json:"cluster" binding:"required" validate:"required,min=4"`
 	LabelIpAddress   string `gorm:"type:varchar(30);not null" json:"label_ip_address" validate:"required,min=4"`
 	Cpu              string `gorm:"type:varchar(30);not null" json:"cpu" validate:"required,min=3"`
 	Memory           string `gorm:"type:varchar(30);not null" json:"memory" validate:"required,min=3"`
@@ -99,16 +99,6 @@ type Router struct {
 
 }
 
-type Switch struct {
-	gorm.Model
-	Name           string `gorm:"type:varchar(30);not null" json:"name"`
-	Models         string `gorm:"type:varchar(30);not null" json:"model"`
-	Location       string `gorm:"type:varchar(30);not null" json:"location"`
-	Ipaddress      string `gorm:"type:varchar(30);not null" json:"ipaddress"`
-	Cabinet_number string `gorm:"type:varchar(30);not null" json:"cabinet_number"`
-	Idc            string `gorm:"type:varchar(30);not null" json:"idc"`
-
-}
 */
 type CloudInstance struct {
 	gorm.Model

@@ -41,9 +41,6 @@ func LastServeID() int {
 
 type ScanServers struct {
 	ID               int    `gorm:"primary_key;auto_increment;int" json:"id"`
-	City             string `gorm:"type:varchar(30);not null" json:"city" validate:"required,min=4"`
-	IDC_Name         string `gorm:"type:varchar(30);not null" json:"idc_name" validate:"required,min=4"`
-	Cabinet_Number   string `gorm:"type:varchar(30);not null" json:"cabinet_number"`
 	Name             string `gorm:"type:varchar(30);not null" json:"name" validate:"required,min=4"`
 	Models           string `gorm:"type:varchar(30);not null" json:"models" validate:"required,min=4"`
 	Location         string `gorm:"type:varchar(30);not null" json:"location" validate:"required,min=4"`
@@ -59,6 +56,9 @@ type ScanServers struct {
 	State            string `gorm:"type:varchar(10);not null" json:"state" validate:"required,min=4"`
 	IDC_ID           int    `gorm:"type:int;not null" json:"idc_id" validate:"required,min=4"`
 	Cabinet_NumberID int    `gorm:"type:int;not null" json:"cabinet_number_id" validate:"required,min=4"`
+	City             string `gorm:"type:varchar(30);not null" json:"city" validate:"required,min=4"`
+	IDC_Name         string `gorm:"type:varchar(30);not null" json:"idc_name" validate:"required,min=4"`
+	Cabinet_Number   string `gorm:"type:varchar(30);not null" json:"cabinet_number"`
 }
 
 //批量创建
@@ -182,27 +182,29 @@ func GetOwnedUser() ([]Server, int64) {
 }
 
 //查询对应城市的所有服务器
-func GetIdcServers(pageSize, pageNum int, name string) ([]Server, int64) {
-	var svc []Server
+func GetIdcServers(pageSize, pageNum int, name string) ([]ScanServers, int64) {
+	var scan []ScanServers
 	var total int64
-	err = db.Unscoped().Where(" idc = ?", name).Find(&svc).Limit(pageSize).Offset((pageNum - 1) * pageSize).Error
-	db.Model(&svc).Count(&total)
+	err = db.Debug().Unscoped().Model(&Server{}).Select("select distinct server.id, city,idc_name,cabinet_number,name,"+
+		"models,location,private_ip_address,public_ip_address,label,cluster,label_ip_address,cpu,memory,disk,user,state,server.idc_id,server.cabinet_number_id").Joins("left join idc on "+
+		"idc.idc_id =server.idc_id and idc_name= ?", name).Scan(&scan).Limit(pageSize).Offset((pageNum - 1) * pageSize).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return nil, 0
 	}
-	return svc, total
+	return scan, total
 }
 
 //查询对应城市所对应机柜的所有服务器
-func GetCabinetServers(pageSize, pageNum int, name, cabinet_number string) ([]Server, int64) {
-	var svc []Server
+func GetCabinetServers(pageSize, pageNum int, name, cabinet_number string) ([]ScanServers, int64) {
 	var total int64
-	err = db.Unscoped().Where("idc = ? AND  cabinet_number = ?", name, cabinet_number).Find(&svc).Limit(pageSize).Offset((pageNum - 1) * pageSize).Error
-	db.Model(&svc).Count(&total)
+	var scan []ScanServers
+	err := db.Unscoped().Debug().Raw("select distinct server.id, city,idc_name,cabinet_number,name,models,location,private_ip_address,public_ip_address,label,cluster,label_ip_address,cpu,memory,disk,user,state,"+
+		"server.idc_id,server.cabinet_number_id from  server  left join cabinet  on  cabinet.cabinet_number_id=server.cabinet_number_id  and idc_name = ? left join idc on idc.idc_id =server.idc_id and cabinet_number=? "+
+		"limit ?,?", name, cabinet_number, pageSize, pageNum).Scan(&scan).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return nil, 0
 	}
-	return svc, total
+	return scan, total
 }
 
 func InsertServerID(name string, idc_id, server_id, cabinet_number_id int) {

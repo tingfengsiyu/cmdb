@@ -119,7 +119,8 @@ func HttpCheckExporter(client *http.Client, url string) int {
 
 func Prometheus_server() []ScanMonitorPrometheus {
 	var svc []ScanMonitorPrometheus
-	errs := db.Debug().Unscoped().Model(&MonitorPrometheus{}).Select("monitor_prometheus.server_id,private_ip_address,node_export_port,process_export_port,script_export_port,node_export_status,process_export_status,script_export_status,label,disable_node_export,disable_process_export,disable_script_export").Joins("left join server on server.server_id=monitor_prometheus.server_id").Scan(&svc)
+	errs := db.Debug().Unscoped().Model(&MonitorPrometheus{}).Select("monitor_prometheus.server_id,private_ip_address,node_export_port,process_export_port,script_export_port,node_export_status," +
+		"process_export_status,script_export_status,label,disable_node_export,disable_process_export,disable_script_export").Joins("left join server on server.server_id=monitor_prometheus.server_id").Scan(&svc)
 	if errs != nil {
 		middleware.SugarLogger.Errorf("", errs)
 		return svc
