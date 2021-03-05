@@ -71,8 +71,8 @@ func BatchCreateServer(servers *[]Server) int {
 	return errmsg.SUCCSE
 }
 
-func BatchUpdateServer(servers map[string]interface{}) int {
-	err := db.Debug().Model(Server{}).Updates(servers).Error
+func BatchUpdateServer(servers map[string]interface{}, ID int) int {
+	err := db.Debug().Model(Server{}).Where("id=?", ID).Updates(servers).Error
 	if err != nil {
 		return errmsg.ERROR
 	}
@@ -117,6 +117,7 @@ func GetServers(pageSize int, pageNum int) ([]Server, int64) {
 	var total int64
 	err = db.Unscoped().Find(&svc).Limit(pageSize).Offset((pageNum - 1) * pageSize).Error
 	db.Model(&svc).Count(&total)
+	//select name,models,idc_name,city,cabinet.cabinet_number from  server  left join cabinet on  cabinet.cabinet_number_id=server.cabinet_number_id left join idc on idc.idc_id =server.idc_id;
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return nil, 0
 	}
@@ -131,7 +132,9 @@ func EditServer(id int, data *Server) int {
 	maps["location"] = data.Location
 	maps["private_ip_address"] = data.PrivateIpAddress
 	maps["public_ip_address"] = data.PublicIpAddress
+	maps["label_ip_address"] = data.LabelIpAddress
 	maps["label"] = data.Label
+	maps["cluster"] = data.Cluster
 	maps["cpu"] = data.Cpu
 	maps["memory"] = data.Memory
 	maps["disk"] = data.Disk

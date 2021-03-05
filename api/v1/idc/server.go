@@ -187,7 +187,7 @@ func BatchUpdateServers(c *gin.Context) {
 			maps["disk"] = v.Disk
 			maps["user"] = v.User
 			maps["state"] = v.State
-			code = model.BatchUpdateServer(maps)
+			code = model.BatchUpdateServer(maps, v.ID)
 		}
 
 		idc_ids := model.GenerateIDCID(idcNames)

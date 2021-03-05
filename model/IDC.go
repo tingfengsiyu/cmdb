@@ -196,7 +196,7 @@ func UpdateIdcID(idc_name, city_name string, idc_id, cabinet_number_id, ID int) 
 		middleware.SugarLogger.Errorf("查询idc错误%s", err)
 	}
 	if idc.Cabinet_NumberID == 0 {
-		db.Model(&idc).Where("ID =?", ID).Updates(idcs)
+		db.Model(&idc).Where("idc_id =?", ID).Updates(idcs)
 	}
 }
 
@@ -212,7 +212,7 @@ func UpdateCabinetID(cabinet_number string, idc_id, cabinet_number_id, ID int) {
 		middleware.SugarLogger.Errorf("查询cabinet错误%s", err)
 	}
 	if cabinet.Cabinet_NumberID == 0 {
-		db.Model(&cabinet).Where("ID=?", ID).Updates(cabinets)
+		db.Model(&cabinet).Where("cabinet_number_id=?", ID).Updates(cabinets)
 	}
 
 }
