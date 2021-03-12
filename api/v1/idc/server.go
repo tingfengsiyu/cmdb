@@ -155,7 +155,7 @@ func BatchUpdateServers(c *gin.Context) {
 	var code int
 	assets := []model.ScanServers{}
 	var idcNames, citys, cabinetNumbers, hostNames []string
-	var IDCID, CabinetID []int
+	var CabinetID []int
 	_ = c.ShouldBindJSON(&assets)
 	var IDS []int
 	for _, v := range assets {
@@ -172,7 +172,6 @@ func BatchUpdateServers(c *gin.Context) {
 			cabinetNumbers = append(cabinetNumbers, v.Cabinet_Number)
 			hostNames = append(hostNames, v.Name)
 			CabinetID = append(CabinetID, v.Cabinet_NumberID)
-			IDCID = append(CabinetID, v.IDC_ID)
 			var maps = make(map[string]interface{})
 			maps["name"] = v.Name
 			maps["models"] = v.Models
@@ -211,8 +210,16 @@ func BatchUpdateServers(c *gin.Context) {
 			if len(idc_ids)-1 < k {
 				idc_ids = append(idc_ids, idc_ids[0])
 			}
-			model.UpdateIdcID(idcNames[k], citys[k], idc_ids[k], cabinet_number_ids[k], IDCID[k])
-			model.UpdateCabinetID(cabinetNumbers[k], idc_ids[k], cabinet_number_ids[k], CabinetID[k])
+			cabinet_number_id, _ := model.Check_Cabinet_Number(cabinetNumbers[k], idc_ids[k])
+			if cabinet_number_id == 0 {
+				model.InsertCabinetID(cabinetNumbers[k], idc_ids[k], cabinet_number_ids[k])
+			}
+			idc_id, _ := model.Check_Idc_Name(idcNames[k])
+			if idc_id == 0 {
+				model.InsertIdcID(idcNames[k], citys[k], idc_ids[k], cabinet_number_ids[k])
+			}
+			model.InsertServerID(hostNames[k], idc_ids[k], server_ids[k], cabinet_number_ids[k])
+
 		}
 	}
 	c.JSON(

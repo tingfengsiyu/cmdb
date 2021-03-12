@@ -79,11 +79,6 @@ func GetIDCs(pageSize int, pageNum int) ([]Idc, int64) {
 	return svc, total
 }
 
-type result struct {
-	Name  string `json:"name"`
-	Label string `json:"label"`
-}
-
 //网络拓扑展示
 //根据机房名查询name和机柜号查询对应服务器名中对应的idc和机柜号和所属用户，形成网络拓扑
 func Network_topology(id int, name, cabinet_number, user string) ([]ScanServers, int) {

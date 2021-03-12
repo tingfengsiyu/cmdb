@@ -102,11 +102,11 @@ func BatchCheckServer(data []string) (code int) {
 }
 
 func BatchCheckServerID(data []int) (code int) {
-	var svc Server
-	db.Find(&svc, data)
-	if svc.ID >= len(data) {
+	var svc []Server
+	db.Debug().Find(&svc, data)
+	if len(svc) >= len(data) {
 		return errmsg.ERROR_ALL_DEVICE_EXIST
-	} else if svc.ID > 0 {
+	} else if len(svc) > 0 {
 		return errmsg.ERROR_DEVICE_EXIST
 	}
 	return errmsg.SUCCSE
