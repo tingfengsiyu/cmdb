@@ -157,7 +157,10 @@ func InsertIdcID(idc_name, city_name string, idc_id, cabinet_number_id int) {
 		middleware.SugarLogger.Errorf("查询idc错误%s", err)
 	}
 	if idc.Cabinet_NumberID == 0 {
-		db.Model(&idc).Create(idcs)
+		idc_id, _ := Check_Idc_Name(idc_name)
+		if idc_id == 0 {
+			db.Model(&idc).Create(idcs)
+		}
 	}
 }
 
@@ -173,7 +176,10 @@ func InsertCabinetID(cabinet_number string, idc_id, cabinet_number_id int) {
 		middleware.SugarLogger.Errorf("查询cabinet错误%s", err)
 	}
 	if cabinet.Cabinet_NumberID == 0 {
-		db.Model(&cabinet).Create(cabinets)
+		cabinet_number_id, _ := Check_Cabinet_Number(cabinet_number, idc_id)
+		if cabinet_number_id == 0 {
+			db.Model(&cabinet).Create(cabinets)
+		}
 	}
 
 }

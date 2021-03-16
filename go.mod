@@ -3,6 +3,7 @@ module cmdb
 go 1.15
 
 require (
+	github.com/360EntSecGroup-Skylar/excelize v1.4.1
 	github.com/aliyun/alibaba-cloud-sdk-go v1.61.973
 	github.com/aws/aws-sdk-go v1.37.24
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
@@ -21,5 +22,7 @@ require (
 	gopkg.in/ini.v1 v1.62.0
 	gorm.io/driver/mysql v1.0.4
 	gorm.io/gorm v1.21.2
-	k8s.io/client-go v0.18.8 // indirect
+	k8s.io/api v0.18.8
+	k8s.io/apimachinery v0.18.8
+	k8s.io/client-go v0.18.8
 )

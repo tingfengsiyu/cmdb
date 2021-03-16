@@ -41,7 +41,10 @@ func InitRouter() {
 		router.DELETE("deleteserver/:id", idc.DeleteServer)
 		router.PUT("editservers/:id", idc.UpdateServer)
 		router.GET("getnetwork_topology", idc.Network_topology)
-		//router.POST("excelassetsupload",idc.ExcelUpload)
+
+		router.GET("uploadexcel", idc.UploadExcel)
+		router.GET("download/read", idc.DownloadReadFile)
+		router.GET("download/write", idc.DownloadWriteFile)
 	}
 	clouds := r.Group("api/v1/cloud")
 	clouds.Use(middleware.JwtToken())

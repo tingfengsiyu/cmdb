@@ -38,6 +38,7 @@ var (
 	StorageSudoPass   string
 	RootPass          string
 	RootPub           string
+	SR_File_Max_Bytes string
 )
 
 func init() {
@@ -68,6 +69,7 @@ func LoadServer(file *ini.File) {
 	StorageSudoPass = file.Section("server").Key("StorageSudoPass").MustString("xxxx/cmdb")
 	RootPass = file.Section("server").Key("RootPass").MustString("xxxx/cmdb")
 	RootPub = file.Section("server").Key("RootPub").MustString("xxxx/cmdb")
+	SR_File_Max_Bytes = file.Section("server").Key("SR_File_Max_Bytes").MustString("")
 }
 func LoadData(file *ini.File) {
 	Db = file.Section("database").Key("Db").MustString("debug")

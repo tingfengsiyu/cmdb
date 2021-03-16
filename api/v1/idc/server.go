@@ -34,7 +34,14 @@ func BatchAddServers(c *gin.Context) {
 	var code int
 	var hostNames = make([]string, 0)
 	assets := model.Assets{}
-	_ = c.ShouldBindJSON(&assets)
+	if err := c.ShouldBindJSON(&assets); err != nil {
+		c.JSON(
+			http.StatusOK, gin.H{
+				"status":  code,
+				"message": errmsg.GetErrMsg(code),
+			},
+		)
+	}
 	for _, v := range assets.Asset.Servers {
 		hostNames = append(hostNames, v.Name)
 	}
@@ -42,42 +49,7 @@ func BatchAddServers(c *gin.Context) {
 	cabinetNumbers := assets.Asset.Idcs.Cabinet_Number
 	citys := assets.Asset.Idcs.City
 	code = model.BatchCheckServer(hostNames)
-	if code == errmsg.SUCCSE {
-		code = model.BatchCreateServer(&assets.Asset.Servers)
-		//检查不存在后执行
-		//生成idc_id
-		idc_ids := model.GenerateIDCID(idcNames)
-
-		//生成cabinet_number_id
-		cabinet_number_ids := model.GenerateCabinetID(cabinetNumbers, idc_ids)
-
-		//生成server_id
-		server_ids := model.GenerateServerID(hostNames)
-
-		//插入对应id
-		for k, _ := range server_ids {
-			if len(idcNames)-1 < k {
-				idcNames = append(idcNames, idcNames[0])
-			}
-			if len(citys)-1 < k {
-				citys = append(citys, citys[0])
-			}
-			if len(cabinetNumbers)-1 < k {
-				cabinetNumbers = append(cabinetNumbers, cabinetNumbers[0])
-			}
-			if len(idc_ids)-1 < k {
-				idc_ids = append(idc_ids, idc_ids[0])
-			}
-			model.InsertIdcID(idcNames[k], citys[k], idc_ids[k], cabinet_number_ids[k])
-			model.InsertServerID(hostNames[k], idc_ids[k], server_ids[k], cabinet_number_ids[k])
-			model.InsertCabinetID(cabinetNumbers[k], idc_ids[k], cabinet_number_ids[k])
-			model.InsertPrometheusID(server_ids[k])
-		}
-	} else if code == errmsg.ERROR_DEVICE_EXIST {
-		code = errmsg.ERROR_DEVICE_EXIST
-	} else if code == errmsg.ERROR_ALL_DEVICE_EXIST {
-		code = errmsg.ERROR_ALL_DEVICE_EXIST
-	}
+	code = addServerVerify(code, assets.Asset.Servers, idcNames, cabinetNumbers, hostNames, citys)
 	c.JSON(
 		http.StatusOK, gin.H{
 			"status":  code,
@@ -309,4 +281,44 @@ func GetUser(c *gin.Context) {
 			"message": errmsg.GetErrMsg(code),
 		},
 	)
+}
+
+func addServerVerify(code int, servers []model.Server, idcNames, cabinetNumbers, hostNames, citys []string) int {
+	if code == errmsg.SUCCSE {
+		code = model.BatchCreateServer(&servers)
+		//检查不存在后执行
+		//生成idc_id
+		idc_ids := model.GenerateIDCID(idcNames)
+
+		//生成cabinet_number_id
+		cabinet_number_ids := model.GenerateCabinetID(cabinetNumbers, idc_ids)
+
+		//生成server_id
+		server_ids := model.GenerateServerID(hostNames)
+
+		//插入对应id
+		for k, _ := range server_ids {
+			if len(idcNames)-1 < k {
+				idcNames = append(idcNames, idcNames[0])
+			}
+			if len(citys)-1 < k {
+				citys = append(citys, citys[0])
+			}
+			if len(cabinetNumbers)-1 < k {
+				cabinetNumbers = append(cabinetNumbers, cabinetNumbers[0])
+			}
+			if len(idc_ids)-1 < k {
+				idc_ids = append(idc_ids, idc_ids[0])
+			}
+			model.InsertIdcID(idcNames[k], citys[k], idc_ids[k], cabinet_number_ids[k])
+			model.InsertServerID(hostNames[k], idc_ids[k], server_ids[k], cabinet_number_ids[k])
+			model.InsertCabinetID(cabinetNumbers[k], idc_ids[k], cabinet_number_ids[k])
+			model.InsertPrometheusID(server_ids[k])
+		}
+	} else if code == errmsg.ERROR_DEVICE_EXIST {
+		code = errmsg.ERROR_DEVICE_EXIST
+	} else if code == errmsg.ERROR_ALL_DEVICE_EXIST {
+		code = errmsg.ERROR_ALL_DEVICE_EXIST
+	}
+	return code
 }
