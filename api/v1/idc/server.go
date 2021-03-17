@@ -161,10 +161,10 @@ func BatchUpdateServers(c *gin.Context) {
 			code = model.BatchUpdateServer(maps, v.ID)
 		}
 
-		idc_ids := model.GenerateIDCID(idcNames)
+		idc_ids := model.GenerateIDCID(idcNames, nil)
 
 		//生成cabinet_number_id
-		cabinet_number_ids := model.GenerateCabinetID(cabinetNumbers, idc_ids)
+		cabinet_number_ids := model.GenerateCabinetID(cabinetNumbers, idc_ids, nil)
 
 		//生成server_id
 		server_ids := model.GenerateServerID(hostNames)
@@ -287,11 +287,14 @@ func addServerVerify(code int, servers []model.Server, idcNames, cabinetNumbers,
 	if code == errmsg.SUCCSE {
 		code = model.BatchCreateServer(&servers)
 		//检查不存在后执行
+		var idcNameMap = make(map[string]interface{})
+		var cabinetNumberMap = make(map[string]interface{})
+
 		//生成idc_id
-		idc_ids := model.GenerateIDCID(idcNames)
+		idc_ids := model.GenerateIDCID(idcNames, idcNameMap)
 
 		//生成cabinet_number_id
-		cabinet_number_ids := model.GenerateCabinetID(cabinetNumbers, idc_ids)
+		cabinet_number_ids := model.GenerateCabinetID(cabinetNumbers, idc_ids, cabinetNumberMap)
 
 		//生成server_id
 		server_ids := model.GenerateServerID(hostNames)
