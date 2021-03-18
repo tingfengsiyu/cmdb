@@ -4,6 +4,7 @@ import (
 	"cmdb/utils"
 	"context"
 	"fmt"
+	"github.com/gin-gonic/gin"
 	"log"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -19,6 +20,8 @@ type clientconfig struct {
 	clientset *kubernetes.Clientset
 }
 
+var Client = clientconfig{}
+
 func int32Ptr(i int32) *int32 { return &i }
 
 func Initk8s() {
@@ -32,13 +35,12 @@ func Initk8s() {
 
 	// create the clientset
 	clientset, err := kubernetes.NewForConfig(config)
-	client := clientconfig{
+	Client = clientconfig{
 		clientset,
 	}
 	if err != nil {
 		panic(err.Error())
 	}
-	client.ListPod()
 }
 
 func (c *clientconfig) CreateDeployment(namespace, deploymentName, imageName string, replicas int32) {
@@ -131,8 +133,7 @@ func (c *clientconfig) ListDeployment(namespace string) {
 	}
 }
 
-func (c *clientconfig) ListPod() {
-	namespace := "default"
+func (c *clientconfig) ListPod(namespace string) {
 	pods, err := c.clientset.CoreV1().Pods(namespace).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		panic(err.Error())
@@ -157,7 +158,7 @@ func (c *clientconfig) ListNode() {
 func (c *clientconfig) ListNamespace() {
 	namespaceList, _ := c.clientset.CoreV1().Namespaces().List(context.TODO(), metav1.ListOptions{})
 	for _, namespace := range namespaceList.Items {
-		fmt.Println(namespace.Name)
+		fmt.Println(namespace.Name, namespace.GetCreationTimestamp())
 	}
 
 }
@@ -174,6 +175,10 @@ func (c *clientconfig) GetPod(namespace, pod string) {
 	} else {
 		fmt.Printf("Found pod %s in namespace %s\n", pod, namespace)
 	}
+}
+
+func a(c *gin.Context) {
+	Client.ListPod("namespace")
 }
 
 //func ListStatefulSet(c *gin.Context) {

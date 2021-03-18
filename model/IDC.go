@@ -83,7 +83,7 @@ func GetIDCs(pageSize int, pageNum int) ([]Idc, int64) {
 //根据机房名查询name和机柜号查询对应服务器名中对应的idc和机柜号和所属用户，形成网络拓扑
 func Network_topology(id int, name, cabinet_number, user string) ([]ScanServers, int) {
 	var scan []ScanServers
-	err := db.Unscoped().Debug().Raw("select distinct server.id, city,idc_name,cabinet_number,name,models,location,private_ip_address,public_ip_address,label,cluster,label_ip_address,cpu," +
+	err := db.Raw("select distinct server.id, city,idc_name,cabinet_number,name,models,location,private_ip_address,public_ip_address,label,cluster,label_ip_address,cpu," +
 		"memory,disk,user,state,server.idc_id,server.cabinet_number_id from  server  left join cabinet on  cabinet.cabinet_number_id=server.cabinet_number_id left join idc on idc.idc_id =server.idc_id").Scan(&scan).Error
 	if err != nil {
 		middleware.SugarLogger.Errorf("查询错误%s", err)
@@ -101,7 +101,8 @@ func DeleteIDC(id int) int {
 	return errmsg.SUCCSE
 }
 
-func GenerateIDCID(idcNames []string, nameMap map[string]interface{}) []int {
+func GenerateIDCID(idcNames []string) []int {
+	var nameMap = make(map[string]interface{})
 	number := 0
 	var idc_ids = make([]int, 0)
 	for k, v := range idcNames {
@@ -128,7 +129,8 @@ func GenerateIDCID(idcNames []string, nameMap map[string]interface{}) []int {
 	return idc_ids
 }
 
-func GenerateCabinetID(cabinetNumbers []string, idc_ids []int, numberMap map[string]interface{}) []int {
+func GenerateCabinetID(cabinetNumbers []string, idc_ids []int) []int {
+	var numberMap = make(map[string]interface{})
 	number := 0
 	var cabinet_number_ids = make([]int, 0)
 	for k, v := range cabinetNumbers {

@@ -3,6 +3,8 @@ package model
 import (
 	"bufio"
 	"cmdb/middleware"
+	"cmdb/utils"
+	"fmt"
 	"golang.org/x/crypto/ssh"
 	"io"
 	"net"
@@ -96,5 +98,19 @@ func SshCommands(user, password, addr, sudopass string, cmds ...string) ([]byte,
 }
 
 func Execshell() {
-
+	servers, _ := GetServers(0, 0)
+	for _, v := range servers {
+		go func(v Server) {
+			var user, passwd, sudopasswd string
+			user = "root"
+			passwd = utils.RootPass
+			sudopasswd = utils.RootPass
+			hostname := fmt.Sprintf("hostnamectl set-hostname %s ", v.Name)
+			outs, err := SshCommands(user, passwd, v.PrivateIpAddress+":"+"22", sudopasswd, hostname)
+			if err != nil {
+				middleware.SugarLogger.Errorf("ssh commands  %s ", err)
+			}
+			middleware.SugarLogger.Infof("%s ", string(outs))
+		}(v)
+	}
 }

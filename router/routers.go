@@ -31,6 +31,7 @@ func InitRouter() {
 		router.POST("batchupdateserver", idc.BatchUpdateServers)
 		router.POST("cron", idc.Cron)
 		router.POST("osinit", script.OsInit)
+		router.POST("updatehostname", script.UpdateHostName)
 
 		router.GET("WritePrometheus", prometheus.WritePrometheus)
 		router.GET("getservers", idc.GetServers)
@@ -42,9 +43,9 @@ func InitRouter() {
 		router.PUT("editservers/:id", idc.UpdateServer)
 		router.GET("getnetwork_topology", idc.Network_topology)
 
-		router.GET("uploadexcel", idc.UploadExcel)
-		router.GET("download/read", idc.DownloadReadFile)
-		router.GET("download/write", idc.DownloadWriteFile)
+		router.POST("uploadexcel", idc.UploadExcel)
+		router.GET("exportcsv", idc.ExportCsv)
+
 	}
 	clouds := r.Group("api/v1/cloud")
 	clouds.Use(middleware.JwtToken())

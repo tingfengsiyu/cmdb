@@ -1,15 +1,14 @@
 package idc
 
 import (
-	"bufio"
+	"bytes"
+	"cmdb/middleware"
 	"cmdb/model"
 	"cmdb/utils"
 	"cmdb/utils/errmsg"
 	"encoding/csv"
-	"fmt"
 	"github.com/360EntSecGroup-Skylar/excelize"
 	"github.com/gin-gonic/gin"
-	"io"
 	"net/http"
 	"os"
 	"path"
@@ -66,7 +65,6 @@ func GetIDCs(c *gin.Context) {
 }
 
 func Network_topology(c *gin.Context) {
-	//var data []model.Server
 	id, _ := strconv.Atoi(c.Param("id"))
 	name := c.Param("name")
 	cabinet_number := c.Param("cabinet_number")
@@ -77,50 +75,6 @@ func Network_topology(c *gin.Context) {
 		"data":    data,
 		"message": errmsg.GetErrMsg(code),
 	})
-}
-
-func DownloadReadFile(c *gin.Context) {
-	//http下载地址 csv
-	csvFileUrl := c.PostForm("file_name")
-	res, err := http.Get(csvFileUrl)
-	if err != nil {
-		c.String(400, err.Error())
-		return
-	}
-	defer res.Body.Close()
-	//读取csv
-	reader := csv.NewReader(bufio.NewReader(res.Body))
-	for {
-		line, err := reader.Read()
-		if err == io.EOF {
-			break
-		} else if err != nil {
-			c.String(400, err.Error())
-			return
-		}
-		//line 就是每一行的内容
-		fmt.Println(line)
-		//line[0] 就是第几列
-		fmt.Println(line[0])
-	}
-}
-
-func DownloadWriteFile(c *gin.Context) {
-	//写文件
-	var filename = "./output1.csv"
-	if !checkFileIsExist(filename) {
-		file, err := os.Create(filename) //创建文件
-		if err != nil {
-			c.String(400, err.Error())
-			return
-		}
-		buf := bufio.NewWriter(file) //创建新的 Writer 对象
-		buf.WriteString("\xEF\xBB\xBF")
-		buf.Flush()
-		defer file.Close()
-	}
-	//返回文件流
-	c.File(filename)
 }
 
 //判断文件是否存在  存在返回 true 不存在返回false
@@ -154,8 +108,7 @@ func UploadExcel(c *gin.Context) {
 	}
 	xlsx, err := excelize.OpenFile(dst)
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		middleware.SugarLogger.Errorf("打开文件错误%s", err)
 	}
 	rows := xlsx.GetRows("Sheet" + "1")
 
@@ -195,4 +148,23 @@ func UploadExcel(c *gin.Context) {
 			"message": errmsg.GetErrMsg(code),
 		},
 	)
+}
+
+func ExportCsv(c *gin.Context) {
+	bytesBuffer := &bytes.Buffer{}
+	bytesBuffer.WriteString("xEFxBBxBF") // 写入UTF-8 BOM，避免使用Microsoft Excel打开乱码
+	data, _ := model.Network_topology(1, "1", "1", "1")
+	writer := csv.NewWriter(bytesBuffer)
+
+	writer.Write([]string{"id", "主机名", "型号", "位置U数", "私有地址", "公网地址", "角色标签", "集群名", "机房标签ip", "cpu", "内存", "磁盘", "用户", "状态已上架", "城市", "机房名", "机柜名"})
+	for _, v := range data {
+		writer.Write([]string{strconv.Itoa(v.ID), v.Name, v.Models, v.Location, v.PrivateIpAddress, v.PrivateIpAddress, v.PublicIpAddress,
+			v.Label, v.LabelIpAddress, v.Cpu, v.Memory, v.Disk, v.User, v.State, v.City, v.IDC_Name, v.Cabinet_Number})
+	}
+
+	writer.Flush() // 此时才会将缓冲区数据写入
+	// 设置下载的文件名
+	c.Writer.Header().Set("Content-Disposition", "attachment;filename=data.csv")
+	// 设置文件类型以及输出数据
+	c.Data(http.StatusOK, "text/csv", bytesBuffer.Bytes())
 }

@@ -46,3 +46,14 @@ func OsInit(c *gin.Context) {
 		},
 	)
 }
+
+func UpdateHostName(c *gin.Context) {
+	c.Copy()
+	go model.Execshell()
+	c.JSON(
+		http.StatusOK, gin.H{
+			"status": 200,
+			"data":   "执行shell中",
+		},
+	)
+}
