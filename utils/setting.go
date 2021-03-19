@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"cmdb/middleware"
 	"gopkg.in/ini.v1"
 )
 
@@ -39,8 +38,7 @@ var (
 func init() {
 	file, err := ini.Load("config/config.ini")
 	if err != nil {
-		middleware.SugarLogger.Errorf("配置文件读取错误，请检查文件路径: %s", err)
-		panic(1)
+		panic("配置文件读取错误，请检查文件路径")
 	}
 	LoadServer(file)
 	LoadData(file)
