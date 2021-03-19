@@ -1,16 +1,14 @@
 package router
 
 import (
-	"cmdb/api/v1/prometheus"
-	"cmdb/utils"
-
-	"github.com/gin-gonic/gin"
-
 	"cmdb/api/v1/cloud"
 	"cmdb/api/v1/idc"
+	"cmdb/api/v1/prometheus"
 	"cmdb/api/v1/script"
 	"cmdb/api/v1/user"
 	"cmdb/middleware"
+	"cmdb/utils"
+	"github.com/gin-gonic/gin"
 )
 
 func InitRouter() {
@@ -41,7 +39,7 @@ func InitRouter() {
 		router.GET("getcabinetserver", idc.GetCabinetServers)
 		router.DELETE("deleteserver/:id", idc.DeleteServer)
 		router.PUT("editservers/:id", idc.UpdateServer)
-		router.GET("getnetworktopology", idc.Network_topology)
+		router.GET("getnetworktopology", idc.Networktopology)
 
 		router.POST("uploadexcel", idc.UploadExcel)
 		router.GET("exportcsv", idc.ExportCsv)

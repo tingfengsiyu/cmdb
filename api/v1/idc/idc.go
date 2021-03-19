@@ -64,12 +64,12 @@ func GetIDCs(c *gin.Context) {
 	)
 }
 
-func Network_topology(c *gin.Context) {
+func Networktopology(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	name := c.Param("name")
 	cabinet_number := c.Param("cabinet_number")
 	user := c.Param("user")
-	data, code := model.Network_topology(id, name, cabinet_number, user)
+	data, code := model.NetworkTopology(id, name, cabinet_number, user)
 	c.JSON(http.StatusOK, gin.H{
 		"status":  code,
 		"data":    data,
@@ -153,7 +153,7 @@ func UploadExcel(c *gin.Context) {
 func ExportCsv(c *gin.Context) {
 	bytesBuffer := &bytes.Buffer{}
 	bytesBuffer.WriteString("xEFxBBxBF") // 写入UTF-8 BOM，避免使用Microsoft Excel打开乱码
-	data, _ := model.Network_topology(1, "1", "1", "1")
+	data, _ := model.NetworkTopology(1, "1", "1", "1")
 	writer := csv.NewWriter(bytesBuffer)
 
 	writer.Write([]string{"id", "主机名", "型号", "位置U数", "私有地址", "公网地址", "角色标签", "集群名", "机房标签ip", "cpu", "内存", "磁盘", "用户", "状态已上架", "城市", "机房名", "机柜名"})

@@ -6,18 +6,6 @@ import (
 	"net/http"
 )
 
-func Checktargets() {
-
-}
-
-func Updatetargets() {
-
-}
-
-func Deletetargets() {
-
-}
-
 func WritePrometheus(c *gin.Context) {
 	model.WritePrometheus()
 	c.JSON(

@@ -40,7 +40,7 @@ func InitLog() error {
 	hostName, err := os.Hostname()
 	config := zap.Config{
 		Level:         atom,                                         // 日志级别
-		Development:   true,                                         // 开发模式，堆栈跟踪
+		Development:   false,                                        // 开发模式，堆栈跟踪
 		Encoding:      "json",                                       // 输出格式 console 或 json
 		EncoderConfig: encoderConfig,                                // 编码器配置
 		InitialFields: map[string]interface{}{"Hostname": hostName}, // 初始化字段，如：添加一个服务器名称
