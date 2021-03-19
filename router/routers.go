@@ -41,7 +41,7 @@ func InitRouter() {
 		router.GET("getcabinetserver", idc.GetCabinetServers)
 		router.DELETE("deleteserver/:id", idc.DeleteServer)
 		router.PUT("editservers/:id", idc.UpdateServer)
-		router.GET("getnetwork_topology", idc.Network_topology)
+		router.GET("getnetworktopology", idc.Network_topology)
 
 		router.POST("uploadexcel", idc.UploadExcel)
 		router.GET("exportcsv", idc.ExportCsv)

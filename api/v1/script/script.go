@@ -11,7 +11,7 @@ import (
 
 func OsInit(c *gin.Context) {
 	c.Copy()
-	monitorPrometheus := model.Prometheus_server()
+	monitorPrometheus := model.PrometheusServer()
 	for _, v := range monitorPrometheus {
 		go func(v model.ScanMonitorPrometheus) {
 			var user, passwd, sudopasswd string

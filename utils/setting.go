@@ -1,10 +1,8 @@
 package utils
 
 import (
-	"fmt"
-
+	"cmdb/middleware"
 	"gopkg.in/ini.v1"
-	//"github.com/sirupsen/logrus"
 )
 
 var (
@@ -27,9 +25,6 @@ var (
 	ErrorLogFile      string
 	KubeFile          string
 	PrometheusConfDir string
-	NodeConf          string
-	ScriptConf        string
-	ProcessConf       string
 	WorkerUser        string
 	WorkerPass        string
 	WorkerSudoPass    string
@@ -44,7 +39,7 @@ var (
 func init() {
 	file, err := ini.Load("config/config.ini")
 	if err != nil {
-		fmt.Println("配置文件读取错误，请检查文件路径:", err)
+		middleware.SugarLogger.Errorf("配置文件读取错误，请检查文件路径: %s", err)
 		panic(1)
 	}
 	LoadServer(file)
@@ -87,9 +82,6 @@ func LoadAli(file *ini.File) {
 
 func LoadPrometheus(file *ini.File) {
 	PrometheusConfDir = file.Section("prometheus").Key("prometheus_config_dir").MustString("12344x")
-	NodeConf = file.Section("prometheus").Key("nodeconf").MustString("12344x")
-	ProcessConf = file.Section("prometheus").Key("processconf").MustString("12344x")
-	ScriptConf = file.Section("prometheus").Key("scriptconf").MustString("12344x")
 }
 func LoadAws(file *ini.File) {
 

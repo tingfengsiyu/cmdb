@@ -8,6 +8,7 @@ import (
 	"github.com/robfig/cron"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -17,7 +18,8 @@ type PrometheusTarget struct {
 	Labels  Labels   `json:"labels"`
 }
 type Labels struct {
-	Idc string `json:"idc"`
+	Idc     string `json:"idc"`
+	Cluster string `json:"cluster"`
 }
 
 type ScanMonitorPrometheus struct {
@@ -30,6 +32,7 @@ type ScanMonitorPrometheus struct {
 	ProcessExportStatus  int    `json:"process_export_status"`
 	ScriptExportStatus   int    `json:"script_export_status"`
 	Label                string `json:"label"`
+	Cluster              string `json:"cluster"`
 	DisableNodeExport    int    `json:"disable_node_export"`
 	DisableProcessExport int    `json:"disable_process_export"`
 	DisableScriptExport  int    `json:"disable_script_export"`
@@ -47,14 +50,8 @@ func Croninit() {
 //并发检测监控agent运行状态
 func CheckAgentStatus() {
 
-	monitorPrometheus := Prometheus_server()
+	monitorPrometheus := PrometheusServer()
 	client := &http.Client{Timeout: 200 * time.Millisecond}
-	//nodefile, err := os.Open(utils.PrometheusConfDir + "/" + utils.NodeConf)
-	//defer nodefile.Close()
-	//processfile, err := os.Open(utils.PrometheusConfDir + "/" + utils.ProcessConf)
-	//defer processfile.Close()
-	//scriptfile, err := os.Open(utils.PrometheusConfDir + "/" + utils.ScriptConf)
-	//defer scriptfile.Close()
 	if err != nil {
 		middleware.SugarLogger.Errorf("Open file failed [Err:%s]", err.Error())
 	}
@@ -67,31 +64,6 @@ func CheckAgentStatus() {
 				nodeStatusCode := HttpCheckExporter(client, nodeExporterUrl)
 				processStatusCode := HttpCheckExporter(client, processExporterUrl)
 				scriptStatusCode := HttpCheckExporter(client, scriptExporterUrl)
-				//if nodeStatusCode == 2 && v.DisableNodeExport == 1 {
-				//	targets := fmt.Sprintf("%s:%s", v.PrivateIpAddress, v.NodeExportPort)
-				//	code, err := ReadJsonfile(nodefile, targets)
-				//	if err != nil && code == 0 {
-				//		middleware.SugarLogger.Errorf("read %s", err)
-				//	} else {
-				//		nodeStatusCode += 1
-				//	}
-				//}
-				//if processStatusCode == 2 && v.DisableProcessExport == 1 {
-				//	code, err = ReadJsonfile(processfile, v.PrivateIpAddress+":"+v.ProcessExportPort)
-				//	if err != nil && code == 0 {
-				//		middleware.SugarLogger.Errorf("read %s", err)
-				//	} else {
-				//		processStatusCode += 1
-				//	}
-				//}
-				//if scriptStatusCode == 2 && v.DisableScriptExport == 1 {
-				//	code, err = ReadJsonfile(scriptfile, v.PrivateIpAddress+":"+v.ScriptExportPort)
-				//	if err != nil && code == 0 {
-				//		middleware.SugarLogger.Errorf("read %s", err)
-				//	} else {
-				//		scriptStatusCode += 1
-				//	}
-				//}
 				var monitor = make(map[string]interface{})
 				monitor["node_export_status"] = nodeStatusCode
 				monitor["process_export_status"] = processStatusCode
@@ -117,10 +89,10 @@ func HttpCheckExporter(client *http.Client, url string) int {
 	return 0
 }
 
-func Prometheus_server() []ScanMonitorPrometheus {
+func PrometheusServer() []ScanMonitorPrometheus {
 	var svc []ScanMonitorPrometheus
 	errs := db.Model(&MonitorPrometheus{}).Select("monitor_prometheus.server_id,private_ip_address,node_export_port,process_export_port,script_export_port,node_export_status," +
-		"process_export_status,script_export_status,label,disable_node_export,disable_process_export,disable_script_export").Joins("left join server on server.server_id=monitor_prometheus.server_id").Scan(&svc)
+		"process_export_status,script_export_status,label,cluster,disable_node_export,disable_process_export,disable_script_export").Joins("left join server on server.server_id=monitor_prometheus.server_id").Scan(&svc)
 	if errs != nil {
 		middleware.SugarLogger.Errorf("", errs)
 		return svc
@@ -129,33 +101,29 @@ func Prometheus_server() []ScanMonitorPrometheus {
 }
 
 func WritePrometheus() {
-	monitorPrometheus := Prometheus_server()
+	monitorPrometheus := PrometheusServer()
 	var node = make([]string, 0)
-	var process = make([]string, 0)
 	var script = make([]string, 0)
+	maps := make(map[string][]string, 0)
 	for _, v := range monitorPrometheus {
 		if v.NodeExportStatus == 2 && v.DisableNodeExport == 1 {
 			node = append(node, v.PrivateIpAddress+":"+v.NodeExportPort)
+			maps[v.Cluster+".json"] = append(node)
 		}
 		if v.ProcessExportStatus == 2 && v.DisableProcessExport == 1 {
-			process = append(process, v.PrivateIpAddress+":"+v.ProcessExportPort)
+			node = append(node, v.PrivateIpAddress+":"+v.ProcessExportPort)
+			maps[v.Cluster+".json"] = append(node)
 		}
 		if v.ScriptExportStatus == 2 && v.DisableScriptExport == 1 {
 			script = append(script, v.PrivateIpAddress+":"+v.ScriptExportPort)
+			maps[v.Cluster+".yaml"] = append(script)
 		}
 	}
-	if len(node) > 0 {
-		WriteJsonfile(utils.PrometheusConfDir+"/"+utils.NodeConf, node)
+	for k, v := range maps {
+		if maps[k] != nil {
+			WriteJsonfile(strings.Split(k, ".")[0], utils.PrometheusConfDir+"/"+k, v)
+		}
 	}
-
-	if len(process) > 0 {
-		WriteJsonfile(utils.PrometheusConfDir+"/"+utils.ProcessConf, process)
-
-	}
-	if len(script) > 0 {
-		WriteJsonfile(utils.PrometheusConfDir+"/"+utils.ScriptConf, script)
-	}
-
 }
 
 func InsertPrometheusID(server_id int) {
@@ -189,11 +157,12 @@ func ReadJsonfile(filePtr *os.File, targets string) (int, error) {
 	return code, err
 }
 
-func WriteJsonfile(file string, targets []string) error {
+func WriteJsonfile(cluster, file string, targets []string) error {
 	var tmp = make([]PrometheusTarget, 0)
 	tmp = append(tmp, PrometheusTarget{Targets: targets,
 		Labels: Labels{
-			Idc: "成都郫县",
+			Idc:     "成都郫县",
+			Cluster: cluster,
 		},
 	})
 	filePtr, err := os.Create(file)
