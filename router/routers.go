@@ -27,11 +27,14 @@ func InitRouter() {
 		router.POST("createserver", idc.AddServer)
 		router.POST("batchcreateserver", idc.BatchAddServers)
 		router.POST("batchupdateserver", idc.BatchUpdateServers)
-		router.POST("cron", idc.Cron)
-		router.POST("osinit", script.OsInit)
-		router.POST("updatehostname", script.UpdateHostName)
 
-		router.GET("WritePrometheus", prometheus.WritePrometheus)
+		router.POST("osinit", script.OsInit)
+		router.POST("shellosinit", script.ShellInit)
+		router.POST("storagemount", script.StorageMount)
+		router.PUT("batchip", script.BatchIp)
+		router.POST("updatehostname", script.UpdateHostName)
+		router.POST("WritePrometheus", prometheus.WritePrometheus)
+
 		router.GET("getservers", idc.GetServers)
 		router.GET("getserver/:id", idc.GetServer)
 		router.GET("getuser", idc.GetUser)

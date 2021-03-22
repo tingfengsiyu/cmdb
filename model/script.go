@@ -7,9 +7,34 @@ import (
 	"fmt"
 	"golang.org/x/crypto/ssh"
 	"io"
+	"io/ioutil"
 	"net"
+	"os/exec"
 	"strings"
 )
+
+type BatchIpStruct struct {
+	SourceStartIp     string `json:"source_start_ip" validate:"required,min=10,max=12" `
+	SourceGateway     string `json:"source_gateway" validate:"required,min=10,max=10" `
+	SourceEndNumber   string `json:"source_end_number" validate:"required,gte=2"  `
+	TargetStartIP     string `json:"target_start_ip" validate:"required,min=10,max=12" `
+	TargetGateway     string `json:"target_gateway" validate:"required,min=10,max=10" `
+	TargetClusterName string `json:"target_cluster_name" validate:"required,min=4,max=50"`
+}
+
+type OsInitStruct struct {
+	InitUser     string `json:"init_user" validate:"required,min=10,max=10" `
+	InitPass     string `json:"init_pass" validate:"required,min=4,max=50"`
+	Role         string `json:"role" validate:"required,min=4,max=10"`
+	StorageMount StorageMountStruct
+}
+
+type StorageMountStruct struct {
+	InitStartIP       string `json:"init_start_ip" validate:"required,min=10,max=12" `
+	InitEndNumber     string `json:"init_end_number" validate:"required,gte=2" `
+	StorageStartIP    string `json:"storage_start_ip" validate:"required,min=4,max=50"`
+	StorageStopnumber string `json:"storage_stop_number" validate:"required,min=1,max=3"`
+}
 
 type Connection struct {
 	*ssh.Client
@@ -97,7 +122,7 @@ func SshCommands(user, password, addr, sudopass string, cmds ...string) ([]byte,
 	return output, nil
 }
 
-func Execshell() {
+func UpdateHostName() {
 	servers, _ := GetServers(0, 0)
 	for _, v := range servers {
 		go func(v Server) {
@@ -113,4 +138,27 @@ func Execshell() {
 			middleware.SugarLogger.Infof("%s ", string(outs))
 		}(v)
 	}
+}
+
+func ExecLocalShell(command string) {
+	cmd := exec.Command("/bin/bash", "-c", command)
+
+	stdin, _ := cmd.StdinPipe()
+	stdout, _ := cmd.StdoutPipe()
+
+	if err := cmd.Start(); err != nil {
+		fmt.Println("Execute failed when Start:" + err.Error())
+		return
+	}
+
+	stdin.Close()
+
+	out_bytes, _ := ioutil.ReadAll(stdout)
+	stdout.Close()
+
+	fmt.Println(string(out_bytes))
+}
+
+func GenerateAnsibleHosts() {
+
 }

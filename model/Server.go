@@ -185,7 +185,7 @@ func GetOwnedUser() ([]Server, int64) {
 func GetIdcServers(pageSize, pageNum int, name string) ([]ScanServers, int64) {
 	var scan []ScanServers
 	var total int64
-	err = db.Debug().Unscoped().Model(&Server{}).Select("select distinct server.id, city,idc_name,cabinet_number,name,"+
+	err = db.Model(&Server{}).Select("select distinct server.id, city,idc_name,cabinet_number,name,"+
 		"models,location,private_ip_address,public_ip_address,label,cluster,label_ip_address,cpu,memory,disk,user,state,server.idc_id,server.cabinet_number_id").Joins("left join idc on "+
 		"idc.idc_id =server.idc_id and idc_name= ?", name).Scan(&scan).Limit(pageSize).Offset((pageNum - 1) * pageSize).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
@@ -235,4 +235,17 @@ func GenerateServerID(hostNames []string) []int {
 		}
 	}
 	return server_ids
+}
+
+func CheckClusterName(ipaddress, clustername string) int {
+	var svc Server
+	db.Select("id").Where("cluster = ?  and private_ip_address = ?", clustername, ipaddress).First(&svc)
+	return svc.ID
+}
+
+func UpdateClusterName(id int, ipaddress, clustername string) {
+	err := db.Model(Server{}).Where("id = ?", "id").Updates(Server{PrivateIpAddress: ipaddress, Cluster: clustername})
+	if err != nil {
+		middleware.SugarLogger.Error(err)
+	}
 }
