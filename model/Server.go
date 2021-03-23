@@ -244,7 +244,7 @@ func CheckClusterName(ipaddress, clustername string) int {
 }
 
 func UpdateClusterName(id int, ipaddress, clustername string) {
-	err := db.Model(Server{}).Where("id = ?", "id").Updates(Server{PrivateIpAddress: ipaddress, Cluster: clustername})
+	err := db.Model(Server{}).Where("id = ?", id).Updates(Server{PrivateIpAddress: ipaddress, Cluster: clustername})
 	if err != nil {
 		middleware.SugarLogger.Error(err)
 	}

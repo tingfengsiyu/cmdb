@@ -3,7 +3,6 @@ package router
 import (
 	"cmdb/api/v1/cloud"
 	"cmdb/api/v1/idc"
-	"cmdb/api/v1/prometheus"
 	"cmdb/api/v1/script"
 	"cmdb/api/v1/user"
 	"cmdb/middleware"
@@ -33,7 +32,8 @@ func InitRouter() {
 		router.POST("storagemount", script.StorageMount)
 		router.PUT("batchip", script.BatchIp)
 		router.POST("updatehostname", script.UpdateHostName)
-		router.POST("WritePrometheus", prometheus.WritePrometheus)
+		router.POST("WritePrometheus", script.WritePrometheus)
+		router.POST("InstallMointorAgent", script.InstallMointorAgent)
 
 		router.GET("getservers", idc.GetServers)
 		router.GET("getserver/:id", idc.GetServer)

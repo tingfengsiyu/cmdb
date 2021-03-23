@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"golang.org/x/crypto/ssh"
 	"io"
-	"io/ioutil"
 	"net"
 	"os/exec"
 	"strings"
@@ -142,21 +141,30 @@ func UpdateHostName() {
 
 func ExecLocalShell(command string) {
 	cmd := exec.Command("/bin/bash", "-c", command)
-
-	stdin, _ := cmd.StdinPipe()
-	stdout, _ := cmd.StdoutPipe()
-
-	if err := cmd.Start(); err != nil {
-		fmt.Println("Execute failed when Start:" + err.Error())
-		return
+	output, err := cmd.Output()
+	if err != nil {
+		fmt.Printf("Execute Shell:%s failed with error:%s", command, err.Error())
 	}
+	fmt.Printf("Execute Shell:%s finished with output:\n%s", command, string(output))
+	/*
+		cmd := exec.Command("/bin/bash", "-c", command)
 
-	stdin.Close()
+		stdin, _ := cmd.StdinPipe()
+		stdout, _ := cmd.StdoutPipe()
 
-	out_bytes, _ := ioutil.ReadAll(stdout)
-	stdout.Close()
+		if err := cmd.Start(); err != nil {
+			fmt.Println("Execute failed when Start:" + err.Error())
+			return
+		}
 
-	fmt.Println(string(out_bytes))
+		stdin.Close()
+
+		out_bytes, _ := ioutil.ReadAll(stdout)
+		stdout.Close()
+
+		fmt.Println(string(out_bytes))
+	*/
+
 }
 
 func GenerateAnsibleHosts() {

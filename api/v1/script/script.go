@@ -66,8 +66,8 @@ func ShellInit(c *gin.Context) {
 		c.String(400, "格式不符合要求", err.Error())
 		return
 	}
-
-	if shellinit.Role != "lotus-worker" || shellinit.Role != "lotus-storage" {
+	if shellinit.Role == "lotus-worker" || shellinit.Role == "lotus-storage" {
+	} else {
 		c.String(400, "role错误 lotus-worker|lotus-storage")
 		return
 	}
@@ -75,7 +75,7 @@ func ShellInit(c *gin.Context) {
 	//osinit.sh  initStartIP initStopNumber  initUser initPass  Role  storageStartIP  storageStopnumber
 	cmd := "/root/ops/osinit.sh " + shellinit.StorageMount.InitStartIP + " " + shellinit.StorageMount.InitEndNumber + " " + shellinit.InitUser + " " +
 		shellinit.InitPass + " " + shellinit.Role + " " + shellinit.StorageMount.StorageStartIP + " " + shellinit.StorageMount.StorageStopnumber
-	model.ExecLocalShell(cmd)
+	go model.ExecLocalShell(cmd)
 	c.JSON(
 		http.StatusOK, gin.H{
 			"status": 200,
@@ -93,26 +93,25 @@ func BatchIp(c *gin.Context) {
 	var ids = make([]int, 0)
 	var ips = make([]string, 0)
 	tmpEndNumber, _ := strconv.Atoi(batchip.SourceEndNumber)
-	strTargetEndNumber := strings.Split(batchip.TargetStartIP, ".")[len(batchip.TargetStartIP)-1]
-	tmpTargetEndNumber, _ := strconv.Atoi(strTargetEndNumber)
-	targetPrefix := strings.Replace(batchip.TargetStartIP, strTargetEndNumber, "", -1)
+	sourceStartIpNumber, _ := strconv.Atoi(strings.Split(batchip.SourceStartIp, ".")[3])
+	targetStartNumber, _ := strconv.Atoi(strings.Split(batchip.TargetStartIP, ".")[3])
+	targetPrefix := strings.Replace(batchip.TargetStartIP, strings.Split(batchip.TargetStartIP, ".")[3], "", -1)
 
-	for i := 1; i <= tmpEndNumber; i++ {
+	for i := sourceStartIpNumber; i <= tmpEndNumber; i++ {
 		id := model.CheckClusterName(batchip.SourceStartIp, batchip.TargetClusterName)
 		if id <= 0 {
 			c.String(400, "集群名和ip不存在数据库，请确认后修改ip")
 			return
 		}
 		ids = append(ids, id)
-		tmpTargetEndNumber += 1
-		ips = append(ips, targetPrefix+strconv.Itoa(tmpTargetEndNumber))
+		ips = append(ips, targetPrefix+strconv.Itoa(targetStartNumber))
+		targetStartNumber += 1
 	}
 
-	//sh /root/ops/osinit.sh sourceIP sourceGateway sourceEndNumber targetStartIP targetGateway
-	cmd := "/root/ops/osinit.sh " + batchip.SourceStartIp + " " + batchip.SourceGateway + " " +
+	//sh /root/ops/batchip.sh sourceIP sourceGateway sourceEndNumber targetStartIP targetGateway
+	cmd := "/root/ops/batchip.sh " + batchip.SourceStartIp + " " + batchip.SourceGateway + " " +
 		batchip.SourceEndNumber + " " + batchip.TargetStartIP + " " + batchip.TargetGateway
 	model.ExecLocalShell(cmd)
-
 	for k, v := range ids {
 		model.UpdateClusterName(v, ips[k], batchip.TargetClusterName)
 	}
@@ -133,11 +132,38 @@ func StorageMount(c *gin.Context) {
 	c.Copy()
 	// batchStorage-mount.sh  sourceIP  sourceEndNumber storageStartIP storageEndNumber
 	cmd := "/root/ops/batchStorage-mount.sh  " + storagemount.InitStartIP + " " + storagemount.InitEndNumber + " " + storagemount.StorageStartIP + " " + storagemount.StorageStopnumber
-	model.ExecLocalShell(cmd)
+	go model.ExecLocalShell(cmd)
 	c.JSON(
 		http.StatusOK, gin.H{
 			"status": 200,
 			"data":   "存储生成并挂载中",
+		},
+	)
+}
+
+func WritePrometheus(c *gin.Context) {
+	model.WritePrometheus()
+	c.JSON(
+		http.StatusOK, gin.H{
+			"status":  200,
+			"message": "write ok!!!",
+		},
+	)
+}
+
+func InstallMointorAgent(c *gin.Context) {
+
+	clustername := c.Query("clustername")
+	if clustername == "" {
+		c.String(400, "clustername不能为空")
+		return
+	}
+	c.Copy()
+	go model.InstallAgent(clustername)
+	c.JSON(
+		http.StatusOK, gin.H{
+			"status":  200,
+			"message": "agent安装中",
 		},
 	)
 }
