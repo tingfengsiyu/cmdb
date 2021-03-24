@@ -125,7 +125,7 @@ func InsertPrometheusID(server_id int) {
 }
 
 func InstallAgent(clustername string) {
-	cmd := "/root/ops/monitoragent.sh " + clustername
+	cmd := "monitoragent.sh " + clustername
 	ExecLocalShell(cmd)
 }
 

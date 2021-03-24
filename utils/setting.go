@@ -5,11 +5,9 @@ import (
 )
 
 var (
-	AppMode  string
-	HttpPort string
-	JwtKey   string
-
-	Db         string
+	AppMode    string
+	HttpPort   string
+	JwtKey     string
 	DbHost     string
 	DbPort     string
 	DbUser     string
@@ -26,7 +24,6 @@ var (
 	PrometheusConfDir string
 	WorkerUser        string
 	WorkerPass        string
-	WorkerSudoPass    string
 	StorageUser       string
 	StoragePass       string
 	StorageSudoPass   string
@@ -58,7 +55,6 @@ func LoadServer(file *ini.File) {
 	ErrorLogFile = file.Section("server").Key("ErrorLogFile").MustString("xxxx/cmdb")
 	WorkerUser = file.Section("server").Key("WorkerUser").MustString("xxxx/cmdb")
 	WorkerPass = file.Section("server").Key("WorkerPass").MustString("xxxx/cmdb")
-	WorkerSudoPass = file.Section("server").Key("WorkerSudoPass").MustString("xxxx/cmdb")
 	StorageUser = file.Section("server").Key("StorageUser").MustString("xxxx/cmdb")
 	StoragePass = file.Section("server").Key("StoragePass").MustString("xxxx/cmdb")
 	StorageSudoPass = file.Section("server").Key("StorageSudoPass").MustString("xxxx/cmdb")
@@ -69,7 +65,6 @@ func LoadServer(file *ini.File) {
 	AnsibleHosts = file.Section("server").Key("AnsibleHosts").MustString("")
 }
 func LoadData(file *ini.File) {
-	Db = file.Section("database").Key("Db").MustString("debug")
 	DbHost = file.Section("database").Key("DbHost").MustString("47.s.197.46")
 	DbPort = file.Section("database").Key("DbPort").MustString("3306")
 	DbUser = file.Section("database").Key("DbUser").MustString("root")
