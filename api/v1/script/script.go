@@ -100,11 +100,15 @@ func BatchIp(c *gin.Context) {
 	var ips = make([]string, 0)
 	tmpEndNumber, _ := strconv.Atoi(batchip.SourceEndNumber)
 	sourceStartIpNumber, _ := strconv.Atoi(strings.Split(batchip.SourceStartIp, ".")[3])
+	fmt.Println(batchip.SourceStartIp)
+	t := strings.Split(batchip.SourceStartIp, ".")
+	startPrefix := t[0] + "." + t[1] + "." + t[2] + "."
 	targetStartNumber, _ := strconv.Atoi(strings.Split(batchip.TargetStartIP, ".")[3])
-	targetPrefix := strings.Replace(batchip.TargetStartIP, strings.Split(batchip.TargetStartIP, ".")[3], "", -1)
-
+	t = strings.Split(batchip.TargetStartIP, ".")
+	targetPrefix := t[0] + "." + t[1] + "." + t[2] + "."
 	for i := sourceStartIpNumber; i <= tmpEndNumber; i++ {
-		id := model.CheckClusterName(batchip.SourceStartIp, batchip.TargetClusterName)
+		tmp := strconv.Itoa(i)
+		id := model.CheckClusterName(startPrefix+tmp, batchip.TargetClusterName)
 		if id <= 0 {
 			c.String(400, "集群名和ip不存在数据库，请确认后修改ip")
 			return
@@ -117,7 +121,7 @@ func BatchIp(c *gin.Context) {
 	//sh batchip.sh sourceIP sourceGateway sourceEndNumber targetStartIP targetGateway
 	cmd := "batchip.sh " + batchip.SourceStartIp + " " + batchip.SourceGateway + " " +
 		batchip.SourceEndNumber + " " + batchip.TargetStartIP + " " + batchip.TargetGateway
-	model.ExecLocalShell(cmd)
+	go model.ExecLocalShell(cmd)
 	for k, v := range ids {
 		model.UpdateClusterName(v, ips[k], batchip.TargetClusterName)
 	}

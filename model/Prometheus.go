@@ -69,7 +69,7 @@ func CheckAgentStatus() {
 func HttpCheckExporter(client *http.Client, url string) int {
 	resp, err := client.Get(url)
 	if err != nil {
-		middleware.SugarLogger.Errorf("url %s", err)
+		//middleware.SugarLogger.Errorf("url %s", err)
 		return 0
 	}
 	if resp.StatusCode == 200 {
