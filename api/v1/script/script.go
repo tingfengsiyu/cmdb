@@ -4,6 +4,7 @@ import (
 	"cmdb/middleware"
 	"cmdb/model"
 	"cmdb/utils"
+	"cmdb/utils/errmsg"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -66,15 +67,20 @@ func ShellInit(c *gin.Context) {
 		c.String(400, "格式不符合要求", err.Error())
 		return
 	}
-	if shellinit.Role == "lotus-worker" || shellinit.Role == "lotus-storage" {
+	var cmd string
+	if shellinit.Role == "lotus-worker" {
+		cmd = "osinit.sh " + shellinit.StorageMount.InitStartIP + " " + shellinit.StorageMount.InitEndNumber + " " + shellinit.InitUser + " " +
+			shellinit.InitPass + " " + shellinit.Role + " " + shellinit.StorageMount.StorageStartIP + " " + shellinit.StorageMount.StorageStopnumber
+	} else if shellinit.Role == "lotus-storage" {
+		cmd = "osinit.sh " + shellinit.StorageMount.InitStartIP + " " + shellinit.StorageMount.InitEndNumber + " " + shellinit.InitUser + " " +
+			shellinit.InitPass + " " + shellinit.Role
 	} else {
 		c.String(400, "role错误 lotus-worker|lotus-storage")
 		return
 	}
 	c.Copy()
 	//osinit.sh  initStartIP initStopNumber  initUser initPass  Role  storageStartIP  storageStopnumber
-	cmd := "/root/ops/osinit.sh " + shellinit.StorageMount.InitStartIP + " " + shellinit.StorageMount.InitEndNumber + " " + shellinit.InitUser + " " +
-		shellinit.InitPass + " " + shellinit.Role + " " + shellinit.StorageMount.StorageStartIP + " " + shellinit.StorageMount.StorageStopnumber
+
 	go model.ExecLocalShell(cmd)
 	c.JSON(
 		http.StatusOK, gin.H{
@@ -108,8 +114,8 @@ func BatchIp(c *gin.Context) {
 		targetStartNumber += 1
 	}
 
-	//sh /root/ops/batchip.sh sourceIP sourceGateway sourceEndNumber targetStartIP targetGateway
-	cmd := "/root/ops/batchip.sh " + batchip.SourceStartIp + " " + batchip.SourceGateway + " " +
+	//sh batchip.sh sourceIP sourceGateway sourceEndNumber targetStartIP targetGateway
+	cmd := "batchip.sh " + batchip.SourceStartIp + " " + batchip.SourceGateway + " " +
 		batchip.SourceEndNumber + " " + batchip.TargetStartIP + " " + batchip.TargetGateway
 	model.ExecLocalShell(cmd)
 	for k, v := range ids {
@@ -131,7 +137,7 @@ func StorageMount(c *gin.Context) {
 	}
 	c.Copy()
 	// batchStorage-mount.sh  sourceIP  sourceEndNumber storageStartIP storageEndNumber
-	cmd := "/root/ops/batchStorage-mount.sh  " + storagemount.InitStartIP + " " + storagemount.InitEndNumber + " " + storagemount.StorageStartIP + " " + storagemount.StorageStopnumber
+	cmd := "batchStorage-mount.sh  " + storagemount.InitStartIP + " " + storagemount.InitEndNumber + " " + storagemount.StorageStartIP + " " + storagemount.StorageStopnumber
 	go model.ExecLocalShell(cmd)
 	c.JSON(
 		http.StatusOK, gin.H{
@@ -164,6 +170,21 @@ func InstallMointorAgent(c *gin.Context) {
 		http.StatusOK, gin.H{
 			"status":  200,
 			"message": "agent安装中",
+		},
+	)
+}
+
+func GenerateAnsibleHosts(c *gin.Context) {
+	var code int
+	if err := model.GenerateAnsibleHosts(); err != nil {
+		code = 4003
+	} else {
+		code = 200
+	}
+	c.JSON(
+		http.StatusOK, gin.H{
+			"status":  code,
+			"message": errmsg.GetErrMsg(code),
 		},
 	)
 }

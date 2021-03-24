@@ -32,8 +32,9 @@ func InitRouter() {
 		router.POST("storagemount", script.StorageMount)
 		router.PUT("batchip", script.BatchIp)
 		router.POST("updatehostname", script.UpdateHostName)
-		router.POST("WritePrometheus", script.WritePrometheus)
-		router.POST("InstallMointorAgent", script.InstallMointorAgent)
+		router.POST("writeprometheus", script.WritePrometheus)
+		router.GET("installmointoragent", script.InstallMointorAgent)
+		router.GET("generateansiblehosts", script.GenerateAnsibleHosts)
 
 		router.GET("getservers", idc.GetServers)
 		router.GET("getserver/:id", idc.GetServer)

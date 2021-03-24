@@ -33,6 +33,8 @@ var (
 	RootPass          string
 	RootPub           string
 	SR_File_Max_Bytes string
+	ScriptDir         string
+	AnsibleHosts      string
 )
 
 func init() {
@@ -63,6 +65,8 @@ func LoadServer(file *ini.File) {
 	RootPass = file.Section("server").Key("RootPass").MustString("xxxx/cmdb")
 	RootPub = file.Section("server").Key("RootPub").MustString("xxxx/cmdb")
 	SR_File_Max_Bytes = file.Section("server").Key("SR_File_Max_Bytes").MustString("")
+	ScriptDir = file.Section("server").Key("ScriptDir").MustString("")
+	AnsibleHosts = file.Section("server").Key("AnsibleHosts").MustString("")
 }
 func LoadData(file *ini.File) {
 	Db = file.Section("database").Key("Db").MustString("debug")

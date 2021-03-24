@@ -14,10 +14,11 @@ const (
 	ERROR_TOKEN_TYPE_WRONG = 1007
 	ERROR_USER_NO_RIGHT    = 1008
 
-    //设备相关信息
+	//设备相关信息
 	ERROR_DEVICE_NOT_EXIST = 4004
 	ERROR_DEVICE_EXIST     = 2001
 	ERROR_ALL_DEVICE_EXIST = 2002
+	ERROR_WRITE_FILE       = 4003
 )
 
 var codeMsg = map[int]string{
@@ -33,9 +34,9 @@ var codeMsg = map[int]string{
 	ERROR_USER_NO_RIGHT:    "该用户无权限",
 
 	ERROR_DEVICE_NOT_EXIST: "设备不存在",
-	ERROR_DEVICE_EXIST: "设备已存在",
+	ERROR_DEVICE_EXIST:     "设备已存在",
 	ERROR_ALL_DEVICE_EXIST: "所有设备已存在",
-
+	ERROR_WRITE_FILE:       "文件写入错误",
 }
 
 func GetErrMsg(code int) string {

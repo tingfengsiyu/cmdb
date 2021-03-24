@@ -161,15 +161,15 @@ func BatchUpdateServers(c *gin.Context) {
 			code = model.BatchUpdateServer(maps, v.ID)
 		}
 
-		idc_ids := model.GenerateIDCID(idcNames)
+		idcIds := model.GenerateIDCID(idcNames)
 
-		//生成cabinet_number_id
-		cabinet_number_ids := model.GenerateCabinetID(cabinetNumbers, idc_ids)
+		//生成cabinetNumberId
+		cabinetNumberIds := model.GenerateCabinetID(cabinetNumbers, idcIds)
 
 		//生成server_id
-		server_ids := model.GenerateServerID(hostNames)
+		serverIds := model.GenerateServerID(hostNames)
 		//插入对应id
-		for k, _ := range server_ids {
+		for k, _ := range serverIds {
 			if len(idcNames)-1 < k {
 				idcNames = append(idcNames, idcNames[0])
 			}
@@ -179,18 +179,18 @@ func BatchUpdateServers(c *gin.Context) {
 			if len(cabinetNumbers)-1 < k {
 				cabinetNumbers = append(cabinetNumbers, cabinetNumbers[0])
 			}
-			if len(idc_ids)-1 < k {
-				idc_ids = append(idc_ids, idc_ids[0])
+			if len(idcIds)-1 < k {
+				idcIds = append(idcIds, idcIds[0])
 			}
-			cabinet_number_id, _ := model.Check_Cabinet_Number(cabinetNumbers[k], idc_ids[k])
-			if cabinet_number_id == 0 {
-				model.InsertCabinetID(cabinetNumbers[k], idc_ids[k], cabinet_number_ids[k])
+			cabinetNumberId, _ := model.CheckCabinetNumber(cabinetNumbers[k], idcIds[k])
+			if cabinetNumberId == 0 {
+				model.InsertCabinetID(cabinetNumbers[k], idcIds[k], cabinetNumberIds[k])
 			}
-			idc_id, _ := model.Check_Idc_Name(idcNames[k])
+			idc_id, _ := model.CheckIdcName(idcNames[k])
 			if idc_id == 0 {
-				model.InsertIdcID(idcNames[k], citys[k], idc_ids[k], cabinet_number_ids[k])
+				model.InsertIdcID(idcNames[k], citys[k], idcIds[k], cabinetNumberIds[k])
 			}
-			model.InsertServerID(hostNames[k], idc_ids[k], server_ids[k], cabinet_number_ids[k])
+			model.InsertServerID(hostNames[k], idcIds[k], serverIds[k], cabinetNumberIds[k])
 
 		}
 	}
@@ -289,16 +289,16 @@ func addServerVerify(code int, servers []model.Server, idcNames, cabinetNumbers,
 		//检查不存在后执行
 
 		//生成idc_id
-		idc_ids := model.GenerateIDCID(idcNames)
+		idcIds := model.GenerateIDCID(idcNames)
 
-		//生成cabinet_number_id
-		cabinet_number_ids := model.GenerateCabinetID(cabinetNumbers, idc_ids)
+		//生成cabinetNumberId
+		cabinetNumberIds := model.GenerateCabinetID(cabinetNumbers, idcIds)
 
 		//生成server_id
-		server_ids := model.GenerateServerID(hostNames)
+		serverIds := model.GenerateServerID(hostNames)
 
 		//插入对应id
-		for k, _ := range server_ids {
+		for k, _ := range serverIds {
 			if len(idcNames)-1 < k {
 				idcNames = append(idcNames, idcNames[0])
 			}
@@ -308,13 +308,13 @@ func addServerVerify(code int, servers []model.Server, idcNames, cabinetNumbers,
 			if len(cabinetNumbers)-1 < k {
 				cabinetNumbers = append(cabinetNumbers, cabinetNumbers[0])
 			}
-			if len(idc_ids)-1 < k {
-				idc_ids = append(idc_ids, idc_ids[0])
+			if len(idcIds)-1 < k {
+				idcIds = append(idcIds, idcIds[0])
 			}
-			model.InsertIdcID(idcNames[k], citys[k], idc_ids[k], cabinet_number_ids[k])
-			model.InsertServerID(hostNames[k], idc_ids[k], server_ids[k], cabinet_number_ids[k])
-			model.InsertCabinetID(cabinetNumbers[k], idc_ids[k], cabinet_number_ids[k])
-			model.InsertPrometheusID(server_ids[k])
+			model.InsertIdcID(idcNames[k], citys[k], idcIds[k], cabinetNumberIds[k])
+			model.InsertServerID(hostNames[k], idcIds[k], serverIds[k], cabinetNumberIds[k])
+			model.InsertCabinetID(cabinetNumbers[k], idcIds[k], cabinetNumberIds[k])
+			model.InsertPrometheusID(serverIds[k])
 		}
 	} else if code == errmsg.ERROR_DEVICE_EXIST {
 		code = errmsg.ERROR_DEVICE_EXIST

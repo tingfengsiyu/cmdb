@@ -8,8 +8,10 @@ import (
 	"golang.org/x/crypto/ssh"
 	"io"
 	"net"
+	"os"
 	"os/exec"
 	"strings"
+	"time"
 )
 
 type BatchIpStruct struct {
@@ -140,12 +142,13 @@ func UpdateHostName() {
 }
 
 func ExecLocalShell(command string) {
-	cmd := exec.Command("/bin/bash", "-c", command)
+	cmd := exec.Command("/bin/bash", "-c", utils.ScriptDir+command)
 	output, err := cmd.Output()
 	if err != nil {
-		fmt.Printf("Execute Shell:%s failed with error:%s", command, err.Error())
+		fmt.Println("Exec shell error !!!", time.Now(), err.Error())
 	}
-	fmt.Printf("Execute Shell:%s finished with output:\n%s", command, string(output))
+	fmt.Println(string(output))
+	fmt.Println("Exec shell success !!!", time.Now())
 	/*
 		cmd := exec.Command("/bin/bash", "-c", command)
 
@@ -153,7 +156,7 @@ func ExecLocalShell(command string) {
 		stdout, _ := cmd.StdoutPipe()
 
 		if err := cmd.Start(); err != nil {
-			fmt.Println("Execute failed when Start:" + err.Error())
+			fmt.Println("Execute failed when Star`21wt:" + err.Error())
 			return
 		}
 
@@ -167,6 +170,53 @@ func ExecLocalShell(command string) {
 
 }
 
-func GenerateAnsibleHosts() {
+func GenerateAnsibleHosts() error {
+	type ansibleStruct struct {
+		PrivateIpAddress string `json:"private_ip_address"`
+		Label            string `json:"label"`
+		Cluster          string `json:"cluster"`
+	}
+	var ansiblehost = []ansibleStruct{}
 
+	err = db.Model(&Server{}).Select("private_ip_address,label,cluster").Scan(&ansiblehost).Error
+	if err != nil {
+		middleware.SugarLogger.Errorf("sql查询错误%s", err)
+	}
+	var worker, miner, storage, none []string
+	var maps = make(map[string][]string, 0)
+	for _, v := range ansiblehost {
+		if maps[v.Cluster+"-"+v.Label] == nil {
+			miner = []string{}
+			worker = []string{}
+			storage = []string{}
+			none = []string{}
+		}
+		if v.Label == "lotus-worker" {
+			worker = append(worker, v.PrivateIpAddress)
+			maps[v.Cluster+"-"+v.Label] = worker
+		} else if v.Label == "lotus-storage" {
+			storage = append(storage, v.PrivateIpAddress)
+			maps[v.Cluster+"-"+v.Label] = storage
+		} else if v.Label == "lotus-miner" {
+			miner = append(miner, v.PrivateIpAddress)
+			maps[v.Cluster+"-"+v.Label] = miner
+		} else {
+			none = append(none, v.PrivateIpAddress)
+			maps[v.Cluster+"-"+v.Label] = none
+		}
+
+	}
+	file, err := os.OpenFile(utils.AnsibleHosts, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0666)
+	if err != nil {
+		middleware.SugarLogger.Errorf("写入文件错误!!!%s", err)
+		return nil
+	}
+	defer file.Close()
+	for k, v := range maps {
+		file.WriteString("[" + k + "]\n")
+		for _, ip := range v {
+			file.WriteString(ip + "\n")
+		}
+	}
+	return err
 }

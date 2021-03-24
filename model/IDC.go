@@ -16,7 +16,7 @@ func CheckIdc(idc_name string) (code int) {
 	return errmsg.SUCCSE
 }
 
-func Check_Cabinet_Number(cabinet_number string, idc_id int) (int, int) {
+func CheckCabinetNumber(cabinet_number string, idc_id int) (int, int) {
 
 	var data = Cabinet{}
 	err := db.Select("cabinet_number_id").Where("idc_id = ? and cabinet_number = ? ", idc_id, cabinet_number).First(&data).Error
@@ -29,7 +29,7 @@ func Check_Cabinet_Number(cabinet_number string, idc_id int) (int, int) {
 }
 
 //检查idc name是否存在
-func Check_Idc_Name(idc_name string) (int, int) {
+func CheckIdcName(idc_name string) (int, int) {
 	var data = Idc{}
 	err := db.Select("idc_id").Where("idc_name = ?", idc_name).First(&data).Error
 	if err != nil {
@@ -104,41 +104,41 @@ func DeleteIDC(id int) int {
 func GenerateIDCID(idcNames []string) []int {
 	var nameMap = make(map[string]interface{})
 	number := 0
-	var idc_ids = make([]int, 0)
+	var idcIds = make([]int, 0)
 	for k, v := range idcNames {
-		idc_id, _ := Check_Idc_Name(v)
-		if idc_id == 0 {
+		idcId, _ := CheckIdcName(v)
+		if idcId == 0 {
 			if nameMap[v] == nil {
 				if k == 0 {
 					//第一次查询数据库总记录
-					id := LastCabintID()
+					id := LastIdcID()
 					number = id + 1
 				} else if k != 0 {
 					number = number + 1
 				}
 				nameMap[v] = number
-				idc_ids = append(idc_ids, number)
+				idcIds = append(idcIds, number)
 			} else if nameMap[v] != nil {
 				number = nameMap[v].(int)
 			}
-			idc_ids = append(idc_ids, number)
+			idcIds = append(idcIds, number)
 		} else {
-			idc_ids = append(idc_ids, idc_id)
+			idcIds = append(idcIds, idcId)
 		}
 	}
-	return idc_ids
+	return idcIds
 }
 
-func GenerateCabinetID(cabinetNumbers []string, idc_ids []int) []int {
+func GenerateCabinetID(cabinetNumbers []string, idcIds []int) []int {
 	var numberMap = make(map[string]interface{})
 	number := 0
-	var cabinet_number_ids = make([]int, 0)
+	var cabinetNumberIds = make([]int, 0)
 	for k, v := range cabinetNumbers {
-		if len(idc_ids)-1 < k {
-			idc_ids = append(idc_ids, idc_ids[0])
+		if len(idcIds)-1 < k {
+			idcIds = append(idcIds, idcIds[0])
 		}
-		cabinet_number_id, _ := Check_Cabinet_Number(v, idc_ids[k])
-		if cabinet_number_id == 0 {
+		cabinetNumberId, _ := CheckCabinetNumber(v, idcIds[k])
+		if cabinetNumberId == 0 {
 			if numberMap[v] == nil {
 				if k == 0 {
 					//第一次查询数据库总记录
@@ -148,28 +148,28 @@ func GenerateCabinetID(cabinetNumbers []string, idc_ids []int) []int {
 					number = number + 1
 				}
 				numberMap[v] = number
-				cabinet_number_ids = append(cabinet_number_ids, number)
+				cabinetNumberIds = append(cabinetNumberIds, number)
 			} else if numberMap[v] != nil {
 				t := numberMap[v].(int)
-				cabinet_number_ids = append(cabinet_number_ids, t)
+				cabinetNumberIds = append(cabinetNumberIds, t)
 			}
 
 		} else {
-			cabinet_number_ids = append(cabinet_number_ids, cabinet_number_id)
+			cabinetNumberIds = append(cabinetNumberIds, cabinetNumberId)
 		}
 	}
-	return cabinet_number_ids
+	return cabinetNumberIds
 }
 
-func InsertIdcID(idc_name, city_name string, idc_id, cabinet_number_id int) {
+func InsertIdcID(idcName, cityName string, idcId, cabinetNumberId int) {
 	var idc = Idc{}
 	var idcs = make(map[string]interface{})
-	idcs["cabinet_number_id"] = cabinet_number_id
-	idcs["idc_id"] = idc_id
-	idcs["city"] = city_name
-	idcs["idc_name"] = idc_name
+	idcs["cabinet_number_id"] = cabinetNumberId
+	idcs["idc_id"] = idcId
+	idcs["city"] = cityName
+	idcs["idc_name"] = idcName
 	////检查 cabinet_number_id 是否已存在，存在相同则不创建
-	err = db.Where("idc_name = ? AND  cabinet_number_id = ?", idc_name, cabinet_number_id).Find(&idc).Error
+	err = db.Where("idc_name = ? AND  cabinet_number_id = ?", idcName, cabinetNumberId).Find(&idc).Error
 	//err = db.Unscoped().Debug().Where("idc_name = ? AND  cabinet_number_id = ?", idc_name, cabinet_number_id).Find(&idc).Error
 	if idc.Cabinet_NumberID == 0 {
 		//idc_id, _ := Check_Idc_Name(idc_name)
@@ -179,16 +179,16 @@ func InsertIdcID(idc_name, city_name string, idc_id, cabinet_number_id int) {
 	}
 }
 
-func InsertCabinetID(cabinet_number string, idc_id, cabinet_number_id int) {
+func InsertCabinetID(cabinetNumber string, idcId, cabinetNumberId int) {
 	var cabinet = Cabinet{}
 	var cabinets = make(map[string]interface{})
-	cabinets["cabinet_number_id"] = cabinet_number_id
-	cabinets["idc_id"] = idc_id
-	cabinets["cabinet_number"] = cabinet_number
+	cabinets["cabinet_number_id"] = cabinetNumberId
+	cabinets["idc_id"] = idcId
+	cabinets["cabinet_number"] = cabinetNumber
 
 	//err = db.Where("idc_id = ? AND  cabinet_number_id = ?", idc_id, cabinet_number_id).Find(&cabinet).Error
-	cabinetNumberId, _ := Check_Cabinet_Number(cabinet_number, idc_id)
-	if cabinetNumberId == 0 {
+	tmpcabinetNumberId, _ := CheckCabinetNumber(cabinetNumber, idcId)
+	if tmpcabinetNumberId == 0 {
 		//if cabinet.Cabinet_NumberID == 0 {
 		//cabinet_number_id, _ := Check_Cabinet_Number(cabinet_number, idc_id)
 		//if cabinet_number_id == 0 {

@@ -195,30 +195,30 @@ func GetIdcServers(pageSize, pageNum int, name string) ([]ScanServers, int64) {
 }
 
 //查询对应城市所对应机柜的所有服务器
-func GetCabinetServers(pageSize, pageNum int, name, cabinet_number string) ([]ScanServers, int64) {
+func GetCabinetServers(pageSize, pageNum int, name, cabinetNumber string) ([]ScanServers, int64) {
 	var total int64
 	var scan []ScanServers
 	err := db.Unscoped().Debug().Raw("select distinct server.id, city,idc_name,cabinet_number,name,models,location,private_ip_address,public_ip_address,label,cluster,label_ip_address,cpu,memory,disk,user,state,"+
 		"server.idc_id,server.cabinet_number_id from  server  left join cabinet  on  cabinet.cabinet_number_id=server.cabinet_number_id  and idc_name = ? left join idc on idc.idc_id =server.idc_id and cabinet_number=? "+
-		"limit ?,?", name, cabinet_number, pageSize, pageNum).Scan(&scan).Error
+		"limit ?,?", name, cabinetNumber, pageSize, pageNum).Scan(&scan).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return nil, 0
 	}
 	return scan, total
 }
 
-func InsertServerID(name string, idc_id, server_id, cabinet_number_id int) {
+func InsertServerID(name string, idcId, serverId, cabinetNumberId int) {
 	var server = Server{}
 	var servers = make(map[string]interface{})
-	servers["server_id"] = server_id
-	servers["cabinet_number_id"] = cabinet_number_id
-	servers["idc_id"] = idc_id
+	servers["server_id"] = serverId
+	servers["cabinet_number_id"] = cabinetNumberId
+	servers["idc_id"] = idcId
 	db.Model(&server).Where("name =?", name).Updates(servers)
 }
 
 func GenerateServerID(hostNames []string) []int {
 	//server_id
-	var server_ids = make([]int, 0)
+	var serverIds = make([]int, 0)
 	number := 0
 	for k, v := range hostNames {
 		server_id, _ := CheckServer(v)
@@ -229,12 +229,12 @@ func GenerateServerID(hostNames []string) []int {
 			} else {
 				number = number + 1
 			}
-			server_ids = append(server_ids, number)
+			serverIds = append(serverIds, number)
 		} else {
-			server_ids = append(server_ids, server_id)
+			serverIds = append(serverIds, server_id)
 		}
 	}
-	return server_ids
+	return serverIds
 }
 
 func CheckClusterName(ipaddress, clustername string) int {

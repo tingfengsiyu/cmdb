@@ -5,7 +5,6 @@ import (
 	"cmdb/utils"
 	"encoding/json"
 	"fmt"
-	"github.com/robfig/cron"
 	"net/http"
 	"os"
 	"strings"
@@ -36,15 +35,6 @@ type ScanMonitorPrometheus struct {
 	DisableNodeExport    int    `json:"disable_node_export"`
 	DisableProcessExport int    `json:"disable_process_export"`
 	DisableScriptExport  int    `json:"disable_script_export"`
-}
-
-func Croninit() {
-	go func() {
-		crontab := cron.New()
-		crontab.AddFunc("0 */3 * * * *", CheckAgentStatus) // 每隔3分钟 定时执行 CheckAgentStatus 函数
-		crontab.AddFunc("0 */4 * * * * ", WritePrometheus)
-		crontab.Start()
-	}()
 }
 
 //并发检测监控agent运行状态
