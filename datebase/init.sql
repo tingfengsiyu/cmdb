@@ -1,48 +1,63 @@
-create database cmdb ;
-use cmdb;
-create table engine_room (
-    id int primary key AUTO_INCREMENT,
-    city varchar(255) NOT NULL,
-    engine_room varchar(30) NOT NULL ,
-    cabinet varchar(30) NOT NULL,
-    create_time DATETIME ,
-    update_time DATETIME ,
-    cabinet_number varchar(30) NOT NULL
-    )  ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = DYNAMIC ;
+--
+-- Host: 172.22.0.20    Database: cmdb
+-- ------------------------------------------------------
+-- Server version	8.0.23
 
-create table server (
-    id int  primary key AUTO_INCREMENT,
-    cabinet_number varchar(30) NOT NULL,
-    name varchar(30) NOT NULL,
-    model varchar(30) NOT NULL,
-    label varchar(30) NOT NULL,
-    ipaddresss varchar(30) NOT NULL,
-    cpu    varchar(30) NOT NULL,
-    memory varchar(30) NOT NULL,
-    disk   varchar(30) NOT NULL,
-    create_time DATETIME ,
-    update_time DATETIME ,
-    location    varchar(30) NOT NULL
-)  ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = DYNAMIC   ;
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
-create table switch  (
-       id int primary key AUTO_INCREMENT,
-       name varchar(30) NOT NULL,
-       model varchar(30) NOT NULL,
-       location varchar(30) NOT NULL,
-       ipaddresss varchar(30) NOT NULL,
-       create_time DATETIME ,
-       update_time DATETIME ,
-       cabinet_number varchar(30) NOT NULL
-)  ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = DYNAMIC   ;
+--
+-- Table structure for table `user`
+--
+create
+database cmdb ;
+use
+cmdb;
+DROP TABLE IF EXISTS `user`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `user`
+(
+    `id`         bigint unsigned NOT NULL AUTO_INCREMENT,
+    `created_at` datetime(3) DEFAULT NULL,
+    `updated_at` datetime(3) DEFAULT NULL,
+    `deleted_at` datetime(3) DEFAULT NULL,
+    `username`   varchar(20) NOT NULL,
+    `password`   varchar(20) NOT NULL,
+    `role`       bigint DEFAULT '2',
+    PRIMARY KEY (`id`),
+    KEY          `idx_user_deleted_at` (`deleted_at`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
-create table router (
-    id int primary key AUTO_INCREMENT,
-    name varchar(30) NOT NULL,
-    model varchar(30) NOT NULL,
-    location varchar(30) NOT NULL,
-    ipaddresss varchar(30) NOT NULL,
-    create_time DATETIME ,
-    update_time DATETIME ,
-    cabinet_number varchar(30) NOT NULL
-)  ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = DYNAMIC ;
+--
+-- Dumping data for table `user`
+--
+
+LOCK
+TABLES `user` WRITE;
+/*!40000 ALTER TABLE `user` DISABLE KEYS */;
+INSERT INTO `user`
+VALUES (4, '2021-01-26 15:22:12.588', '2021-01-26 15:22:12.588', NULL, 'luofeng', 'rytBNnf2J2vciy+8', 1);
+/*!40000 ALTER TABLE `user` ENABLE KEYS */;
+UNLOCK
+TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2021-03-25 13:13:10
