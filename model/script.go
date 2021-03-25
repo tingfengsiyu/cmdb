@@ -131,12 +131,11 @@ func UpdateHostName() {
 			user = "root"
 			passwd = utils.RootPass
 			sudopasswd = utils.RootPass
-			hostname := fmt.Sprintf("hostnamectl set-hostname %s ", v.Name)
-			outs, err := SshCommands(user, passwd, v.PrivateIpAddress+":"+"22", sudopasswd, hostname)
+			outs, err := SshCommands(user, passwd, v.PrivateIpAddress+":"+"22", sudopasswd, "hostnamectl set-hostname "+v.Name)
 			if err != nil {
-				middleware.SugarLogger.Errorf("ssh commands  %s ", err)
+				fmt.Println("ssh exec commands error !!!  %s ", err)
 			}
-			middleware.SugarLogger.Infof("%s ", string(outs))
+			fmt.Println(string(outs))
 		}(v)
 	}
 }
