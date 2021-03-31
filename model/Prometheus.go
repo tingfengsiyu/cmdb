@@ -96,6 +96,12 @@ func WritePrometheus() {
 	var script = make([]string, 0)
 	maps := make(map[string][]string, 0)
 	for _, v := range monitorPrometheus {
+		if maps[v.Cluster+".json"] == nil {
+			node = []string{}
+		}
+		if maps[v.Cluster+".yaml"] == nil {
+			script = []string{}
+		}
 		if v.NodeExportStatus == 2 && v.DisableNodeExport == 1 {
 			node = append(node, v.PrivateIpAddress+":"+v.NodeExportPort)
 			maps[v.Cluster+".json"] = append(node)
