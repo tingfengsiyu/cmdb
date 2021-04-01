@@ -41,7 +41,7 @@ func LastServeID() int {
 
 type ScanServers struct {
 	ID               int    `gorm:"primary_key;auto_increment;int" json:"id"`
-	Name             string `gorm:"type:varchar(30);not null" json:"name" validate:"required,min=4"`
+	Name             string `gorm:"type:varchar(42);not null" json:"name" validate:"required,min=4"`
 	Models           string `gorm:"type:varchar(30);not null" json:"models" validate:"required,min=4"`
 	Location         string `gorm:"type:varchar(30);not null" json:"location" validate:"required,min=4"`
 	PrivateIpAddress string `gorm:"type:varchar(30);not null" json:"private_ip_address" validate:"required,min=16"`
