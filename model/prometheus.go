@@ -81,12 +81,9 @@ func HttpCheckExporter(client *http.Client, url string) int {
 
 func PrometheusServer() []ScanMonitorPrometheus {
 	var svc []ScanMonitorPrometheus
-	//errs := db.Model(&Server{}).Select("monitor_prometheus.server_id,private_ip_address,node_export_port,process_export_port,script_export_port,node_export_status," +
-	//	"process_export_status,script_export_status,label,cluster,disable_node_export,disable_process_export,disable_script_export").Joins("left join" +
-	//		" monitor_prometheus on server.server_id=monitor_prometheus.server_id").Scan(&svc).Order("cluster").Error
-	err := db.Raw("select monitor_prometheus.server_id,private_ip_address,node_export_port,process_export_port,script_export_port,node_export_status," +
-		"process_export_status,script_export_status,label,cluster,disable_node_export,disable_process_export,disable_script_export " +
-		"from server left join monitor_prometheus on server.server_id=monitor_prometheus.server_id order by cluster").Scan(&svc).Error
+	err := db.Model(&Server{}).Select("monitor_prometheus.server_id,private_ip_address,node_export_port,process_export_port,script_export_port,node_export_status," +
+		"process_export_status,script_export_status,label,cluster,disable_node_export,disable_process_export,disable_script_export").Joins("left join" +
+		" monitor_prometheus on server.server_id=monitor_prometheus.server_id").Order("cluster").Scan(&svc).Error
 	if err != nil {
 		middleware.SugarLogger.Errorf("", err)
 		return svc
