@@ -177,7 +177,7 @@ func GenerateAnsibleHosts() error {
 	}
 	var ansiblehost = []ansibleStruct{}
 
-	err = db.Model(&Server{}).Select("private_ip_address,label,cluster").Scan(&ansiblehost).Error
+	err = db.Model(&Server{}).Select("private_ip_address,label,cluster").Scan(&ansiblehost).Order("cluster").Error
 	if err != nil {
 		middleware.SugarLogger.Errorf("sql查询错误%s", err)
 	}

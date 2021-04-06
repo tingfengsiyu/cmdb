@@ -108,9 +108,9 @@ func BatchIp(c *gin.Context) {
 	targetPrefix := t[0] + "." + t[1] + "." + t[2] + "."
 	for i := sourceStartIpNumber; i <= tmpEndNumber; i++ {
 		tmp := strconv.Itoa(i)
-		id := model.CheckClusterName(startPrefix+tmp, batchip.TargetClusterName)
+		id := model.CheckClusterName(startPrefix + tmp)
 		if id <= 0 {
-			c.String(400, "集群名和ip不存在数据库，请确认后修改ip")
+			c.String(400, "集群ip不存在数据库，请确认后修改ip")
 			return
 		}
 		ids = append(ids, id)

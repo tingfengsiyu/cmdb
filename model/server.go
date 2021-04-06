@@ -198,7 +198,7 @@ func GetIdcServers(pageSize, pageNum int, name string) ([]ScanServers, int64) {
 func GetCabinetServers(pageSize, pageNum int, name, cabinetNumber string) ([]ScanServers, int64) {
 	var total int64
 	var scan []ScanServers
-	err := db.Unscoped().Debug().Raw("select distinct server.id, city,idc_name,cabinet_number,name,models,location,private_ip_address,public_ip_address,label,cluster,label_ip_address,cpu,memory,disk,user,state,"+
+	err := db.Raw("select distinct server.id, city,idc_name,cabinet_number,name,models,location,private_ip_address,public_ip_address,label,cluster,label_ip_address,cpu,memory,disk,user,state,"+
 		"server.idc_id,server.cabinet_number_id from  server  left join cabinet  on  cabinet.cabinet_number_id=server.cabinet_number_id  and idc_name = ? left join idc on idc.idc_id =server.idc_id and cabinet_number=? "+
 		"limit ?,?", name, cabinetNumber, pageSize, pageNum).Scan(&scan).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
@@ -237,9 +237,9 @@ func GenerateServerID(hostNames []string) []int {
 	return serverIds
 }
 
-func CheckClusterName(ipaddress, clustername string) int {
+func CheckClusterName(ipaddress string) int {
 	var svc Server
-	db.Select("id").Where("cluster = ?  and private_ip_address = ?", clustername, ipaddress).First(&svc)
+	db.Select("id").Where("cluster = ?  and private_ip_address = ?", ipaddress).First(&svc)
 	return svc.ID
 }
 
