@@ -95,6 +95,7 @@ func WritePrometheus() {
 	var node = make([]string, 0)
 	var script = make([]string, 0)
 	maps := make(map[string][]string, 0)
+	//sort.Slice(monitorPrometheus,func(i, j int) bool { return monitorPrometheus[i].Cluster < monitorPrometheus[j].Cluster })
 	for _, v := range monitorPrometheus {
 		if maps[v.Cluster+".json"] == nil {
 			node = []string{}

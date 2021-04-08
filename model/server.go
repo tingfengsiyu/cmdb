@@ -239,7 +239,7 @@ func GenerateServerID(hostNames []string) []int {
 
 func CheckClusterName(ipaddress string) int {
 	var svc Server
-	db.Select("id").Where("cluster = ?  and private_ip_address = ?", ipaddress).First(&svc)
+	db.Select("id").Where("private_ip_address = ?", ipaddress).First(&svc)
 	return svc.ID
 }
 
