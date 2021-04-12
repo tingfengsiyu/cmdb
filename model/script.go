@@ -10,6 +10,7 @@ import (
 	"net"
 	"os"
 	"os/exec"
+	"sort"
 	"strings"
 	"time"
 )
@@ -177,31 +178,42 @@ func GenerateAnsibleHosts() error {
 	}
 	var ansiblehost = []ansibleStruct{}
 
-	err = db.Model(&Server{}).Select("private_ip_address,label,cluster").Order("cluster").Scan(&ansiblehost).Error
+	err = db.Model(&Server{}).Select("private_ip_address,label,cluster").Scan(&ansiblehost).Error
 	if err != nil {
 		middleware.SugarLogger.Errorf("sql查询错误%s", err)
 	}
+	type server struct {
+		PrivateIpAddress string `json:"private_ip_address"`
+		Role             string `json:"Role"` //cluster+Label
+	}
+	servers := []server{}
+	for _, v := range ansiblehost {
+		servers = append(servers, server{v.PrivateIpAddress, v.Cluster + "-" + v.Label})
+	}
+	sort.Slice(servers, func(i, j int) bool { return servers[i].Role < servers[j].Role })
+
 	var worker, miner, storage, none []string
 	var maps = make(map[string][]string, 0)
-	for _, v := range ansiblehost {
-		if maps[v.Cluster+"-"+v.Label] == nil {
+	for _, v := range servers {
+		if _, ok := maps[v.Role]; !ok {
 			miner = []string{}
 			worker = []string{}
 			storage = []string{}
 			none = []string{}
 		}
-		if v.Label == "lotus-worker" {
+		switch v.Role {
+		case "lotus-worker":
 			worker = append(worker, v.PrivateIpAddress)
-			maps[v.Cluster+"-"+v.Label] = worker
-		} else if v.Label == "lotus-storage" {
+			maps[v.Role] = worker
+		case "lotus-storage":
 			storage = append(storage, v.PrivateIpAddress)
-			maps[v.Cluster+"-"+v.Label] = storage
-		} else if v.Label == "lotus-miner" {
+			maps[v.Role] = storage
+		case "lotus-miner":
 			miner = append(miner, v.PrivateIpAddress)
-			maps[v.Cluster+"-"+v.Label] = miner
-		} else {
+			maps[v.Role] = miner
+		default:
 			none = append(none, v.PrivateIpAddress)
-			maps[v.Cluster+"-"+v.Label] = none
+			maps[v.Role] = none
 		}
 
 	}
