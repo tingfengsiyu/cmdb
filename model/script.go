@@ -204,15 +204,19 @@ func GenerateAnsibleHosts() error {
 		switch v.Role {
 		case "lotus-worker":
 			worker = append(worker, v.PrivateIpAddress)
+			sort.Strings(worker)
 			maps[v.Role] = worker
 		case "lotus-storage":
 			storage = append(storage, v.PrivateIpAddress)
+			sort.Strings(storage)
 			maps[v.Role] = storage
 		case "lotus-miner":
 			miner = append(miner, v.PrivateIpAddress)
+			sort.Strings(miner)
 			maps[v.Role] = miner
 		default:
 			none = append(none, v.PrivateIpAddress)
+			sort.Strings(none)
 			maps[v.Role] = none
 		}
 
