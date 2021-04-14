@@ -243,6 +243,15 @@ func CheckClusterName(ipaddress string) int {
 	return svc.ID
 }
 
+func BatchCheckClusterName(ipaddress []string) bool {
+	var svc Server
+	db.Select("id").Where("private_ip_address IN ?", ipaddress).First(&svc)
+	if svc.ID != len(ipaddress) {
+		return false
+	}
+	return true
+}
+
 func UpdateClusterName(id int, ipaddress, clustername string) {
 	err := db.Model(Server{}).Where("id = ?", id).Updates(Server{PrivateIpAddress: ipaddress, Cluster: clustername})
 	if err != nil {

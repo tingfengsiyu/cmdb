@@ -78,6 +78,11 @@ func ShellInit(c *gin.Context) {
 		c.String(400, "role错误 lotus-worker|lotus-storage")
 		return
 	}
+	flag := ScriptIpVerfiy(shellinit.StorageMount.InitEndNumber, shellinit.StorageMount.InitStartIP)
+	if !flag {
+		c.String(400, "集群ip不存在数据库,请确认ip已录入")
+		return
+	}
 	c.Copy()
 	//osinit.sh  initStartIP initStopNumber  initUser initPass  Role  storageStartIP  storageStopnumber
 
@@ -100,7 +105,6 @@ func BatchIp(c *gin.Context) {
 	var ips = make([]string, 0)
 	tmpEndNumber, _ := strconv.Atoi(batchip.SourceEndNumber)
 	sourceStartIpNumber, _ := strconv.Atoi(strings.Split(batchip.SourceStartIp, ".")[3])
-	fmt.Println(batchip.SourceStartIp)
 	t := strings.Split(batchip.SourceStartIp, ".")
 	startPrefix := t[0] + "." + t[1] + "." + t[2] + "."
 	targetStartNumber, _ := strconv.Atoi(strings.Split(batchip.TargetStartIP, ".")[3])
@@ -137,6 +141,11 @@ func StorageMount(c *gin.Context) {
 	var storagemount = model.StorageMountStruct{}
 	if err := c.ShouldBindJSON(&storagemount); err != nil {
 		c.String(400, "格式不符合要求", err.Error())
+		return
+	}
+	flag := ScriptIpVerfiy(storagemount.InitEndNumber, storagemount.InitStartIP)
+	if !flag {
+		c.String(400, "集群ip不存在数据库,请确认ip已录入")
 		return
 	}
 	c.Copy()
@@ -191,4 +200,19 @@ func GenerateAnsibleHosts(c *gin.Context) {
 			"message": errmsg.GetErrMsg(code),
 		},
 	)
+}
+
+func ScriptIpVerfiy(initNumber, initStartIp string) bool {
+	tmpEndNumber, _ := strconv.Atoi(initNumber)
+	sourceStartIpNumber, _ := strconv.Atoi(strings.Split(initStartIp, ".")[3])
+	t := strings.Split(initStartIp, ".")
+	var ipLists = make([]string, 0)
+	startPrefix := t[0] + "." + t[1] + "." + t[2] + "."
+	for i := sourceStartIpNumber; i <= tmpEndNumber; i++ {
+		tmp := strconv.Itoa(i)
+		ipLists = append(ipLists, startPrefix+tmp)
+
+	}
+	flag := model.BatchCheckClusterName(ipLists)
+	return flag
 }

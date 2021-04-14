@@ -4,7 +4,6 @@ import (
 	"cmdb/middleware"
 	"cmdb/utils"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"os"
 	"strings"
@@ -17,7 +16,7 @@ type PrometheusTarget struct {
 	Labels  Labels   `json:"labels"`
 }
 type Labels struct {
-	Idc     string `json:"idc"`
+	//Idc     string `json:"idc"`
 	Cluster string `json:"cluster"`
 }
 
@@ -47,20 +46,18 @@ func CheckAgentStatus() {
 	}
 	for _, v := range monitorPrometheus {
 		go func(client *http.Client, tmp ScanMonitorPrometheus) {
-			for _, v := range monitorPrometheus {
-				nodeExporterUrl := fmt.Sprintf("http://%s:%s", v.PrivateIpAddress, v.NodeExportPort)
-				processExporterUrl := fmt.Sprintf("http://%s:%s", v.PrivateIpAddress, v.ProcessExportPort)
-				scriptExporterUrl := fmt.Sprintf("http://%s:%s", v.PrivateIpAddress, v.ScriptExportPort)
-				nodeStatusCode := HttpCheckExporter(client, nodeExporterUrl)
-				processStatusCode := HttpCheckExporter(client, processExporterUrl)
-				scriptStatusCode := HttpCheckExporter(client, scriptExporterUrl)
-				var monitor = make(map[string]interface{})
-				monitor["node_export_status"] = nodeStatusCode
-				monitor["process_export_status"] = processStatusCode
-				monitor["script_export_status"] = scriptStatusCode
-
-				db.Model(&MonitorPrometheus{}).Where("server_id =?", v.ServerID).Updates(monitor)
-			}
+			ipaddress := strings.Trim(tmp.PrivateIpAddress, " ")
+			nodeExporterUrl := "http://" + ipaddress + ":" + tmp.NodeExportPort
+			processExporterUrl := "http://" + ipaddress + ":" + tmp.ProcessExportPort
+			scriptExporterUrl := "http://" + ipaddress + ":" + tmp.ScriptExportPort
+			nodeStatusCode := HttpCheckExporter(client, nodeExporterUrl)
+			processStatusCode := HttpCheckExporter(client, processExporterUrl)
+			scriptStatusCode := HttpCheckExporter(client, scriptExporterUrl)
+			var monitor = make(map[string]interface{})
+			monitor["node_export_status"] = nodeStatusCode
+			monitor["process_export_status"] = processStatusCode
+			monitor["script_export_status"] = scriptStatusCode
+			db.Model(&MonitorPrometheus{}).Where("server_id =?", tmp.ServerID).Updates(monitor)
 		}(client, v)
 
 	}
@@ -69,6 +66,7 @@ func CheckAgentStatus() {
 func HttpCheckExporter(client *http.Client, url string) int {
 	resp, err := client.Get(url)
 	if err != nil {
+		middleware.SugarLogger.Errorf("%s", err)
 		return 0
 	}
 	if resp.StatusCode == 200 {
@@ -97,6 +95,7 @@ func WritePrometheus() {
 	maps := make(map[string][]string, 0)
 	//sort.Slice(monitorPrometheus,func(i, j int) bool { return monitorPrometheus[i].Cluster < monitorPrometheus[j].Cluster })
 	for _, v := range monitorPrometheus {
+		ipaddress := strings.TrimSpace(v.PrivateIpAddress)
 		if maps[v.Cluster+".json"] == nil {
 			node = []string{}
 		}
@@ -104,21 +103,40 @@ func WritePrometheus() {
 			script = []string{}
 		}
 		if v.NodeExportStatus == 2 && v.DisableNodeExport == 1 {
-			node = append(node, v.PrivateIpAddress+":"+v.NodeExportPort)
+			node = append(node, ipaddress+":"+v.NodeExportPort)
 			maps[v.Cluster+".json"] = append(node)
 		}
 		if v.ProcessExportStatus == 2 && v.DisableProcessExport == 1 {
-			node = append(node, v.PrivateIpAddress+":"+v.ProcessExportPort)
+			node = append(node, ipaddress+":"+v.ProcessExportPort)
 			maps[v.Cluster+".json"] = append(node)
 		}
 		if v.ScriptExportStatus == 2 && v.DisableScriptExport == 1 {
-			script = append(script, v.PrivateIpAddress+":"+v.ScriptExportPort)
+			script = append(script, ipaddress+":"+v.ScriptExportPort)
 			maps[v.Cluster+".yaml"] = append(script)
 		}
 	}
 	for k, v := range maps {
 		if maps[k] != nil {
-			WriteJsonfile(strings.Split(k, ".")[0], utils.PrometheusConfDir+"/"+k, v)
+			//WriteJsonfile(strings.Split(k, ".")[0], utils.PrometheusConfDir+"/"+k, v)
+			func(cluster, file string, targets []string) {
+				var tmp = make([]PrometheusTarget, 0)
+				tmp = append(tmp, PrometheusTarget{Targets: targets,
+					Labels: Labels{
+						Cluster: cluster,
+					},
+				})
+				filePtr, err := os.Create(file)
+				if err != nil {
+					middleware.SugarLogger.Errorf("Create file failed", err.Error())
+				}
+
+				datas, err := json.MarshalIndent(tmp, "", "  ")
+				if err != nil {
+					middleware.SugarLogger.Errorf("Encoder failed", err.Error())
+				}
+				filePtr.Write(datas)
+				defer filePtr.Close()
+			}(strings.Split(k, ".")[0], utils.PrometheusConfDir+"/"+k, v)
 		}
 	}
 }
@@ -153,28 +171,4 @@ func ReadJsonfile(filePtr *os.File, targets string) (int, error) {
 		}
 	}
 	return code, err
-}
-
-func WriteJsonfile(cluster, file string, targets []string) error {
-	var tmp = make([]PrometheusTarget, 0)
-	tmp = append(tmp, PrometheusTarget{Targets: targets,
-		Labels: Labels{
-			Idc:     "成都郫县",
-			Cluster: cluster,
-		},
-	})
-	filePtr, err := os.Create(file)
-	if err != nil {
-		middleware.SugarLogger.Errorf("Create file failed", err.Error())
-		return err
-	}
-
-	datas, err := json.MarshalIndent(tmp, "", "  ")
-	if err != nil {
-		middleware.SugarLogger.Errorf("Encoder failed", err.Error())
-		return err
-	}
-	filePtr.Write(datas)
-	defer filePtr.Close()
-	return err
 }
