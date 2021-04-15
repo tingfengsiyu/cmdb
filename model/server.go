@@ -244,9 +244,9 @@ func CheckClusterName(ipaddress string) int {
 }
 
 func BatchCheckClusterName(ipaddress []string) bool {
-	var svc Server
-	db.Select("id").Where("private_ip_address IN ?", ipaddress).First(&svc)
-	if svc.ID != len(ipaddress) {
+	var svc []Server
+	db.Select("private_ip_address").Where("private_ip_address IN ?", ipaddress).Find(&svc)
+	if len(svc) != len(ipaddress) {
 		return false
 	}
 	return true

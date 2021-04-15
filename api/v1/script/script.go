@@ -211,7 +211,6 @@ func ScriptIpVerfiy(initNumber, initStartIp string) bool {
 	for i := sourceStartIpNumber; i <= tmpEndNumber; i++ {
 		tmp := strconv.Itoa(i)
 		ipLists = append(ipLists, startPrefix+tmp)
-
 	}
 	flag := model.BatchCheckClusterName(ipLists)
 	return flag
