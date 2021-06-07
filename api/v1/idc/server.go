@@ -72,6 +72,16 @@ func GetServer(c *gin.Context) {
 		},
 	)
 }
+func GetCluster(c *gin.Context) {
+	cluster := c.Query("cluster")
+	data, code := model.GetCluster(cluster)
+	c.JSON(
+		http.StatusOK, gin.H{
+			"status": code,
+			"data":   data,
+		},
+	)
+}
 
 func Cron(c *gin.Context) {
 	c.Copy()
@@ -100,6 +110,20 @@ func GetServers(c *gin.Context) {
 	}
 
 	data, total := model.GetServers(pageSize, pageNum)
+	code := errmsg.SUCCSE
+	c.JSON(
+		http.StatusOK, gin.H{
+			"status":  code,
+			"data":    data,
+			"total":   total,
+			"message": errmsg.GetErrMsg(code),
+		},
+	)
+}
+
+func GetClusters(c *gin.Context) {
+
+	data, total := model.GetClusters()
 	code := errmsg.SUCCSE
 	c.JSON(
 		http.StatusOK, gin.H{

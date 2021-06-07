@@ -27,7 +27,7 @@ func LastIdcID() int {
 }
 func LastServeID() int {
 	var data = Server{}
-	db.Unscoped().Debug().Order("server_id desc").Find(&data).Limit(1)
+	db.Order("server_id desc").Find(&data).Limit(1)
 	return int(data.ServerID)
 }
 
@@ -119,6 +119,36 @@ func GetServers(pageSize int, pageNum int) ([]Server, int64) {
 	db.Model(&svc).Count(&total)
 	//select name,models,idc_name,city,cabinet.cabinet_number from  server  left join cabinet on  cabinet.cabinet_number_id=server.cabinet_number_id left join idc on idc.idc_id =server.idc_id;
 	if err != nil && err != gorm.ErrRecordNotFound {
+		return nil, 0
+	}
+	return svc, total
+}
+
+func GetClusters() ([]string, int64) {
+	type Cluster struct {
+		Cluster string `gorm:"type:varchar(30);not null" json:"cluster" binding:"required" validate:"required,min=4"`
+	}
+	var cluster = make([]string, 0)
+
+	var svc []Server
+	var total int64
+	err = db.Distinct("cluster").Order("cluster desc").Find(&svc).Error
+	for _, v := range svc {
+		cluster = append(cluster, v.Cluster)
+	}
+
+	db.Model(&svc).Count(&total)
+	if err != nil {
+		return nil, 0
+	}
+	return cluster, total
+}
+func GetCluster(cluster string) ([]Server, int64) {
+	var svc []Server
+	var total int64
+	err = db.Where("cluster = ?", cluster).Find(&svc).Error
+	db.Model(&svc).Count(&total)
+	if err != nil {
 		return nil, 0
 	}
 	return svc, total

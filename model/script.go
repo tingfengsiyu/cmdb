@@ -24,6 +24,12 @@ type BatchIpStruct struct {
 	TargetClusterName string `json:"target_cluster_name" validate:"required,min=4,max=50"`
 }
 
+type UpdateClusterStruct struct {
+	SourceStartIp     string `json:"source_start_ip" validate:"required,min=10,max=12" `
+	SourceEndNumber   string `json:"source_end_number" validate:"required,gte=2"  `
+	TargetClusterName string `json:"target_cluster_name" validate:"required,min=4,max=50"`
+}
+
 type OsInitStruct struct {
 	InitUser     string `json:"init_user" validate:"required,min=10,max=10" `
 	InitPass     string `json:"init_pass" validate:"required,min=4,max=50"`
@@ -36,6 +42,13 @@ type StorageMountStruct struct {
 	InitEndNumber     string `json:"init_end_number" validate:"required,gte=2" `
 	StorageStartIP    string `json:"storage_start_ip" validate:"required,min=4,max=50"`
 	StorageStopnumber string `json:"storage_stop_number" validate:"required,min=1,max=3"`
+	Operating         string `json:"operating" validate:"required,min=1,max=3"`
+}
+
+type ansibleStruct struct {
+	PrivateIpAddress string `json:"private_ip_address"`
+	Label            string `json:"label"`
+	Cluster          string `json:"cluster"`
 }
 
 type Connection struct {
@@ -129,9 +142,9 @@ func UpdateHostName() {
 	for _, v := range servers {
 		go func(v Server) {
 			var user, passwd, sudopasswd string
-			user = "root"
-			passwd = utils.RootPass
-			sudopasswd = utils.RootPass
+			user = utils.WorkerUser
+			passwd = utils.WorkerPass
+			sudopasswd = utils.WorkerSudoPass
 			outs, err := SshCommands(user, passwd, v.PrivateIpAddress+":"+"22", sudopasswd, "hostnamectl set-hostname "+v.Name)
 			if err != nil {
 				fmt.Println("ssh exec commands error !!!  %s ", err)
@@ -171,11 +184,7 @@ func ExecLocalShell(command string) {
 }
 
 func GenerateAnsibleHosts() error {
-	type ansibleStruct struct {
-		PrivateIpAddress string `json:"private_ip_address"`
-		Label            string `json:"label"`
-		Cluster          string `json:"cluster"`
-	}
+
 	var ansiblehost = []ansibleStruct{}
 
 	err = db.Model(&Server{}).Select("private_ip_address,label,cluster").Scan(&ansiblehost).Error
@@ -233,5 +242,81 @@ func GenerateAnsibleHosts() error {
 			file.WriteString(ip + "\n")
 		}
 	}
+	return err
+}
+
+func AppendAnsibleHosts(ips []string, cluster string) error {
+	file, err := os.OpenFile(utils.AnsibleHosts, os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		middleware.SugarLogger.Errorf("写入文件错误!!!%s", err)
+		return nil
+	}
+	defer file.Close()
+	file.WriteString("[" + cluster + "-tmpworker]\n")
+	for _, ip := range ips {
+		file.WriteString(ip + "\n")
+	}
+	//sync  target cluster ansible hosts
+	SyncTargetHosts(ips, cluster)
+	return err
+}
+
+func SyncTargetHosts(ips []string, cluster string) error {
+	sudostr := " ansible_ssh_user=" + utils.WorkerUser + " ansible_ssh_pass=" + utils.WorkerPass + " ansible_sudo_pass=" + utils.WorkerSudoPass
+	tmpfile := utils.AnsibleHosts + ".tmp"
+	file, err := os.OpenFile(tmpfile, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0666)
+	if err != nil {
+		middleware.SugarLogger.Errorf("写入文件错误!!!%s", err)
+		return nil
+	}
+	defer file.Close()
+
+	//sync  target cluster ansible hosts
+	servers, _ := GetCluster(cluster)
+	sort.Slice(servers, func(i, j int) bool { return servers[i].Label < servers[j].Label })
+	var worker, miner, storage, none []string
+	var maps = make(map[string][]string, 0)
+	for _, v := range servers {
+		if _, ok := maps[v.Label]; !ok {
+			miner = []string{}
+			worker = []string{}
+			storage = []string{}
+			none = []string{}
+		}
+		switch v.Label {
+		case "lotus-worker":
+			worker = append(worker, v.PrivateIpAddress)
+			sort.Strings(worker)
+			maps[v.Label] = worker
+		case "lotus-storage":
+			storage = append(storage, v.PrivateIpAddress)
+			sort.Strings(storage)
+			maps[v.Label] = storage
+		case "lotus-miner":
+			miner = append(miner, v.PrivateIpAddress)
+			sort.Strings(miner)
+			maps[v.Label] = miner
+		default:
+			none = append(none, v.PrivateIpAddress)
+			sort.Strings(none)
+			maps[v.Label] = none
+		}
+	}
+	for k, v := range maps {
+		file.WriteString("[" + k + "]\n")
+		for _, ip := range v {
+			file.WriteString(ip + sudostr + "\n")
+		}
+	}
+	//
+	file.WriteString("[" + "addworker]\n")
+	for _, ip := range ips {
+		file.WriteString(ip + sudostr + "\n")
+	}
+	//
+	cmd := "scp.sh " + cluster + "-*miner" + tmpfile
+	ExecLocalShell(cmd)
+	cmd = "execshell.sh " + cluster + "-*miner" + " mv  " + tmpfile + utils.AnsibleHosts
+	ExecLocalShell(cmd)
 	return err
 }

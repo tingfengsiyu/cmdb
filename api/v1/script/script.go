@@ -1,54 +1,13 @@
 package script
 
 import (
-	"cmdb/middleware"
 	"cmdb/model"
-	"cmdb/utils"
 	"cmdb/utils/errmsg"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
 	"strings"
 )
-
-func OsInit(c *gin.Context) {
-	c.Copy()
-	monitorPrometheus := model.PrometheusServer()
-	for _, v := range monitorPrometheus {
-		go func(v model.ScanMonitorPrometheus) {
-			var user, passwd, sudopasswd string
-			if v.Label == "lotus-miner" || v.Label == "lotus-worker" {
-				user = utils.WorkerUser
-				passwd = utils.WorkerPass
-				sudopasswd = utils.WorkerPass
-			} else if v.Label == "lotus-storage" {
-				user = utils.StorageUser
-				passwd = utils.StoragePass
-				sudopasswd = utils.StorageSudoPass
-			} else {
-				user = utils.WorkerUser
-				passwd = utils.WorkerPass
-				sudopasswd = utils.WorkerPass
-			}
-			sshdConfig := "sudo sed -i 's@PasswordAuthentication no@PasswordAuthentication yes@g' /etc/ssh/sshd_config"
-			updatePass := fmt.Sprintf("sudo echo root:%s | chpasswd", utils.RootPass)
-			updatePubKey := fmt.Sprintf("sudo grep ops /root/.ssh/authorized_keys || sudo sed -i '1i %s' /root/.ssh/authorized_keys ", utils.RootPub)
-			outs, err := model.SshCommands(user, passwd, v.PrivateIpAddress+":"+"22", sudopasswd, sshdConfig, updatePass, updatePubKey)
-			if err != nil {
-				middleware.SugarLogger.Errorf("ssh commands  %s ", err)
-			}
-			middleware.SugarLogger.Infof("%s ", string(outs))
-		}(v)
-
-	}
-	c.JSON(
-		http.StatusOK, gin.H{
-			"status": 200,
-			"data":   "系统初始化中",
-		},
-	)
-}
 
 func UpdateHostName(c *gin.Context) {
 	c.Copy()
@@ -129,6 +88,7 @@ func BatchIp(c *gin.Context) {
 	for k, v := range ids {
 		model.UpdateClusterName(v, ips[k], batchip.TargetClusterName)
 	}
+	model.AppendAnsibleHosts(ips, batchip.TargetClusterName)
 	c.JSON(
 		http.StatusOK, gin.H{
 			"status": 200,
@@ -149,8 +109,8 @@ func StorageMount(c *gin.Context) {
 		return
 	}
 	c.Copy()
-	// batchStorage-mount.sh  sourceIP  sourceEndNumber storageStartIP storageEndNumber
-	cmd := "batchStorage-mount.sh  " + storagemount.InitStartIP + " " + storagemount.InitEndNumber + " " + storagemount.StorageStartIP + " " + storagemount.StorageStopnumber
+	// batchStorage-mount.sh  sourceIP  sourceEndNumber storageStartIP storageEndNumber operating
+	cmd := "batchStorage-mount.sh  " + storagemount.InitStartIP + " " + storagemount.InitEndNumber + " " + storagemount.StorageStartIP + " " + storagemount.StorageStopnumber + " " + storagemount.Operating
 	go model.ExecLocalShell(cmd)
 	c.JSON(
 		http.StatusOK, gin.H{
@@ -202,6 +162,26 @@ func GenerateAnsibleHosts(c *gin.Context) {
 	)
 }
 
+func GenerateClustersHosts(c *gin.Context) {
+	var code int
+	clusters, _ := model.GetClusters()
+	for _, v := range clusters {
+		var ips []string
+		if err := model.SyncTargetHosts(ips, v); err != nil {
+			code = 4003
+		} else {
+			code = 200
+		}
+	}
+
+	c.JSON(
+		http.StatusOK, gin.H{
+			"status":  code,
+			"message": errmsg.GetErrMsg(code),
+		},
+	)
+}
+
 func ScriptIpVerfiy(initNumber, initStartIp string) bool {
 	tmpEndNumber, _ := strconv.Atoi(initNumber)
 	sourceStartIpNumber, _ := strconv.Atoi(strings.Split(initStartIp, ".")[3])
@@ -214,4 +194,44 @@ func ScriptIpVerfiy(initNumber, initStartIp string) bool {
 	}
 	flag := model.BatchCheckClusterName(ipLists)
 	return flag
+}
+
+func UpdateCluster(c *gin.Context) {
+	var cluster = model.UpdateClusterStruct{}
+	if err := c.ShouldBindJSON(&cluster); err != nil {
+		c.String(400, "格式不符合要求", err.Error())
+		return
+	}
+	var ids = make([]int, 0)
+	var ips = make([]string, 0)
+	tmpEndNumber, _ := strconv.Atoi(cluster.SourceEndNumber)
+	sourceStartIpNumber, _ := strconv.Atoi(strings.Split(cluster.SourceStartIp, ".")[3])
+	t := strings.Split(cluster.SourceStartIp, ".")
+	startPrefix := t[0] + "." + t[1] + "." + t[2] + "."
+	for i := sourceStartIpNumber; i <= tmpEndNumber; i++ {
+		tmp := strconv.Itoa(i)
+		id := model.CheckClusterName(startPrefix + tmp)
+		if id <= 0 {
+			c.String(400, "集群ip不存在数据库，请确认后修改ip")
+			return
+		}
+		ids = append(ids, id)
+		ips = append(ips, startPrefix+strconv.Itoa(sourceStartIpNumber))
+		sourceStartIpNumber += 1
+	}
+
+	for k, v := range ids {
+		model.UpdateClusterName(v, ips[k], cluster.TargetClusterName)
+	}
+	model.GenerateAnsibleHosts()
+	model.AppendAnsibleHosts(ips, cluster.TargetClusterName)
+	//追加生成 ansible hosts  worker
+
+	c.JSON(
+		http.StatusOK, gin.H{
+			"status": 200,
+			"data":   "ok",
+		},
+	)
+
 }

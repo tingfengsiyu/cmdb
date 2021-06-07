@@ -24,11 +24,7 @@ var (
 	PrometheusConfDir string
 	WorkerUser        string
 	WorkerPass        string
-	StorageUser       string
-	StoragePass       string
-	StorageSudoPass   string
-	RootPass          string
-	RootPub           string
+	WorkerSudoPass    string
 	SR_File_Max_Bytes string
 	ScriptDir         string
 	AnsibleHosts      string
@@ -55,11 +51,7 @@ func LoadServer(file *ini.File) {
 	ErrorLogFile = file.Section("server").Key("ErrorLogFile").MustString("xxxx/cmdb")
 	WorkerUser = file.Section("server").Key("WorkerUser").MustString("xxxx/cmdb")
 	WorkerPass = file.Section("server").Key("WorkerPass").MustString("xxxx/cmdb")
-	StorageUser = file.Section("server").Key("StorageUser").MustString("xxxx/cmdb")
-	StoragePass = file.Section("server").Key("StoragePass").MustString("xxxx/cmdb")
-	StorageSudoPass = file.Section("server").Key("StorageSudoPass").MustString("xxxx/cmdb")
-	RootPass = file.Section("server").Key("RootPass").MustString("xxxx/cmdb")
-	RootPub = file.Section("server").Key("RootPub").MustString("xxxx/cmdb")
+	WorkerSudoPass = file.Section("server").Key("WorkerSudoPass").MustString("xxxx/cmdb")
 	SR_File_Max_Bytes = file.Section("server").Key("SR_File_Max_Bytes").MustString("")
 	ScriptDir = file.Section("server").Key("ScriptDir").MustString("")
 	AnsibleHosts = file.Section("server").Key("AnsibleHosts").MustString("")
