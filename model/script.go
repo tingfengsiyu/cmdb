@@ -15,6 +15,8 @@ import (
 	"time"
 )
 
+var sudostr = " ansible_ssh_user=" + utils.WorkerUser + " ansible_ssh_pass=" + utils.WorkerPass + " ansible_sudo_pass=" + utils.WorkerSudoPass
+
 type BatchIpStruct struct {
 	SourceStartIp     string `json:"source_start_ip" validate:"required,min=10,max=12" `
 	SourceGateway     string `json:"source_gateway" validate:"required,min=10,max=10" `
@@ -200,7 +202,6 @@ func GenerateAnsibleHosts() error {
 		servers = append(servers, server{v.PrivateIpAddress, v.Cluster + "-" + v.Label})
 	}
 	sort.Slice(servers, func(i, j int) bool { return servers[i].Role < servers[j].Role })
-
 	var worker, miner, storage, none []string
 	var maps = make(map[string][]string, 0)
 	for _, v := range servers {
@@ -210,6 +211,7 @@ func GenerateAnsibleHosts() error {
 			storage = []string{}
 			none = []string{}
 		}
+
 		switch v.Role {
 		case "lotus-worker":
 			worker = append(worker, v.PrivateIpAddress)
@@ -239,7 +241,7 @@ func GenerateAnsibleHosts() error {
 	for k, v := range maps {
 		file.WriteString("[" + k + "]\n")
 		for _, ip := range v {
-			file.WriteString(ip + "\n")
+			file.WriteString(ip + sudostr + "\n")
 		}
 	}
 	return err
@@ -254,7 +256,7 @@ func AppendAnsibleHosts(ips []string, cluster string) error {
 	defer file.Close()
 	file.WriteString("[" + cluster + "-tmpworker]\n")
 	for _, ip := range ips {
-		file.WriteString(ip + "\n")
+		file.WriteString(ip + sudostr + "\n")
 	}
 	//sync  target cluster ansible hosts
 	SyncTargetHosts(ips, cluster)
@@ -262,7 +264,6 @@ func AppendAnsibleHosts(ips []string, cluster string) error {
 }
 
 func SyncTargetHosts(ips []string, cluster string) error {
-	sudostr := " ansible_ssh_user=" + utils.WorkerUser + " ansible_ssh_pass=" + utils.WorkerPass + " ansible_sudo_pass=" + utils.WorkerSudoPass
 	tmpfile := utils.AnsibleHosts + ".tmp"
 	file, err := os.OpenFile(tmpfile, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0666)
 	if err != nil {
@@ -314,9 +315,9 @@ func SyncTargetHosts(ips []string, cluster string) error {
 		file.WriteString(ip + sudostr + "\n")
 	}
 	//
-	cmd := "scp.sh " + cluster + "-*miner" + tmpfile
+	cmd := "scp.sh " + cluster + "-*miner " + tmpfile
 	ExecLocalShell(cmd)
-	cmd = "execshell.sh " + cluster + "-*miner" + " mv  " + tmpfile + utils.AnsibleHosts
+	cmd = "execshell.sh " + cluster + "-*miner " + " mv  " + tmpfile + "  " + utils.AnsibleHosts
 	ExecLocalShell(cmd)
 	return err
 }

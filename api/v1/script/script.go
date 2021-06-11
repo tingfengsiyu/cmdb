@@ -69,9 +69,14 @@ func BatchIp(c *gin.Context) {
 	targetStartNumber, _ := strconv.Atoi(strings.Split(batchip.TargetStartIP, ".")[3])
 	t = strings.Split(batchip.TargetStartIP, ".")
 	targetPrefix := t[0] + "." + t[1] + "." + t[2] + "."
+
+	if id := model.CheckClusterName(batchip.TargetClusterName); id <= 0 {
+		c.String(400, "集群名不存在数据库，请确认后修改ip")
+		return
+	}
 	for i := sourceStartIpNumber; i <= tmpEndNumber; i++ {
 		tmp := strconv.Itoa(i)
-		id := model.CheckClusterName(startPrefix + tmp)
+		id := model.CheckClusterIp(startPrefix + tmp)
 		if id <= 0 {
 			c.String(400, "集群ip不存在数据库，请确认后修改ip")
 			return
@@ -80,7 +85,8 @@ func BatchIp(c *gin.Context) {
 		ips = append(ips, targetPrefix+strconv.Itoa(targetStartNumber))
 		targetStartNumber += 1
 	}
-
+	model.GenerateAnsibleHosts()
+	model.AppendAnsibleHosts(ips, batchip.TargetClusterName)
 	//sh batchip.sh sourceIP sourceGateway sourceEndNumber targetStartIP targetGateway
 	cmd := "batchip.sh " + batchip.SourceStartIp + " " + batchip.SourceGateway + " " +
 		batchip.SourceEndNumber + " " + batchip.TargetStartIP + " " + batchip.TargetGateway
@@ -88,7 +94,6 @@ func BatchIp(c *gin.Context) {
 	for k, v := range ids {
 		model.UpdateClusterName(v, ips[k], batchip.TargetClusterName)
 	}
-	model.AppendAnsibleHosts(ips, batchip.TargetClusterName)
 	c.JSON(
 		http.StatusOK, gin.H{
 			"status": 200,
@@ -192,7 +197,7 @@ func ScriptIpVerfiy(initNumber, initStartIp string) bool {
 		tmp := strconv.Itoa(i)
 		ipLists = append(ipLists, startPrefix+tmp)
 	}
-	flag := model.BatchCheckClusterName(ipLists)
+	flag := model.BatchCheckClusterIps(ipLists)
 	return flag
 }
 
@@ -208,9 +213,13 @@ func UpdateCluster(c *gin.Context) {
 	sourceStartIpNumber, _ := strconv.Atoi(strings.Split(cluster.SourceStartIp, ".")[3])
 	t := strings.Split(cluster.SourceStartIp, ".")
 	startPrefix := t[0] + "." + t[1] + "." + t[2] + "."
+	if id := model.CheckClusterName(cluster.TargetClusterName); id <= 0 {
+		c.String(400, "集群名不存在数据库，请确认后修改ip")
+		return
+	}
 	for i := sourceStartIpNumber; i <= tmpEndNumber; i++ {
 		tmp := strconv.Itoa(i)
-		id := model.CheckClusterName(startPrefix + tmp)
+		id := model.CheckClusterIp(startPrefix + tmp)
 		if id <= 0 {
 			c.String(400, "集群ip不存在数据库，请确认后修改ip")
 			return

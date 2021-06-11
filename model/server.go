@@ -267,13 +267,18 @@ func GenerateServerID(hostNames []string) []int {
 	return serverIds
 }
 
-func CheckClusterName(ipaddress string) int {
+func CheckClusterIp(ipaddress string) int {
 	var svc Server
 	db.Select("id").Where("private_ip_address = ?", ipaddress).First(&svc)
 	return svc.ID
 }
+func CheckClusterName(cluster string) int {
+	var svc Server
+	db.Select("id").Where("cluster = ?", cluster).First(&svc)
+	return svc.ID
+}
 
-func BatchCheckClusterName(ipaddress []string) bool {
+func BatchCheckClusterIps(ipaddress []string) bool {
 	var svc []Server
 	db.Select("private_ip_address").Where("private_ip_address IN ?", ipaddress).Find(&svc)
 	if len(svc) != len(ipaddress) {
