@@ -33,10 +33,10 @@ type Cabinet struct {
 //服务器表
 type Server struct {
 	ID               int    `gorm:"primary_key;auto_increment;int" json:"id"`
-	Name             string `gorm:"type:varchar(42);not null" json:"name" validate:"required,min=4"`
+	Name             string `gorm:"type:varchar(42);not null;unique" json:"name" validate:"required,min=4"`
 	Models           string `gorm:"type:varchar(30);not null" json:"models" validate:"required,min=4"`
 	Location         string `gorm:"type:varchar(30);not null" json:"location" validate:"required,min=4"`
-	PrivateIpAddress string `gorm:"type:varchar(30);not null" json:"private_ip_address" validate:"required,min=16"`
+	PrivateIpAddress string `gorm:"type:varchar(30);not null;unique" json:"private_ip_address" validate:"required,min=16"`
 	PublicIpAddress  string `gorm:"type:varchar(30);not null" json:"public_ip_address" `
 	Label            string `gorm:"type:varchar(30);not null" json:"label" binding:"required" validate:"required,min=4"`
 	Cluster          string `gorm:"type:varchar(30);not null" json:"cluster" binding:"required" validate:"required,min=4"`
@@ -47,7 +47,7 @@ type Server struct {
 	gorm.Model
 	User             string `gorm:"type:varchar(30);not null" json:"user" validate:"required,min=4"`
 	State            string `gorm:"type:varchar(10);not null" json:"state" validate:"required,min=4"`
-	ServerID         int    `gorm:"type:int;not null" json:"server_id" validate:"required,min=1"`
+	ServerID         int    `gorm:"type:int;not null;unique" json:"server_id" validate:"required,min=1"`
 	IDC_ID           int    `gorm:"type:int;not null" json:"idc_id" validate:"required,min=4"`
 	Cabinet_NumberID int    `gorm:"type:int;not null" json:"cabinet_number_id" validate:"required,min=4"`
 }
