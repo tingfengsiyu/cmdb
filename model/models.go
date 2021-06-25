@@ -139,3 +139,29 @@ type AwsServer struct {
 	Owner            string    `gorm:"type:varchar(30);not null" json:"owner"`
 	Cloud            string    `gorm:"type:varchar(30);not null" json:"cloud"`
 }
+type Cluster struct {
+	ID      int    `gorm:"primary_key;auto_increment" json:"id"`
+	Cluster string `gorm:"type:varchar(30);not null" json:"cluster" binding:"required" validate:"required,min=4"`
+}
+
+type ScanServers struct {
+	ID               int    `gorm:"primary_key;auto_increment;int" json:"id"`
+	Name             string `gorm:"type:varchar(42);not null" json:"name" validate:"required,min=4"`
+	Models           string `gorm:"type:varchar(30);not null" json:"models" validate:"required,min=4"`
+	Location         string `gorm:"type:varchar(30);not null" json:"location" validate:"required,min=4"`
+	PrivateIpAddress string `gorm:"type:varchar(30);not null" json:"private_ip_address" validate:"required,min=16"`
+	PublicIpAddress  string `gorm:"type:varchar(30);not null" json:"public_ip_address" `
+	Label            string `gorm:"type:varchar(30);not null" json:"label" validate:"required,min=4"`
+	Cluster          string `gorm:"type:varchar(30);not null" json:"cluster" validate:"required,min=4"`
+	LabelIpAddress   string `gorm:"type:varchar(30);not null" json:"label_ip_address" validate:"required,min=4"`
+	Cpu              string `gorm:"type:varchar(30);not null" json:"cpu" validate:"required,min=3"`
+	Memory           string `gorm:"type:varchar(30);not null" json:"memory" validate:"required,min=3"`
+	Disk             string `gorm:"type:varchar(30);not null" json:"disk" validate:"required,min=3"`
+	User             string `gorm:"type:varchar(30);not null" json:"user" validate:"required,min=4"`
+	State            string `gorm:"type:varchar(10);not null" json:"state" validate:"required,min=4"`
+	IDC_ID           int    `gorm:"type:int;not null" json:"idc_id" validate:"required,min=4"`
+	Cabinet_NumberID int    `gorm:"type:int;not null" json:"cabinet_number_id" validate:"required,min=4"`
+	City             string `gorm:"type:varchar(30);not null" json:"city" validate:"required,min=4"`
+	IDC_Name         string `gorm:"type:varchar(30);not null" json:"idc_name" validate:"required,min=4"`
+	Cabinet_Number   string `gorm:"type:varchar(30);not null" json:"cabinet_number"`
+}

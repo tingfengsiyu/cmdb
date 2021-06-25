@@ -15,6 +15,7 @@ func InitRouter() {
 	r := gin.New()
 	r.Use(middleware.Log())
 	r.Use(gin.Recovery())
+	r.Use(middleware.Cors())
 	router := r.Group("api/v1/idc")
 
 	router.Use(middleware.JwtToken())
@@ -70,6 +71,6 @@ func InitRouter() {
 	//{
 	//	//k.GET("listpod",k8s.InitConfig)
 	//}
-	r.GET("api/v1/user/login", user.Login)
+	r.POST("api/v1/login", user.Login)
 	_ = r.Run(utils.HttpPort)
 }

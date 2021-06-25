@@ -7,6 +7,7 @@ require (
 	github.com/aliyun/alibaba-cloud-sdk-go v1.61.973
 	github.com/aws/aws-sdk-go v1.37.24
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/gin-contrib/cors v1.3.1
 	github.com/gin-gonic/gin v1.6.3
 	github.com/go-playground/locales v0.13.0
 	github.com/go-playground/universal-translator v0.17.0

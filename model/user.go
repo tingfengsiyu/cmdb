@@ -42,7 +42,7 @@ func CreateUser(data *User) int {
 
 func DeleteUser(id int) int {
 	var user User
-	err := db.Debug().Unscoped().Where("id=?", id).Delete(&user).Error
+	err := db.Where("id=?", id).Delete(&user).Error
 	if err != nil {
 		return errmsg.ERROR
 	}

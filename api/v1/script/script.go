@@ -85,8 +85,7 @@ func BatchIp(c *gin.Context) {
 		ips = append(ips, targetPrefix+strconv.Itoa(targetStartNumber))
 		targetStartNumber += 1
 	}
-	model.GenerateAnsibleHosts()
-	model.AppendAnsibleHosts(ips, batchip.TargetClusterName)
+
 	//sh batchip.sh sourceIP sourceGateway sourceEndNumber targetStartIP targetGateway
 	cmd := "batchip.sh " + batchip.SourceStartIp + " " + batchip.SourceGateway + " " +
 		batchip.SourceEndNumber + " " + batchip.TargetStartIP + " " + batchip.TargetGateway
@@ -94,6 +93,8 @@ func BatchIp(c *gin.Context) {
 	for k, v := range ids {
 		model.UpdateClusterName(v, ips[k], batchip.TargetClusterName)
 	}
+	model.GenerateAnsibleHosts()
+	model.AppendAnsibleHosts(ips, batchip.TargetClusterName)
 	c.JSON(
 		http.StatusOK, gin.H{
 			"status": 200,
@@ -172,7 +173,7 @@ func GenerateClustersHosts(c *gin.Context) {
 	clusters, _ := model.GetClusters()
 	for _, v := range clusters {
 		var ips []string
-		if err := model.SyncTargetHosts(ips, v); err != nil {
+		if err := model.SyncTargetHosts(ips, v.Cluster); err != nil {
 			code = 4003
 		} else {
 			code = 200
