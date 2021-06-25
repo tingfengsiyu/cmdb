@@ -26,7 +26,7 @@
       </a-row>
 
       <a-table
-          rowKey="ID"
+          rowKey="id"
           :columns="columns"
           :pagination="pagination"
           :dataSource="Artlist"
