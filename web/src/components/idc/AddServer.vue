@@ -9,7 +9,7 @@
           :rules="serverInfoRules"
           :hideRequiredMark="true"
       >
-        <a-row gutter="24">
+        <a-row :gutter="24">
           <a-col :span="10">
             <a-form-model-item label="服务器名称" prop="title">
               <a-input style="width:300px" v-model="serverInfo.name"></a-input>
@@ -37,7 +37,7 @@
             </a-form-model-item>
           </a-col>
           <a-col :span="4">
-            <a-form-model-item label="磁盘" prop="title">
+            <a-form-model-item label="磁盘" >
               <a-input style="width:300px" v-model="serverInfo.disk"></a-input>
             </a-form-model-item>
             <a-form-model-item label="所属用户" prop="title">
@@ -86,7 +86,9 @@ export default {
   props: ['id'],
   data() {
     return {
-      serverInfo: [{
+      serverInfo:
+      {"asset":{
+      "servers":[{
         id: 0,
        name:'',
         models:'',
@@ -101,17 +103,21 @@ export default {
         disk:'',
         user:'',
         state:'',
-        city:'',
-        idc_name:'',
-        cabinet_number:''
+        // city:'',
+        // idc_name:'',
+        // cabinet_number:''
       }],
+          "idcs":{
+            "idc_name": [''],
+            "city":[''],
+            "cabinet_number":['']
+          }}},
       Catelist: [],
       upUrl: Url + 'upload',
       headers: {},
       fileList: [],
       serverInfoRules: {
-        title: [{ required: true, message: '请输入服务器标题', trigger: 'blur' }],
-        cid: [{ required: true, message: '请选择服务器分类', trigger: 'change' }],
+        title: [{ required: false, message: '请输入服务器标题', trigger: 'blur' }],
         desc: [
           { required: true, message: '请输入服务器描述', trigger: 'blur' },
           { max: 120, message: '描述最多可写120个字符', trigger: 'change' },
@@ -150,12 +156,12 @@ export default {
       this.$refs.serverInfoRef.validate(async (valid) => {
         if (!valid) return this.$message.error('参数验证未通过，请按要求录入服务器内容')
         if (id === 0) {
-          const { data: res } = await this.$http.post('article/add', this.serverInfo)
+          const { data: res } = await this.$http.post('idc/batchcreateserver', this.serverInfo)
           if (res.status !== 200) return this.$message.error(res.message)
           this.$router.push('/artlist')
           this.$message.success('添加服务器成功')
         } else {
-          const { data: res } = await this.$http.put(`article/${id}`, this.serverInfo)
+          const { data: res } = await this.$http.post(`idc/batchupdateserver/`, this.serverInfo)
           if (res.status !== 200) return this.$message.error(res.message)
 
           this.$router.push('/artlist')

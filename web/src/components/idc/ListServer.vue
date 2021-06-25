@@ -188,6 +188,7 @@ export default {
       if (res.status !== 200) return this.$message.error(res.message)
       this.ClusterList = res.data
       this.pagination.total = res.total
+      console.log(res.total)
     },
     // 更改分页
     handleTableChange(pagination) {

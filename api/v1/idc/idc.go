@@ -76,6 +76,7 @@ func Networktopology(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"status":  code,
 		"data":    data,
+		"total":   len(data),
 		"message": errmsg.GetErrMsg(code),
 	})
 }

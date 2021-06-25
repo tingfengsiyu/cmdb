@@ -79,6 +79,7 @@ func GetCluster(c *gin.Context) {
 		http.StatusOK, gin.H{
 			"status": code,
 			"data":   data,
+			"total":  len(data),
 		},
 	)
 }
