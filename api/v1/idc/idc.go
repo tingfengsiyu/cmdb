@@ -175,7 +175,7 @@ func ExportCsv(c *gin.Context) {
 }
 
 func Records(c *gin.Context) {
-	action := c.Param("id")
+	action := c.Query("action")
 	data, err := model.GetRecords(action)
 	var code int
 	if err != nil {
