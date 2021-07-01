@@ -7,8 +7,14 @@ const Admin = () => import(/* webpackChunkName: "Admin" */ '../views/Admin.vue')
 const Index = () => import(/* webpackChunkName: "Index" */ '../components/admin/Index')
  const AddServer = () => import(/* webpackChunkName: "AddServer" */ '../components/idc/AddServer')
  const ListServer = () => import(/* webpackChunkName: "ListServer" */ '../components/idc/ListServer')
- const EditServer = () => import(/* webpackChunkName: "EditServer" */ '../components/idc/EditServer')
+ const EditServer = () => import(/* webpackChunkName: "EditServer" */ '../components/idc/AddServer')
 const UserList = () => import(/* webpackChunkName: "UserList" */ '../components/user/UserList')
+const OpsRecords = () => import(/* webpackChunkName: "UserList" */ '../components/ops/OpsRecords')
+const UpdateCluster = () => import(/* webpackChunkName: "UserList" */ '../components/ops/UpdateCluster')
+const OsInit = () => import(/* webpackChunkName: "UserList" */ '../components/ops/OsInit')
+const BatchIp = () => import(/* webpackChunkName: "UserList" */ '../components/ops/BatchIp')
+const InstallMonitorAgent = () => import(/* webpackChunkName: "UserList" */ '../components/ops/InstallMonitorAgent')
+const StorageMount = () => import(/* webpackChunkName: "UserList" */ '../components/ops/StorageMount')
 
 // 路由重复点击捕获错误
 const originalPush = VueRouter.prototype.push
@@ -51,7 +57,7 @@ const routes = [
         }
       },
       {
-        path: 'editServer/:id',
+        path: 'addServer/:id',
         component: EditServer,
         meta: {
           title: '编辑服务器'
@@ -65,13 +71,56 @@ const routes = [
           title: '服务器列表'
         }
       },
-      // {
-      //   path: 'catelist',
-      //   component: CateList,
-      //   meta: {
-      //     title: '分类列表'
-      //   }
-      // },
+      {
+        path: 'opsRecords',
+        component: OpsRecords,
+        meta: {
+          title: '操作记录列表'
+        }
+      },
+      {
+        path: 'updateCluster',
+        component: UpdateCluster,
+        meta: {
+          title: '操作记录列表'
+        }
+      },
+      {
+        path: 'osInit',
+        component: OsInit,
+        meta: {
+          title: '系统初始化'
+        }
+      },
+      {
+        path: 'batchIp',
+        component: BatchIp,
+        meta: {
+          title: '修改ip'
+        }
+      },
+      {
+        path: 'installAgent',
+        component: InstallMonitorAgent,
+        meta: {
+          title: '安装集群监控agent'
+        }
+      },
+      {
+        path: 'StorageMount',
+        component: StorageMount,
+        meta: {
+          title: '挂载机器存储'
+        }
+      },
+      {
+        path: 'updateCluster',
+        component: UpdateCluster,
+        meta: {
+          title: '更新机器所属集群'
+        }
+      },
+
       {
         path: 'userlist',
         component: UserList,

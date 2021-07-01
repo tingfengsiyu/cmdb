@@ -1,11 +1,5 @@
 <template>
   <a-layout class="container">
-    <a-layout-sider>
-<!--      <div class="log">-->
-<!--        <span>cmdb</span>-->
-<!--      </div>-->
-
-    </a-layout-sider>
     <Nav></Nav>
     <a-layout>
       <a-layout-header class="headerBtn">

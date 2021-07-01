@@ -32,8 +32,9 @@ func AddServer(c *gin.Context) {
 
 func BatchAddServers(c *gin.Context) {
 	var code int
-	var hostNames = make([]string, 0)
-	assets := model.Assets{}
+	var hostNames, idcNames, cabinetNumbers, citys []string
+	assets := []model.ScanServers{}
+	servers := []model.Server{}
 	if err := c.ShouldBindJSON(&assets); err != nil {
 		c.JSON(
 			http.StatusOK, gin.H{
@@ -42,14 +43,30 @@ func BatchAddServers(c *gin.Context) {
 			},
 		)
 	}
-	for _, v := range assets.Asset.Servers {
+	for _, v := range assets {
 		hostNames = append(hostNames, v.Name)
+		idcNames = append(idcNames, v.IDC_Name)
+		cabinetNumbers = append(cabinetNumbers, v.Cabinet_Number)
+		citys = append(citys, v.City)
+		servers = append(servers, model.Server{
+			Name:             v.Name,
+			Models:           v.Models,
+			Location:         v.Location,
+			PrivateIpAddress: v.PrivateIpAddress,
+			PublicIpAddress:  v.PublicIpAddress,
+			Label:            v.Label,
+			Cluster:          v.Cluster,
+			LabelIpAddress:   v.LabelIpAddress,
+			Cpu:              v.Cpu,
+			Memory:           v.Memory,
+			Disk:             v.Disk,
+			User:             v.User,
+			State:            v.State,
+		})
 	}
-	idcNames := assets.Asset.Idcs.Idc_name
-	cabinetNumbers := assets.Asset.Idcs.Cabinet_Number
-	citys := assets.Asset.Idcs.City
+
 	code = model.BatchCheckServer(hostNames)
-	code = addServerVerify(code, assets.Asset.Servers, idcNames, cabinetNumbers, hostNames, citys)
+	code = addServerVerify(code, servers, idcNames, cabinetNumbers, hostNames, citys)
 	c.JSON(
 		http.StatusOK, gin.H{
 			"status":  code,

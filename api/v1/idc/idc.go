@@ -7,6 +7,7 @@ import (
 	"cmdb/utils"
 	"cmdb/utils/errmsg"
 	"encoding/csv"
+	"fmt"
 	"github.com/360EntSecGroup-Skylar/excelize"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -65,12 +66,12 @@ func GetIDCs(c *gin.Context) {
 }
 
 func Networktopology(c *gin.Context) {
-	id, _ := strconv.Atoi(c.Query("id"))
+	id, _ := strconv.Atoi(c.Param("id"))
+	fmt.Println(c.Param("id"))
 	name := c.Query("name")
 	cabinet_number := c.Query("cabinet_number")
 	user := c.Query("user")
 	cluster := c.Query("cluster")
-
 	private_ip_address := c.Query("private_ip_address")
 	data, code := model.NetworkTopology(id, name, cabinet_number, user, cluster, private_ip_address)
 	c.JSON(http.StatusOK, gin.H{
@@ -171,4 +172,22 @@ func ExportCsv(c *gin.Context) {
 	c.Writer.Header().Set("Content-Disposition", "attachment;filename=data.csv")
 	// 设置文件类型以及输出数据
 	c.Data(http.StatusOK, "text/csv", bytesBuffer.Bytes())
+}
+
+func Records(c *gin.Context) {
+	action := c.Param("id")
+	data, err := model.GetRecords(action)
+	var code int
+	if err != nil {
+		code = 400
+	} else {
+		code = 200
+	}
+	c.JSON(
+		http.StatusOK, gin.H{
+			"status": code,
+			"data":   data,
+			"total":  len(data),
+		},
+	)
 }

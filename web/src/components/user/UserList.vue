@@ -283,7 +283,6 @@ export default {
       this.pagination.total = res.total
     },
     // 更改分页
-    //handleTableChange(pagination, filters, sorter) {
     handleTableChange(pagination) {
       var pager = { ...this.pagination }
       pager.current = pagination.current

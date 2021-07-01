@@ -1,7 +1,7 @@
 <template>
   <div>
     <a-card>
-      <h3>{{id? '编辑服务器':'新增服务器'}}</h3>
+      <h3>{{ id ? '编辑服务器':'新增服务器'}}</h3>
 
       <a-form-model
           :model="serverInfo"
@@ -61,16 +61,12 @@
 
           </a-col>
         </a-row>
-<!--        <a-form-model-item label="服务器内容" prop="content">-->
-<!--          <Editor v-model="serverInfo.content"></Editor>-->
-<!--        </a-form-model-item>-->
-
         <a-form-model-item>
           <a-button
               type="danger"
               style="margin-right:15px"
               @click.once="artOk(serverInfo.id)"
-          >{{serverInfo.id?'更新':"提交"}}</a-button>
+          >{{serverInfo.id ? '更新':"提交"}}</a-button>
           <a-button type="primary" @click.once="addCancel">取消</a-button>
         </a-form-model-item>
       </a-form-model>
@@ -80,55 +76,43 @@
 
 <script>
 import { Url } from '../../plugin/http'
-//import Editor from '../editor/index'
 export default {
-  //components: { Editor },
   props: ['id'],
   data() {
     return {
-      serverInfo:
-      {"asset":{
-      "servers":[{
+      serverInfo:{
         id: 0,
-       name:'',
-        models:'',
-        location:'',
-        private_ip_address:'',
-        public_ip_address:'',
-        label:'',
-        cluster:'',
-        label_ip_address:'',
-        cpu:'',
-        memory:'',
-        disk:'',
-        user:'',
-        state:'',
-        // city:'',
-        // idc_name:'',
-        // cabinet_number:''
-      }],
-          "idcs":{
-            "idc_name": [''],
-            "city":[''],
-            "cabinet_number":['']
-          }}},
+        name: '',
+        models: '',
+        location: '',
+        private_ip_address: '',
+        public_ip_address: '',
+        label: '',
+        cluster: '',
+        label_ip_address: '',
+        cpu: '',
+        memory: '',
+        disk: '',
+        user: '',
+        state: '',
+        city: '',
+        idc_name: '',
+        cabinet_number: ''
+      },
       Catelist: [],
       upUrl: Url + 'upload',
       headers: {},
       fileList: [],
       serverInfoRules: {
-        title: [{ required: false, message: '请输入服务器标题', trigger: 'blur' }],
+        title: [{ required: true, message: '请输入服务器信息', trigger: 'blur' }],
         desc: [
           { required: true, message: '请输入服务器描述', trigger: 'blur' },
           { max: 120, message: '描述最多可写120个字符', trigger: 'change' },
         ],
-        img: [{ required: true, message: '请选择服务器缩略图', trigger: 'blur' }],
-        content: [{ required: true, message: '请输入服务器内容', trigger: 'blur' }],
       },
     }
   },
   created() {
-    this.getCateList()
     this.headers = { Authorization: `Bearer ${window.sessionStorage.getItem('token')}` }
     if (this.id) {
       this.getserverInfo(this.id)
@@ -137,34 +121,32 @@ export default {
   methods: {
     // 查询服务器信息
     async getserverInfo(id) {
-      const { data: res } = await this.$http.get(`article/info/${id}`)
-      if (res.status !== 200) return this.$message.error(res.message)
-      this.serverInfo = res.data
-      this.serverInfo.id = res.data.ID
-    },
-    // 获取分类列表
-    async getCateList() {
-      const { data: res } = await this.$http.get('idc/getclusters')
-      if (res.status !== 200) return this.$message.error(res.message)
-      this.Catelist = res.data
-    },
-    // 选择分类
-    cateChange(value) {
-      this.serverInfo.cid = value
+        let { data: res }  = await this.$http.get(`idc/getserver/${id}`)
+        if (res.status !== 200) return this.$message.error(res.message)
+        let data = {}
+        if(Array.isArray(res.data)){
+          data = res.data[0]
+        }else{
+          data = res.data
+        }
+        this.serverInfo = data
+        this.serverInfo.id = data.id
     },
     artOk(id) {
       this.$refs.serverInfoRef.validate(async (valid) => {
         if (!valid) return this.$message.error('参数验证未通过，请按要求录入服务器内容')
         if (id === 0) {
-          const { data: res } = await this.$http.post('idc/batchcreateserver', this.serverInfo)
+          const { data: res } = await this.$http.post('idc/batchcreateserver', JSON.stringify([this.serverInfo]))
           if (res.status !== 200) return this.$message.error(res.message)
-          this.$router.push('/artlist')
+          this.$router.push('/listserver')
           this.$message.success('添加服务器成功')
         } else {
-          const { data: res } = await this.$http.post(`idc/batchupdateserver/`, this.serverInfo)
+          const { data: res } = await this.$http.post(`idc/batchupdateserver`, JSON.stringify([this.serverInfo]))
+          //console.log(JSON.stringify([this.serverInfo]))
+          console.log(this.serverInfo)
           if (res.status !== 200) return this.$message.error(res.message)
 
-          this.$router.push('/artlist')
+          this.$router.push('/listserver')
           this.$message.success('更新服务器成功')
         }
       })

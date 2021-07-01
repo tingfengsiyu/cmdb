@@ -16,7 +16,8 @@ import {
     Modal,
     Select,
     Switch,
-    Upload
+    Upload,
+    InputNumber
 } from 'ant-design-vue'
 
 message.config({
@@ -44,3 +45,4 @@ Vue.use(Modal)
 Vue.use(Select)
 Vue.use(Switch)
 Vue.use(Upload)
+Vue.use(InputNumber)

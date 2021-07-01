@@ -34,13 +34,13 @@ func InitRouter() {
 		router.PUT("updatecluster", script.UpdateCluster)
 		router.POST("updatehostname", script.UpdateHostName)
 		router.POST("writeprometheus", script.WritePrometheus)
-		router.GET("installmointoragent", script.InstallMointorAgent)
-		router.GET("generateansiblehosts", script.GenerateAnsibleHosts)
-		router.GET("generateclustershosts", script.GenerateClustersHosts)
+		router.POST("installmointoragent", script.InstallMointorAgent)
+		router.POST("generateansiblehosts", script.GenerateAnsibleHosts)
+		router.POST("generateclustershosts", script.GenerateClustersHosts)
 
 		router.GET("getservers", idc.GetServers)
 		router.GET("getclusters", idc.GetClusters)
-		router.GET("getserver/:id", idc.GetServer)
+		router.GET("getserver/:id", idc.Networktopology)
 		router.GET("getcluster", idc.GetCluster)
 		router.GET("getuser", idc.GetUser)
 		router.GET("getidcserver", idc.GetIdcServers)
@@ -48,6 +48,9 @@ func InitRouter() {
 		router.DELETE("deleteserver/:id", idc.DeleteServer)
 		router.PUT("editservers/:id", idc.UpdateServer)
 		router.GET("getnetworktopology", idc.Networktopology)
+
+		router.GET("opsrecords", idc.Records)
+		router.GET("opsrecord/:id", idc.Records)
 
 		router.POST("uploadexcel", idc.UploadExcel)
 		router.GET("exportcsv", idc.ExportCsv)

@@ -17,42 +17,6 @@ import (
 
 var sudostr = " ansible_ssh_user=" + utils.WorkerUser + " ansible_ssh_pass=" + utils.WorkerPass + " ansible_sudo_pass=" + utils.WorkerSudoPass
 
-type BatchIpStruct struct {
-	SourceStartIp     string `json:"source_start_ip" validate:"required,min=10,max=12" `
-	SourceGateway     string `json:"source_gateway" validate:"required,min=10,max=10" `
-	SourceEndNumber   string `json:"source_end_number" validate:"required,gte=2"  `
-	TargetStartIP     string `json:"target_start_ip" validate:"required,min=10,max=12" `
-	TargetGateway     string `json:"target_gateway" validate:"required,min=10,max=10" `
-	TargetClusterName string `json:"target_cluster_name" validate:"required,min=4,max=50"`
-}
-
-type UpdateClusterStruct struct {
-	SourceStartIp     string `json:"source_start_ip" validate:"required,min=10,max=12" `
-	SourceEndNumber   string `json:"source_end_number" validate:"required,gte=2"  `
-	TargetClusterName string `json:"target_cluster_name" validate:"required,min=4,max=50"`
-}
-
-type OsInitStruct struct {
-	InitUser     string `json:"init_user" validate:"required,min=10,max=10" `
-	InitPass     string `json:"init_pass" validate:"required,min=4,max=50"`
-	Role         string `json:"role" validate:"required,min=4,max=10"`
-	StorageMount StorageMountStruct
-}
-
-type StorageMountStruct struct {
-	InitStartIP       string `json:"init_start_ip" validate:"required,min=10,max=12" `
-	InitEndNumber     string `json:"init_end_number" validate:"required,gte=2" `
-	StorageStartIP    string `json:"storage_start_ip" validate:"required,min=4,max=50"`
-	StorageStopnumber string `json:"storage_stop_number" validate:"required,min=1,max=3"`
-	Operating         string `json:"operating" validate:"required,min=1,max=3"`
-}
-
-type ansibleStruct struct {
-	PrivateIpAddress string `json:"private_ip_address"`
-	Label            string `json:"label"`
-	Cluster          string `json:"cluster"`
-}
-
 type Connection struct {
 	*ssh.Client
 	password string
@@ -156,14 +120,17 @@ func UpdateHostName() {
 	}
 }
 
-func ExecLocalShell(command string) {
+func ExecLocalShell(id int, command string) {
 	cmd := exec.Command("/bin/bash", "-c", utils.ScriptDir+command)
 	output, err := cmd.Output()
+	status := 1
 	if err != nil {
 		fmt.Println("Exec shell error !!!", time.Now(), err.Error())
+		status = 0
 	}
 	fmt.Println(string(output))
 	fmt.Println("Exec shell success !!!", time.Now())
+	UpdateRecords(id, status, string(output), err.Error())
 	/*
 		cmd := exec.Command("/bin/bash", "-c", command)
 
@@ -316,8 +283,8 @@ func SyncTargetHosts(ips []string, cluster string) error {
 	}
 	//
 	cmd := "scp.sh " + cluster + "-*miner " + tmpfile
-	ExecLocalShell(cmd)
+	ExecLocalShell(0, cmd)
 	cmd = "execshell.sh " + cluster + "-*miner " + " mv  " + tmpfile + "  " + utils.AnsibleHosts
-	ExecLocalShell(cmd)
+	ExecLocalShell(0, cmd)
 	return err
 }

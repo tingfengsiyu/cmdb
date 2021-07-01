@@ -5,10 +5,6 @@
     </div>
 
     <a-menu theme="dark" mode="inline" @click="goToPage">
-      <a-menu-item key="index">
-        <a-icon type="dashboard"></a-icon>
-        <span>仪表盘</span>
-      </a-menu-item>
 
       <a-sub-menu>
         <span slot="title">
@@ -47,13 +43,29 @@
           <a-icon type="file" />
           <span>运维操作</span>
         </span>
-        <a-menu-item key="addart">
+        <a-menu-item key="OpsRecords">
           <a-icon type="form" />
           <span>操作记录</span>
         </a-menu-item>
-        <a-menu-item key="artlist">
+        <a-menu-item key="osinit">
           <a-icon type="snippets" />
           <span>系统初始化</span>
+        </a-menu-item>
+        <a-menu-item key="batchip">
+          <a-icon type="snippets" />
+          <span>修改ip</span>
+        </a-menu-item>
+        <a-menu-item key="storagemount">
+          <a-icon type="snippets" />
+          <span>挂载存储</span>
+        </a-menu-item>
+        <a-menu-item key="installagent">
+          <a-icon type="snippets" />
+          <span>安装监控agent</span>
+        </a-menu-item>
+        <a-menu-item key="UpdateCluster">
+          <a-icon type="snippets" />
+          <span>修改机器所属集群</span>
         </a-menu-item>
       </a-sub-menu>
     </a-menu>

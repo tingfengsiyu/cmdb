@@ -44,8 +44,13 @@ func ShellInit(c *gin.Context) {
 	}
 	c.Copy()
 	//osinit.sh  initStartIP initStopNumber  initUser initPass  Role  storageStartIP  storageStopnumber
-
-	go model.ExecLocalShell(cmd)
+	tmp := model.OpsRecords{
+		Object: shellinit.StorageMount.InitStartIP + "-" + shellinit.StorageMount.InitEndNumber + "初始化用户名：" + shellinit.InitUser + "初始化密码" + shellinit.InitPass +
+			"角色：" + shellinit.Role + "存储ip" + shellinit.StorageMount.StorageStartIP + "-" + shellinit.StorageMount.StorageStopnumber,
+		Action: "系统初始化",
+	}
+	id := model.InsertRecords(tmp)
+	go model.ExecLocalShell(id, cmd)
 	c.JSON(
 		http.StatusOK, gin.H{
 			"status": 200,
@@ -85,11 +90,15 @@ func BatchIp(c *gin.Context) {
 		ips = append(ips, targetPrefix+strconv.Itoa(targetStartNumber))
 		targetStartNumber += 1
 	}
-
+	tmp := model.OpsRecords{
+		Object: "源操作：" + batchip.SourceStartIp + "-" + batchip.SourceEndNumber + "源网关" + batchip.SourceGateway + "\n目标操作：" + batchip.TargetStartIP + "目标网关" + batchip.TargetGateway + "目标集群" + batchip.TargetClusterName,
+		Action: "修改ip",
+	}
+	id := model.InsertRecords(tmp)
 	//sh batchip.sh sourceIP sourceGateway sourceEndNumber targetStartIP targetGateway
 	cmd := "batchip.sh " + batchip.SourceStartIp + " " + batchip.SourceGateway + " " +
 		batchip.SourceEndNumber + " " + batchip.TargetStartIP + " " + batchip.TargetGateway
-	go model.ExecLocalShell(cmd)
+	go model.ExecLocalShell(id, cmd)
 	for k, v := range ids {
 		model.UpdateClusterName(v, ips[k], batchip.TargetClusterName)
 	}
@@ -114,10 +123,15 @@ func StorageMount(c *gin.Context) {
 		c.String(400, "集群ip不存在数据库,请确认ip已录入")
 		return
 	}
+	tmp := model.OpsRecords{
+		Object: "worker: " + storagemount.InitStartIP + "-" + storagemount.InitEndNumber + "存储: " + storagemount.StorageStartIP + "-" + storagemount.StorageStopnumber + "worker操作" + storagemount.Operating,
+		Action: "挂载存储",
+	}
+	id := model.InsertRecords(tmp)
 	c.Copy()
 	// batchStorage-mount.sh  sourceIP  sourceEndNumber storageStartIP storageEndNumber operating
 	cmd := "batchStorage-mount.sh  " + storagemount.InitStartIP + " " + storagemount.InitEndNumber + " " + storagemount.StorageStartIP + " " + storagemount.StorageStopnumber + " " + storagemount.Operating
-	go model.ExecLocalShell(cmd)
+	go model.ExecLocalShell(id, cmd)
 	c.JSON(
 		http.StatusOK, gin.H{
 			"status": 200,
@@ -143,8 +157,14 @@ func InstallMointorAgent(c *gin.Context) {
 		c.String(400, "clustername不能为空")
 		return
 	}
+	tmp := model.OpsRecords{
+		Object: "cluster: " + clustername,
+		Action: "安装监控agent",
+	}
+	id := model.InsertRecords(tmp)
 	c.Copy()
-	go model.InstallAgent(clustername)
+
+	go model.InstallAgent(id, clustername)
 	c.JSON(
 		http.StatusOK, gin.H{
 			"status":  200,
@@ -233,6 +253,13 @@ func UpdateCluster(c *gin.Context) {
 	for k, v := range ids {
 		model.UpdateClusterName(v, ips[k], cluster.TargetClusterName)
 	}
+	tmp := model.OpsRecords{
+		Object: "源操作：" + cluster.SourceStartIp + "-" + cluster.SourceEndNumber + "\n目标集群: " + cluster.TargetClusterName,
+		Action: "修改机器所属集群",
+		State:  1,
+	}
+	model.InsertRecords(tmp)
+
 	model.GenerateAnsibleHosts()
 	model.AppendAnsibleHosts(ips, cluster.TargetClusterName)
 	//追加生成 ansible hosts  worker

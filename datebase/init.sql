@@ -61,3 +61,18 @@ TABLES;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
 -- Dump completed on 2021-03-25 13:13:10
+
+CREATE TABLE `ops_records` (
+                               `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+                               `created_at` datetime(3) DEFAULT NULL,
+                               `updated_at` datetime(3) DEFAULT NULL,
+                               `deleted_at` datetime(3) DEFAULT NULL,
+                               `user` varchar(30) NOT NULL,
+                               `object` varchar(1000) DEFAULT NULL,
+                               `action` varchar(30) NOT NULL,
+                               `state` bigint(20) NOT NULL DEFAULT '2',
+                               `success` varchar(1000) NOT NULL,
+                               `error` varchar(1000) NOT NULL,
+                               PRIMARY KEY (`id`),
+                               KEY `idx_ops_records_deleted_at` (`deleted_at`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8

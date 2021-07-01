@@ -83,9 +83,17 @@ func GetIDCs(pageSize int, pageNum int) ([]Idc, int64) {
 //根据机房名查询name和机柜号查询对应服务器名中对应的idc和机柜号和所属用户，形成网络拓扑
 func NetworkTopology(id int, name, cabinet_number, user, cluster, private_ip_address string) ([]ScanServers, int) {
 	var scan []ScanServers
-	err := db.Raw("select distinct server.id, city,idc_name,cabinet_number,name,models,location,private_ip_address,public_ip_address,label,cluster,label_ip_address,cpu,"+
-		"memory,disk,user,state,server.idc_id,server.cabinet_number_id from  server  left join cabinet on  cabinet.cabinet_number_id=server.cabinet_number_id "+
-		"left join idc on idc.idc_id =server.idc_id where private_ip_address like ? and  cabinet_number like ? and  user like ? and  cluster  like ? ", private_ip_address+"%", cabinet_number+"%", user+"%", cluster+"%").Scan(&scan).Error
+	if id != 0 {
+		err = db.Raw("select distinct server.id, city,idc_name,cabinet_number,name,models,location,private_ip_address,public_ip_address,label,cluster,label_ip_address,cpu,"+
+			"memory,disk,user,state,server.idc_id,server.cabinet_number_id from  server  left join cabinet on  cabinet.cabinet_number_id=server.cabinet_number_id "+
+			"left join idc on idc.idc_id =server.idc_id where private_ip_address like ? and  cabinet_number like ? and  user like ? and  cluster  like ?  and   server.id=?", private_ip_address+"%", cabinet_number+"%", user+"%", cluster+"%", id).Scan(&scan).Error
+
+	} else {
+		err = db.Raw("select distinct server.id, city,idc_name,cabinet_number,name,models,location,private_ip_address,public_ip_address,label,cluster,label_ip_address,cpu,"+
+			"memory,disk,user,state,server.idc_id,server.cabinet_number_id from  server  left join cabinet on  cabinet.cabinet_number_id=server.cabinet_number_id "+
+			"left join idc on idc.idc_id =server.idc_id where private_ip_address like ? and  cabinet_number like ? and  user like ? and  cluster  like ?  ", private_ip_address+"%", cabinet_number+"%", user+"%", cluster+"%").Scan(&scan).Error
+
+	}
 	if err != nil {
 		middleware.SugarLogger.Errorf("查询错误%s", err)
 	}
@@ -194,6 +202,32 @@ func InsertCabinetID(cabinetNumber string, idcId, cabinetNumberId int) {
 		//if cabinet_number_id == 0 {
 		db.Model(&cabinet).Create(cabinets)
 		//}
+	}
+
+}
+
+func GetRecords(action string) ([]OpsRecords, error) {
+	var records []OpsRecords
+	if action != "" {
+		err = db.Where("action LIKE ?", action+"%").Find(&records).Error
+	} else {
+		err = db.Find(&records).Error
+	}
+	return records, err
+}
+
+func InsertRecords(records OpsRecords) int {
+	var count int64
+	if err := db.Create(&records).Error; err != nil {
+		middleware.SugarLogger.Errorf("插入错误", err)
+	}
+	db.Model(&User{}).Count(&count)
+
+	return int(count)
+}
+func UpdateRecords(id, state int, success, error string) {
+	if err := db.Debug().Raw("update ops_records set state = ? ,success =? ,error = ?   where id = ? ", state, success, error, id).Error; err != nil {
+		middleware.SugarLogger.Errorf("sql update error", err)
 	}
 
 }

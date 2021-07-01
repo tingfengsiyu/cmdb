@@ -11,10 +11,27 @@
               @search="getServerList"
           />
         </a-col>
-        <a-col :span="4">
+        <a-col :span="3">
           <a-button type="primary" @click="$router.push('/addserver')">新增</a-button>
         </a-col>
+        <a-col :span="2">
 
+          <a-button type="primary" @click="batchaddServer = true">批量新增</a-button>
+          <!-- 批量新增区域 -->
+          <a-modal
+              closable
+              title="批量新增服务器"
+              :visible="batchaddServer"
+              width="60%"
+              @cancel="addServersCancel"
+              destroyOnClose
+          >
+            <a-upload name="file"  :headers="headers" :action=upUrl accept=".xlsx" method="post" @change="upChange" >
+              <a-button> <a-icon type="upload" /> Click to Upload </a-button>
+            </a-upload>
+          </a-modal>
+
+        </a-col>
         <a-col :span="3">
           <a-select placeholder="请选择集群" style="width:200px" @change="ClusterChange">
             <a-select-option v-for="item in ClusterList" :key="item.id" :value="item.cluster">{{item.cluster}}</a-select-option>
@@ -57,7 +74,7 @@
 </template>
 
 <script>
-//import moment from 'moment'
+import { Url } from '../../plugin/http'
 
 const columns = [
   {
@@ -67,16 +84,6 @@ const columns = [
     key: 'id',
     align: 'center',
   },
-  // {
-  //   title: '更新日期',
-  //   dataIndex: 'UpdatedAt',
-  //   width: '10%',
-  //   key: 'UpdatedAt',
-  //   align: 'center',
-  //   customRender: (val) => {
-  //     return val ? moment(val).format('YYYY年MM月DD日 HH:mm') : '暂无'
-  //   },
-  // },
   {
     title: '主机名',
     dataIndex: 'name',
@@ -140,6 +147,7 @@ const columns = [
     align: 'center',
     scopedSlots: { customRender: 'action' },
   },
+
 ]
 
 export default {
@@ -153,6 +161,7 @@ export default {
         showTotal: (total) => `共${total}条`,
       },
       Artlist: [],
+      upUrl: Url + 'idc/uploadexcel',
       ClusterList: [],
       columns,
       queryParam: {
@@ -160,6 +169,10 @@ export default {
         private_ip_address: '',
         pagesize: 5,
         pagenum: 1,
+      },
+      batchaddServer: false,
+      headers: {
+       Authorization: `Bearer ${window.sessionStorage.getItem('token')}`
       },
     }
   },
@@ -182,13 +195,13 @@ export default {
       this.Artlist = res.data
       this.pagination.total = res.total
     },
-    // 获取机器集群集群
+    // 获取机器集群
     async getClusterList() {
       const { data: res } = await this.$http.get('idc/getclusters')
       if (res.status !== 200) return this.$message.error(res.message)
       this.ClusterList = res.data
       this.pagination.total = res.total
-      console.log(res.total)
+      // console.log(res.total)
     },
     // 更改分页
     handleTableChange(pagination) {
@@ -226,16 +239,31 @@ export default {
       this.getClusterServer(value)
     },
     async getClusterServer(value) {
-      const { data: res } = await this.$http.get(`idc/getnetworktopology/`, {
+      const { data: res } = await this.$http.get(`idc/getnetworktopology`, {
         params: {
           pagesize: this.queryParam.pagesize,
           pagenum: this.queryParam.pagenum,
-          cluster: value },
+          cluster: value
+        },
       })
       if (res.status !== 200) return this.$message.error(res.message)
       this.Artlist = res.data
       this.pagination.total = res.total
     },
+    // 取消批量导入服务器
+    addServersCancel() {
+      this.batchaddServer = false
+      this.$message.info('批量新增服务器已取消')
+    },
+
+    upChange(info) {
+      if (info.file.response.status === 200 ) {
+        this.$message.success(`${info.file.name} ${info.file.response.message}`);
+      } else {
+        this.$message.error(`${info.file.name} ${info.file.response.message}`);
+      }
+    },
+
   },
 }
 </script>
@@ -245,13 +273,5 @@ export default {
   display: flex;
   justify-content: center;
 }
-.ArtImg {
-  height: 100%;
-  width: 100%;
-}
 
-.ArtImg img {
-  width: 100px;
-  height: 80px;
-}
 </style>

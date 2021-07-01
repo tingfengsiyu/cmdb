@@ -165,3 +165,49 @@ type ScanServers struct {
 	IDC_Name         string `gorm:"type:varchar(30);not null" json:"idc_name" validate:"required,min=4"`
 	Cabinet_Number   string `gorm:"type:varchar(30);not null" json:"cabinet_number"`
 }
+
+type OpsRecords struct {
+	gorm.Model
+	User    string `gorm:"type:varchar(30);not null" json:"user"`
+	Object  string `gorm:"type:varchar(30);not null" json:"object"`
+	Action  string `gorm:"type:varchar(30);not null" json:"action"`
+	State   int    `gorm:"type:int;not null;default:2" json:"state"`
+	Success string `gorm:"type:varchar(1000);not null" json:"success"`
+	Error   string `gorm:"type:varchar(1000);not null" json:"error"`
+}
+
+type BatchIpStruct struct {
+	SourceStartIp     string `json:"source_start_ip" validate:"required,min=10,max=12" `
+	SourceGateway     string `json:"source_gateway" validate:"required,min=10,max=10" `
+	SourceEndNumber   string `json:"source_end_number" validate:"required,gte=2"  `
+	TargetStartIP     string `json:"target_start_ip" validate:"required,min=10,max=12" `
+	TargetGateway     string `json:"target_gateway" validate:"required,min=10,max=10" `
+	TargetClusterName string `json:"target_cluster_name" validate:"required,min=4,max=50"`
+}
+
+type UpdateClusterStruct struct {
+	SourceStartIp     string `json:"source_start_ip" validate:"required,min=10,max=12" `
+	SourceEndNumber   string `json:"source_end_number" validate:"required,gte=2"  `
+	TargetClusterName string `json:"target_cluster_name" validate:"required,min=4,max=50"`
+}
+
+type OsInitStruct struct {
+	InitUser     string `json:"init_user" validate:"required,min=10,max=10" `
+	InitPass     string `json:"init_pass" validate:"required,min=4,max=50"`
+	Role         string `json:"role" validate:"required,min=4,max=10"`
+	StorageMount StorageMountStruct
+}
+
+type StorageMountStruct struct {
+	InitStartIP       string `json:"init_start_ip" validate:"required,min=10,max=12" `
+	InitEndNumber     string `json:"init_end_number" validate:"required,gte=2" `
+	StorageStartIP    string `json:"storage_start_ip" validate:"required,min=4,max=50"`
+	StorageStopnumber string `json:"storage_stop_number" validate:"required,min=1,max=3"`
+	Operating         string `json:"operating" validate:"required,min=1,max=3"`
+}
+
+type ansibleStruct struct {
+	PrivateIpAddress string `json:"private_ip_address"`
+	Label            string `json:"label"`
+	Cluster          string `json:"cluster"`
+}
