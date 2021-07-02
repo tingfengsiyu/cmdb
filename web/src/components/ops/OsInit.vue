@@ -15,16 +15,13 @@
               <a-input style="width:300px" v-model="ops.init_start_ip"></a-input>
             </a-form-model-item>
             <a-form-model-item label="结束ip位" prop="init_end_number">
-              <a-input style="width:300px" v-model="ops.init_end_number"></a-input>
+              <a-input style="width:300px" v-model.number="ops.init_end_number"></a-input>
             </a-form-model-item>
-            <!--            <a-form-model-item label="源结束ip位" prop="source_end_number">-->
-            <!--              <a-input-number id="inputNumber"    :min="1" :max="255"  v-model="ops.source_end_number"/>-->
-            <!--            </a-form-model-item>-->
             <a-form-model-item label="存储开始ip" prop="storage_start_ip">
               <a-input style="width:300px" v-model="ops.storage_start_ip"></a-input>
             </a-form-model-item>
             <a-form-model-item label="存储结束位" prop="storage_stop_number">
-              <a-input style="width:300px" v-model="ops.storage_stop_number"></a-input>
+              <a-input style="width:300px" v-model.number="ops.storage_stop_number"></a-input>
             </a-form-model-item>
             <a-form-model-item label="初始化用户名" prop="init_user">
               <a-input style="width:300px" v-model="ops.init_user"></a-input>
@@ -54,6 +51,19 @@
 <script>
 export default {
   data() {
+    let checkNumber = (rule, value, callback) => {
+      if (!value) {
+        return callback(new Error('请输入'));
+      }else if (!Number.isInteger(value)) {
+        callback(new Error('请输入整数'));
+      } else {
+        if (value < 0||value > 255) {
+          callback(new Error('输入必须在0-255'));
+        } else {
+          callback();
+        }
+      }
+    };
     return {
       ops:{
         StorageMount: {
@@ -69,9 +79,9 @@ export default {
       ClusterList: [],
       opsRules: {
         init_start_ip: [{ required: true, message: '挂载机器开始ip', trigger: 'blur' }],
-        init_end_number: [{ required: true, message: '挂载机器结束ip位,值为1-253', trigger: 'blur' }],
+        init_end_number: [{ validator: checkNumber, trigger: 'change' }],
         storage_start_ip: [{ required: true, message: '存储机器开始ip', trigger: 'blur' }],
-        storage_stop_number: [{ required: true, message: '挂载机器结束ip位,值为1-253', trigger: 'blur' }],
+        storage_stop_number: [{ validator: checkNumber, trigger: 'change' }],
         init_user: [{ required: true, message: '初始化用户名', trigger: 'blur'}],
         init_pass: [{ required: true, message: '初始化用户名的密码', trigger: 'blur'}],
         role: [{ required: true, message: '机器角色 lotus-worker 或 lotus-storage ', trigger: 'blur'}],
@@ -86,7 +96,10 @@ export default {
     artOk() {
       this.$refs.opsRef.validate(async (valid) => {
         if (!valid) return this.$message.error('参数验证未通过，请按要求录入内容')
-        const { data: res } = await this.$http.put('idc/shellosinit', JSON.stringify(this.ops))
+        let ops = { ...this.ops }
+        ops.init_end_number=String(ops.init_end_number)
+        ops.source_end_number=String(ops.source_end_number)
+        const { data: res } = await this.$http.put('idc/shellosinit', JSON.stringify(ops))
         if (res.status !== 200) return this.$message.error(res.message)
         this.$router.push('/OpsRecords')
         this.$message.success(res.message)

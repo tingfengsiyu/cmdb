@@ -13,6 +13,12 @@ import (
 func InitRouter() {
 	gin.SetMode(utils.AppMode)
 	r := gin.New()
+
+	r.LoadHTMLGlob("web/dist/index.html")
+	r.Static("static", "web/dist/static")
+	r.GET("/", func(c *gin.Context) {
+		c.HTML(200, "index.html", nil)
+	})
 	r.Use(middleware.Log())
 	r.Use(gin.Recovery())
 	r.Use(middleware.Cors())
@@ -34,7 +40,7 @@ func InitRouter() {
 		router.PUT("updatecluster", script.UpdateCluster)
 		router.POST("updatehostname", script.UpdateHostName)
 		router.POST("writeprometheus", script.WritePrometheus)
-		router.POST("installmointoragent", script.InstallMointorAgent)
+		router.GET("installmointoragent", script.InstallMointorAgent)
 		router.POST("generateansiblehosts", script.GenerateAnsibleHosts)
 		router.POST("generateclustershosts", script.GenerateClustersHosts)
 

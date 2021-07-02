@@ -217,19 +217,17 @@ func GetRecords(action string) ([]OpsRecords, error) {
 }
 
 func InsertRecords(records OpsRecords) int {
-	var count int64
 	if err := db.Create(&records).Error; err != nil {
 		middleware.SugarLogger.Errorf("插入错误", err)
 	}
-	db.Model(&User{}).Count(&count)
 
-	return int(count)
+	db.Select("id").Where("object = ?", records.Object).First(&records)
+	return int(records.ID)
 }
 func UpdateRecords(id, state int, success, error string) {
-	if err := db.Debug().Raw("update ops_records set state = ? ,success =? ,error = ?   where id = ? ", state, success, error, id).Error; err != nil {
+	if err := db.Table("ops_records").Where("id =?", id).Updates(map[string]interface{}{"success": success, "error": error, "state": state}).Error; err != nil {
 		middleware.SugarLogger.Errorf("sql update error", err)
 	}
-
 }
 
 /*

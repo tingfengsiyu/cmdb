@@ -20,6 +20,18 @@
 
           @change="handleTableChange"
       >
+<!--        <span slot="state" slot-scope="state">{{ state == 1 ? '成功': '失败' }}</span>-->
+        <span slot="state" slot-scope="state">
+           <div v-if="state===1">
+             成功
+    </div>
+           <div v-else-if="state===0">
+         失败
+     </div>
+          <div v-else>
+         执行中
+     </div>
+        </span>
       </a-table>
     </a-card>
 
@@ -52,6 +64,7 @@ const columns = [
     dataIndex: 'state',
     width: '5%',
     align: 'center',
+    scopedSlots: { customRender: 'state' },
   },
   {
     title: '成功记录',

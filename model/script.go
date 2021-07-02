@@ -12,7 +12,6 @@ import (
 	"os/exec"
 	"sort"
 	"strings"
-	"time"
 )
 
 var sudostr = " ansible_ssh_user=" + utils.WorkerUser + " ansible_ssh_pass=" + utils.WorkerPass + " ansible_sudo_pass=" + utils.WorkerSudoPass
@@ -125,31 +124,9 @@ func ExecLocalShell(id int, command string) {
 	output, err := cmd.Output()
 	status := 1
 	if err != nil {
-		fmt.Println("Exec shell error !!!", time.Now(), err.Error())
 		status = 0
 	}
-	fmt.Println(string(output))
-	fmt.Println("Exec shell success !!!", time.Now())
 	UpdateRecords(id, status, string(output), err.Error())
-	/*
-		cmd := exec.Command("/bin/bash", "-c", command)
-
-		stdin, _ := cmd.StdinPipe()
-		stdout, _ := cmd.StdoutPipe()
-
-		if err := cmd.Start(); err != nil {
-			fmt.Println("Execute failed when Star`21wt:" + err.Error())
-			return
-		}
-
-		stdin.Close()
-
-		out_bytes, _ := ioutil.ReadAll(stdout)
-		stdout.Close()
-
-		fmt.Println(string(out_bytes))
-	*/
-
 }
 
 func GenerateAnsibleHosts() error {
