@@ -17,8 +17,10 @@
             <a-form-model-item has-feedback label="结束ip位" prop="source_end_number">
               <a-input style="width:300px" v-model.number="ops.source_end_number" />
             </a-form-model-item>
-            <a-form-model-item label="目标集群" prop="target_cluster_name">
-              <a-input style="width:300px" v-model="ops.target_cluster_name"></a-input>
+            <a-form-model-item label="目标集群" >
+              <a-select placeholder="请选择集群"  style="width:200px" @change="handleChange" >
+                <a-select-option v-for="item in ClusterList" :key="item.id" :value="item.cluster" >{{item.cluster}}</a-select-option>
+              </a-select>
             </a-form-model-item>
           </a-col>
         </a-row>
@@ -57,7 +59,7 @@ export default {
         source_end_number: '',
         target_cluster_name: '',
       },
-      Catelist: [],
+      ClusterList: [],
       headers: {},
       fileList: [],
       opsRules: {
@@ -69,11 +71,21 @@ export default {
   },
   created() {
     this.headers = { Authorization: `Bearer ${window.sessionStorage.getItem('token')}` }
-    if (this.id) {
-      this.getops(this.id)
-    }
+    this.getClusterList()
   },
   methods: {
+    //获取集群
+    async getClusterList() {
+      const { data: res } = await this.$http.get('idc/getclusters')
+      if (res.status !== 200) return this.$message.error(res.message)
+      this.ClusterList = res.data
+    },
+
+    handleChange(value) {
+      this.ops.target_cluster_name = value;
+      console.log(this.ops)
+    },
+
     // 提交任务
     artOk() {
       this.$refs.opsRef.validate(async (valid) => {

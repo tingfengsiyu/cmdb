@@ -5,12 +5,9 @@
 
       <a-form-model
           ref="opsRef"
+          :model="queryParam"
           :hideRequiredMark="true"
       >
-        <a-select placeholder="请选择集群"  style="width:200px" @change="artOk" >
-          <a-select-option v-for="item in ClusterList" :key="item.id" :value="item.cluster" >{{item.cluster}}</a-select-option>
-        </a-select>
-
         <a-row :gutter="24">
             <a-form-model-item label="集群名" >
               <a-select placeholder="请选择集群"  style="width:200px" @change="handleChange" >
@@ -55,22 +52,17 @@ export default {
 
     handleChange(value) {
       this.queryParam.cluster = value;
-      this.$http.get(`idc/installmointoragent`, {
-            params: {
-              clustername: value
-            },})
     },
     // 提交任务
     artOk() {
       this.$refs.opsRef.validate(async (valid) => {
         if (!valid) return this.$message.error('参数验证未通过，请按要求录入内容')
-        const { data: res } = await this.$http.post(`idc/installagent`, {
+        const { data: res } = await this.$http.get(`idc/installmointoragent`, {
           params: {
             clustername: this.queryParam.cluster
           },
 
         })
-          console.log(this.queryParam.cluster)
           if (res.status !== 200) return this.$message.error(res.message)
           this.$router.push('/OpsRecords')
           this.$message.success(res.message)

@@ -27,9 +27,8 @@
               <a-input style="width:300px" v-model="ops.target_gateway"></a-input>
             </a-form-model-item>
             <a-form-model-item label="选择集群" prop="target_cluster_name">
-              <a-input style="width:300px" v-model="ops.target_cluster_name"></a-input>
-              <a-select placeholder="请选择集群" style="width:300px">
-                <a-select-option v-for="item in ClusterList" :key="item.id" :value="item.cluster">{{item.cluster}}</a-select-option>
+              <a-select placeholder="请选择集群"  style="width:200px" @change="handleChange" >
+                <a-select-option v-for="item in ClusterList" :key="item.id" :value="item.cluster" >{{item.cluster}}</a-select-option>
               </a-select>
             </a-form-model-item>
 
@@ -87,6 +86,7 @@ export default {
   },
   created() {
     this.headers = { Authorization: `Bearer ${window.sessionStorage.getItem('token')}` }
+    this.getClusterList()
   },
   methods: {
     // 获取机器集群
@@ -94,7 +94,10 @@ export default {
       const { data: res } = await this.$http.get('idc/getclusters')
       if (res.status !== 200) return this.$message.error(res.message)
       this.ClusterList = res.data
-      console.log(res.total)
+    },
+    handleChange(value) {
+      this.ops.target_cluster_name = value;
+      console.log(this.ops)
     },
     // 提交任务
     artOk() {

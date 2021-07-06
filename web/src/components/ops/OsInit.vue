@@ -11,17 +11,17 @@
       >
         <a-row :gutter="24">
           <a-col :span="10">
-            <a-form-model-item label="机器开始ip" prop="init_start_ip">
-              <a-input style="width:300px" v-model="ops.init_start_ip"></a-input>
+            <a-form-model-item label="机器开始ip" prop="StorageMount.init_start_ip" :rules="opsRules.init_start_ip">
+              <a-input style="width:300px" v-model="ops.StorageMount.init_start_ip"></a-input>
             </a-form-model-item>
-            <a-form-model-item label="结束ip位" prop="init_end_number">
-              <a-input style="width:300px" v-model.number="ops.init_end_number"></a-input>
+            <a-form-model-item label="结束ip位" prop="StorageMount.init_end_number" :rules="opsRules.init_end_number">
+              <a-input style="width:300px" v-model.number="ops.StorageMount.init_end_number"></a-input>
             </a-form-model-item>
-            <a-form-model-item label="存储开始ip" prop="storage_start_ip">
-              <a-input style="width:300px" v-model="ops.storage_start_ip"></a-input>
+            <a-form-model-item label="存储开始ip" prop="StorageMount.storage_start_ip" :rules="opsRules.storage_start_ip">
+              <a-input style="width:300px" v-model="ops.StorageMount.storage_start_ip"></a-input>
             </a-form-model-item>
-            <a-form-model-item label="存储结束位" prop="storage_stop_number">
-              <a-input style="width:300px" v-model.number="ops.storage_stop_number"></a-input>
+            <a-form-model-item label="存储结束位" prop="StorageMount.storage_stop_number" :rules="opsRules.storage_stop_number">
+              <a-input style="width:300px" v-model.number="ops.StorageMount.storage_stop_number"></a-input>
             </a-form-model-item>
             <a-form-model-item label="初始化用户名" prop="init_user">
               <a-input style="width:300px" v-model="ops.init_user"></a-input>
@@ -53,11 +53,11 @@ export default {
   data() {
     let checkNumber = (rule, value, callback) => {
       if (!value) {
-        return callback(new Error('请输入'));
+        return callback(new Error('请输入整数值'));
       }else if (!Number.isInteger(value)) {
         callback(new Error('请输入整数'));
       } else {
-        if (value < 0||value > 255) {
+        if (value < 1||value > 255) {
           callback(new Error('输入必须在0-255'));
         } else {
           callback();
@@ -97,9 +97,9 @@ export default {
       this.$refs.opsRef.validate(async (valid) => {
         if (!valid) return this.$message.error('参数验证未通过，请按要求录入内容')
         let ops = { ...this.ops }
-        ops.init_end_number=String(ops.init_end_number)
-        ops.source_end_number=String(ops.source_end_number)
-        const { data: res } = await this.$http.put('idc/shellosinit', JSON.stringify(ops))
+        ops.StorageMount.init_end_number=String(ops.StorageMount.init_end_number)
+        ops.StorageMount.storage_stop_number=String(ops.StorageMount.storage_stop_number)
+        const { data: res } = await this.$http.post('idc/shellosinit', JSON.stringify(ops))
         if (res.status !== 200) return this.$message.error(res.message)
         this.$router.push('/OpsRecords')
         this.$message.success(res.message)

@@ -17,9 +17,6 @@
             <a-form-model-item label="结束ip位" prop="init_end_number">
               <a-input style="width:300px" v-model.number="ops.init_end_number"></a-input>
             </a-form-model-item>
-            <!--            <a-form-model-item label="源结束ip位" prop="source_end_number">-->
-            <!--              <a-input-number id="inputNumber"    :min="1" :max="255"  v-model="ops.source_end_number"/>-->
-            <!--            </a-form-model-item>-->
             <a-form-model-item label="存储开始ip" prop="storage_start_ip">
               <a-input style="width:300px" v-model="ops.storage_start_ip"></a-input>
             </a-form-model-item>
@@ -93,6 +90,7 @@ export default {
         let ops = { ...this.ops }
         ops.init_end_number=String(ops.init_end_number)
         ops.storage_stop_number=String(ops.storage_stop_number)
+        console.log(ops)
         const { data: res } = await this.$http.post('idc/storagemount', JSON.stringify(ops))
         if (res.status !== 200) return this.$message.error(res.message)
         this.$router.push('/OpsRecords')

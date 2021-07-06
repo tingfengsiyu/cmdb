@@ -33,7 +33,7 @@
 
         </a-col>
         <a-col :span="3">
-          <a-select placeholder="请选择集群" style="width:200px" @change="ClusterChange">
+          <a-select placeholder="请选择集群" style="width:250px" @change="ClusterChange">
             <a-select-option v-for="item in ClusterList" :key="item.id" :value="item.cluster">{{item.cluster}}</a-select-option>
           </a-select>
         </a-col>

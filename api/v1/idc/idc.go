@@ -7,7 +7,6 @@ import (
 	"cmdb/utils"
 	"cmdb/utils/errmsg"
 	"encoding/csv"
-	"fmt"
 	"github.com/360EntSecGroup-Skylar/excelize"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -67,7 +66,6 @@ func GetIDCs(c *gin.Context) {
 
 func Networktopology(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
-	fmt.Println(c.Param("id"))
 	name := c.Query("name")
 	cabinet_number := c.Query("cabinet_number")
 	user := c.Query("user")

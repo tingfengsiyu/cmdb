@@ -149,11 +149,6 @@ func InsertPrometheusID(server_id int) {
 	db.Model(&prometheustarget).Create(prometheus)
 }
 
-func InstallAgent(id int, clustername string) {
-	cmd := "monitoragent.sh " + clustername
-	ExecLocalShell(id, cmd)
-}
-
 func ReadJsonfile(filePtr *os.File, targets string) (int, error) {
 	var read = make([]PrometheusTarget, 0)
 	decode := json.NewDecoder(filePtr)

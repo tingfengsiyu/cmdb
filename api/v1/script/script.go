@@ -125,7 +125,7 @@ func StorageMount(c *gin.Context) {
 		return
 	}
 	tmp := model.OpsRecords{
-		Object: "worker: " + storagemount.InitStartIP + "-" + storagemount.InitEndNumber + "存储: " + storagemount.StorageStartIP + "-" + storagemount.StorageStopnumber + "worker操作: " + storagemount.Operating,
+		Object: "worker: " + storagemount.InitStartIP + "-" + storagemount.InitEndNumber + " 存储: " + storagemount.StorageStartIP + "-" + storagemount.StorageStopnumber + " worker操作: " + storagemount.Operating,
 		Action: "挂载存储",
 	}
 	id := model.InsertRecords(tmp)
@@ -165,7 +165,7 @@ func InstallMointorAgent(c *gin.Context) {
 	id := model.InsertRecords(tmp)
 	c.Copy()
 
-	go model.InstallAgent(id, clustername)
+	go model.ExecLocalShell(id, "monitoragent.sh "+clustername)
 	c.JSON(
 		http.StatusOK, gin.H{
 			"status":  200,

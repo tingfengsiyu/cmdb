@@ -155,7 +155,7 @@ func EditServer(id int, data *Server) int {
 
 func DeleteServer(id int) int {
 	var servers Server
-	err = db.Debug().Unscoped().Where("id = ? ", id).Delete(&servers).Error
+	err = db.Unscoped().Where("id = ? ", id).Delete(&servers).Error
 	if err != nil {
 		middleware.SugarLogger.Errorf("删除错误%s", err)
 		return errmsg.ERROR

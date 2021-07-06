@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"cmdb/middleware"
 	"cmdb/utils"
+	"context"
 	"fmt"
 	"golang.org/x/crypto/ssh"
 	"io"
@@ -12,6 +13,7 @@ import (
 	"os/exec"
 	"sort"
 	"strings"
+	"time"
 )
 
 var sudostr = " ansible_ssh_user=" + utils.WorkerUser + " ansible_ssh_pass=" + utils.WorkerPass + " ansible_sudo_pass=" + utils.WorkerSudoPass
@@ -120,13 +122,33 @@ func UpdateHostName() {
 }
 
 func ExecLocalShell(id int, command string) {
-	cmd := exec.Command("/bin/bash", "-c", utils.ScriptDir+command)
-	output, err := cmd.Output()
+	timeout := 2
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeout+1)*time.Hour)
+	defer cancel()
+
+	cmdarray := []string{"-c", fmt.Sprintf("%s ", utils.ScriptDir+command)}
+	cmd := exec.CommandContext(ctx, "bash", cmdarray...)
+	out, err := cmd.CombinedOutput()
 	status := 1
 	if err != nil {
 		status = 0
 	}
-	UpdateRecords(id, status, string(output), err.Error())
+	if ctx.Err() != nil {
+		status = 0
+	}
+	//fmt.Printf("ctx.Err : [%v]\n", ctx.Err())
+	//fmt.Printf("error   : [%v]\n", err)
+	//fmt.Printf("out     : [%s]\n", string(out))
+	success := string(out)[len(string(out))-500 : len(string(out))-1]
+	errors := err.Error()
+	if len(success) == 0 {
+		success = "success"
+	}
+	if len(errors) == 0 {
+		errors = "error"
+	}
+	fmt.Println(success, status)
+	//UpdateRecords(id, status, &success,&errors)
 }
 
 func GenerateAnsibleHosts() error {

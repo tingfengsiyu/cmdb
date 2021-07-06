@@ -19,6 +19,7 @@ func InitRouter() {
 	r.GET("/", func(c *gin.Context) {
 		c.HTML(200, "index.html", nil)
 	})
+	r.StaticFile("/favicon.ico", "web/dist/favicon.ico")
 	r.Use(middleware.Log())
 	r.Use(gin.Recovery())
 	r.Use(middleware.Cors())

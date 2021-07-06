@@ -3,6 +3,7 @@ package model
 import (
 	"cmdb/middleware"
 	"cmdb/utils/errmsg"
+	"fmt"
 	"gorm.io/gorm"
 )
 
@@ -85,12 +86,12 @@ func NetworkTopology(id int, name, cabinet_number, user, cluster, private_ip_add
 	var scan []ScanServers
 	if id != 0 {
 		err = db.Raw("select distinct server.id, city,idc_name,cabinet_number,name,models,location,private_ip_address,public_ip_address,label,cluster,label_ip_address,cpu,"+
-			"memory,disk,user,state,server.idc_id,server.cabinet_number_id from  server  left join cabinet on  cabinet.cabinet_number_id=server.cabinet_number_id "+
+			"memory,disk,user,state from  server  left join cabinet on  cabinet.cabinet_number_id=server.cabinet_number_id "+
 			"left join idc on idc.idc_id =server.idc_id where private_ip_address like ? and  cabinet_number like ? and  user like ? and  cluster  like ?  and   server.id=?", private_ip_address+"%", cabinet_number+"%", user+"%", cluster+"%", id).Scan(&scan).Error
 
 	} else {
 		err = db.Raw("select distinct server.id, city,idc_name,cabinet_number,name,models,location,private_ip_address,public_ip_address,label,cluster,label_ip_address,cpu,"+
-			"memory,disk,user,state,server.idc_id,server.cabinet_number_id from  server  left join cabinet on  cabinet.cabinet_number_id=server.cabinet_number_id "+
+			"memory,disk,user,state from  server  left join cabinet on  cabinet.cabinet_number_id=server.cabinet_number_id "+
 			"left join idc on idc.idc_id =server.idc_id where private_ip_address like ? and  cabinet_number like ? and  user like ? and  cluster  like ?  ", private_ip_address+"%", cabinet_number+"%", user+"%", cluster+"%").Scan(&scan).Error
 
 	}
@@ -224,10 +225,11 @@ func InsertRecords(records OpsRecords) int {
 	db.Select("id").Where("object = ?", records.Object).First(&records)
 	return int(records.ID)
 }
-func UpdateRecords(id, state int, success, error string) {
-	if err := db.Table("ops_records").Where("id =?", id).Updates(map[string]interface{}{"success": success, "error": error, "state": state}).Error; err != nil {
-		middleware.SugarLogger.Errorf("sql update error", err)
-	}
+func UpdateRecords(id, state int, success, errors *string) {
+	fmt.Println(id, state, *success, *errors)
+	//if err := db.Debug().Table("ops_records").Where("id =?", id).Updates(map[string]interface{}{"success": *success, "error": *errors, "state": state}).Error; err != nil {
+	//	middleware.SugarLogger.Errorf("sql update error", err)
+	//}
 }
 
 /*
