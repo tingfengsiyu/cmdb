@@ -125,13 +125,16 @@ func ExecLocalShell(id int, command string) {
 	timeout := 2
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeout+1)*time.Hour)
 	defer cancel()
-
 	cmdarray := []string{"-c", fmt.Sprintf("%s ", utils.ScriptDir+command)}
 	cmd := exec.CommandContext(ctx, "bash", cmdarray...)
 	out, err := cmd.CombinedOutput()
+	var cmd_err string
 	status := 1
 	if err != nil {
 		status = 0
+		cmd_err = err.Error()
+	} else {
+		cmd_err = "no error"
 	}
 	if ctx.Err() != nil {
 		status = 0
@@ -139,16 +142,9 @@ func ExecLocalShell(id int, command string) {
 	//fmt.Printf("ctx.Err : [%v]\n", ctx.Err())
 	//fmt.Printf("error   : [%v]\n", err)
 	//fmt.Printf("out     : [%s]\n", string(out))
-	success := string(out)[len(string(out))-500 : len(string(out))-1]
-	errors := err.Error()
-	if len(success) == 0 {
-		success = "success"
-	}
-	if len(errors) == 0 {
-		errors = "error"
-	}
-	fmt.Println(success, status)
-	//UpdateRecords(id, status, &success,&errors)
+	success := string(out)
+	UpdateRecords(id, status, success, cmd_err)
+
 }
 
 func GenerateAnsibleHosts() error {

@@ -67,7 +67,7 @@ export default {
         if (!valid) return this.$message.error('输入非法数据，请重新输入')
         const { data: res } = await this.$http.post('login', this.formdata)
         if (res.status != 200) return this.$message.error(res.message)
-        window.sessionStorage.setItem('token', res.token)
+        localStorage.setItem('token', res.token)
         this.$router.push('/listserver')
       })
     },

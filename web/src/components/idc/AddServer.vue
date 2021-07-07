@@ -113,7 +113,7 @@ export default {
     }
   },
   created() {
-    this.headers = { Authorization: `Bearer ${window.sessionStorage.getItem('token')}` }
+    this.headers = { Authorization: `Bearer ${localStorage.getItem('token')}` }
     if (this.id) {
       this.getserverInfo(this.id)
     }

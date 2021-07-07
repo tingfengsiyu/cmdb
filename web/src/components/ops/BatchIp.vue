@@ -85,7 +85,7 @@ export default {
     }
   },
   created() {
-    this.headers = { Authorization: `Bearer ${window.sessionStorage.getItem('token')}` }
+    this.headers = { Authorization: `Bearer ${localStorage.getItem('token')}` }
     this.getClusterList()
   },
   methods: {

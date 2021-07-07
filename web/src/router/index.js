@@ -141,7 +141,7 @@ router.beforeEach((to, from, next) => {
     document.title = to.meta.title
   }
   next()
-  const token = window.sessionStorage.getItem('token')
+  const token = localStorage.getItem('token')
   if (to.path === '/login') return next()
   if (!token) {
     next('/login')

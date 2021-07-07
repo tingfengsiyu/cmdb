@@ -3,7 +3,6 @@ package model
 import (
 	"cmdb/middleware"
 	"cmdb/utils/errmsg"
-	"fmt"
 	"gorm.io/gorm"
 )
 
@@ -225,11 +224,15 @@ func InsertRecords(records OpsRecords) int {
 	db.Select("id").Where("object = ?", records.Object).First(&records)
 	return int(records.ID)
 }
-func UpdateRecords(id, state int, success, errors *string) {
-	fmt.Println(id, state, *success, *errors)
-	//if err := db.Debug().Table("ops_records").Where("id =?", id).Updates(map[string]interface{}{"success": *success, "error": *errors, "state": state}).Error; err != nil {
+
+func UpdateRecords(id, state int, success, errors string) {
+	//if err := db.Debug().Table("ops_records").Where("id =?", id).Updates(map[string]interface{}{"success": success, "error": errors, "state": state}).Error; err != nil {
 	//	middleware.SugarLogger.Errorf("sql update error", err)
 	//}
+	err := db.Debug().Exec("UPDATE ops_records SET error=?,state=?,success=? where id=?", errors, state, success, id).Error
+	if err != nil {
+		middleware.SugarLogger.Errorf("sql update error", err)
+	}
 }
 
 /*

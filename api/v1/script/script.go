@@ -152,7 +152,6 @@ func WritePrometheus(c *gin.Context) {
 }
 
 func InstallMointorAgent(c *gin.Context) {
-
 	clustername := c.Query("clustername")
 	if clustername == "" {
 		c.String(400, "clustername不能为空")
@@ -164,7 +163,7 @@ func InstallMointorAgent(c *gin.Context) {
 	}
 	id := model.InsertRecords(tmp)
 	c.Copy()
-
+	model.GenerateAnsibleHosts()
 	go model.ExecLocalShell(id, "monitoragent.sh "+clustername)
 	c.JSON(
 		http.StatusOK, gin.H{

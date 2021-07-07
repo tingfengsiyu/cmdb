@@ -69,7 +69,7 @@ CREATE TABLE `ops_records` (
                                `deleted_at` datetime(3) DEFAULT NULL,
                                `user` varchar(30) NOT NULL,
                                `object` varchar(1000) DEFAULT NULL,
-                               `action` varchar(30) NOT NULL,
+                               `action` varchar(500) NOT NULL,
                                `state` bigint(20) NOT NULL DEFAULT '2',
                                `success` varchar(1000) NOT NULL DEFAULT 'success' ,
                                `error` varchar(1000) NOT NULL DEFAULT 'error' ,

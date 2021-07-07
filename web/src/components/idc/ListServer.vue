@@ -15,7 +15,6 @@
           <a-button type="primary" @click="$router.push('/addserver')">新增</a-button>
         </a-col>
         <a-col :span="2">
-
           <a-button type="primary" @click="batchaddServer = true">批量新增</a-button>
           <!-- 批量新增区域 -->
           <a-modal
@@ -31,6 +30,9 @@
             </a-upload>
           </a-modal>
 
+        </a-col>
+        <a-col :span="2">
+        <a-button type="primary" :headers="headers" @click="downloadAllServer">导出服务器</a-button>
         </a-col>
         <a-col :span="3">
           <a-select placeholder="请选择集群" style="width:250px" @change="ClusterChange">
@@ -162,6 +164,7 @@ export default {
       },
       Artlist: [],
       upUrl: Url + 'idc/uploadexcel',
+      downUrl: Url+ 'idc/exportcsv',
       ClusterList: [],
       columns,
       queryParam: {
@@ -172,7 +175,7 @@ export default {
       },
       batchaddServer: false,
       headers: {
-       Authorization: `Bearer ${window.sessionStorage.getItem('token')}`
+       Authorization: `Bearer ${localStorage.getItem('token')}`
       },
     }
   },
@@ -254,6 +257,10 @@ export default {
     addServersCancel() {
       this.batchaddServer = false
       this.$message.info('批量新增服务器已取消')
+    },
+
+    downloadAllServer(){
+      window.open(this.downUrl)
     },
 
     upChange(info) {
