@@ -1,0 +1,43 @@
+{
+  "status": "success",
+  "data": {
+    "alerts": [
+      {
+        "labels": {
+          "alertname": "Chengdu_NODE disk_used_more_than_90%",
+          "cluster": "chengdu-liweixia64",
+          "device": "/dev/nvme2n1p2",
+          "fstype": "ext4",
+          "instance": "172.22.0.108:9100",
+          "job": "prometheus",
+          "level": "emergency",
+          "mountpoint": "/"
+        },
+        "annotations": {
+          "description": "instance: 172.22.0.108:9100 is values: 93.37720930102888 bytes !!!",
+          "summary": "disk used more than 90%",
+          "value": "93.37720930102888"
+        },
+        "state": "firing",
+        "activeAt": "2021-05-19T07:12:30.440512252Z",
+        "value": "9.337720930102888e+01"
+      },
+      {
+        "labels": {
+          "alertname": "chengdu_cluster_disk_used_more_than_90%",
+          "cluster": "chengdu-2",
+          "level": "emergency"
+        },
+        "annotations": {
+          "description": "instance:  is values: 93.7789425405492 %!!!",
+          "summary": "chengdu_cluster_disk_used_more_than_90%",
+          "value": "93.7789425405492"
+        },
+        "state": "firing",
+        "activeAt": "2021-05-14T05:56:15.440512252Z",
+        "value": "9.37789425405492e+01"
+      }
+    ]
+  }
+}
+
