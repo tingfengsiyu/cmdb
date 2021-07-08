@@ -34,4 +34,4 @@
 
 ### 效果图如下
 
-![效果](C:\Users\Administrator\Desktop\goproject\cmdb\效果.png)
+![效果](效果.png)
