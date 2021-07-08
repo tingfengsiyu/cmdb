@@ -103,7 +103,7 @@ export default {
     return {
       pagination: {
         pageSizeOptions: ['5', '10', '20'],
-        pageSize: 5,
+        pageSize: 10,
         total: 0,
         showSizeChanger: true,
         showTotal: (total) => `共${total}条`,
@@ -112,7 +112,7 @@ export default {
       columns,
       queryParam: {
         action: '',
-        pagesize: 5,
+        pagesize: 10,
         pagenum: 1,
       },
     }

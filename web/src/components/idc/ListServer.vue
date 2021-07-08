@@ -77,7 +77,8 @@
 
 <script>
 import { Url } from '../../plugin/http'
-
+import FileDownload from "js-file-download"
+import axios from 'axios'
 const columns = [
   {
     title: 'ID',
@@ -157,7 +158,7 @@ export default {
     return {
       pagination: {
         pageSizeOptions: ['5', '10', '20'],
-        pageSize: 5,
+        pageSize: 10,
         total: 0,
         showSizeChanger: true,
         showTotal: (total) => `共${total}条`,
@@ -170,7 +171,7 @@ export default {
       queryParam: {
         cluster:'',
         private_ip_address: '',
-        pagesize: 5,
+        pagesize: 10,
         pagenum: 1,
       },
       batchaddServer: false,
@@ -260,7 +261,16 @@ export default {
     },
 
     downloadAllServer(){
-      window.open(this.downUrl)
+     axios({
+        method: 'get',
+        url: this.downUrl,
+        headers: {
+          'Authorization': this.headers
+        },
+        responseType: 'blob'
+      }).then(res => {
+        FileDownload(res.data, '服务器.csv');
+      })
     },
 
     upChange(info) {
