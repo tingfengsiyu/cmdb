@@ -90,7 +90,6 @@ export default {
         let ops = { ...this.ops }
         ops.init_end_number=String(ops.init_end_number)
         ops.storage_stop_number=String(ops.storage_stop_number)
-        console.log(ops)
         const { data: res } = await this.$http.post('idc/storagemount', JSON.stringify(ops))
         if (res.status !== 200) return this.$message.error(res.message)
         this.$router.push('/OpsRecords')

@@ -144,7 +144,6 @@ func ExecLocalShell(id int, command string) {
 	//fmt.Printf("out     : [%s]\n", string(out))
 	success := string(out)
 	UpdateRecords(id, status, success, cmd_err)
-
 }
 
 func GenerateAnsibleHosts() error {

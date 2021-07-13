@@ -23,7 +23,8 @@ func UpdateHostName(c *gin.Context) {
 func ShellInit(c *gin.Context) {
 	var shellinit = model.OsInitStruct{}
 	if err := c.ShouldBindJSON(&shellinit); err != nil {
-		c.String(400, "格式不符合要求", err.Error())
+		//c.String(400, "格式不符合要求", err.Error())
+		errors(c, "格式不符合要求"+err.Error())
 		return
 	}
 	var cmd string
@@ -34,12 +35,12 @@ func ShellInit(c *gin.Context) {
 		cmd = "osinit.sh " + shellinit.StorageMount.InitStartIP + " " + shellinit.StorageMount.InitEndNumber + " " + shellinit.InitUser + " " +
 			shellinit.InitPass + " " + shellinit.Role
 	} else {
-		c.String(400, "role错误 lotus-worker|lotus-storage")
+		errors(c, "role错误 lotus-worker|lotus-storage")
 		return
 	}
 	flag := ScriptIpVerfiy(shellinit.StorageMount.InitEndNumber, shellinit.StorageMount.InitStartIP)
 	if !flag {
-		c.String(400, "集群ip不存在数据库,请确认ip已录入")
+		errors(c, "集群ip不存在数据库，请确认ip")
 		return
 	}
 	c.Copy()
@@ -63,7 +64,7 @@ func ShellInit(c *gin.Context) {
 func BatchIp(c *gin.Context) {
 	var batchip = model.BatchIpStruct{}
 	if err := c.ShouldBindJSON(&batchip); err != nil {
-		c.String(400, "格式不符合要求", err.Error())
+		errors(c, "格式不符合要求"+err.Error())
 		return
 	}
 	var ids = make([]int, 0)
@@ -77,14 +78,14 @@ func BatchIp(c *gin.Context) {
 	targetPrefix := t[0] + "." + t[1] + "." + t[2] + "."
 
 	if id := model.CheckClusterName(batchip.TargetClusterName); id <= 0 {
-		c.String(400, "集群名不存在数据库，请确认后修改ip")
+		errors(c, "集群名不存在数据库，请确认集群名")
 		return
 	}
 	for i := sourceStartIpNumber; i <= tmpEndNumber; i++ {
 		tmp := strconv.Itoa(i)
 		id := model.CheckClusterIp(startPrefix + tmp)
 		if id <= 0 {
-			c.String(400, "集群ip不存在数据库，请确认后修改ip")
+			errors(c, "集群ip不存在数据库，请确认ip")
 			return
 		}
 		ids = append(ids, id)
@@ -103,7 +104,6 @@ func BatchIp(c *gin.Context) {
 	for k, v := range ids {
 		model.UpdateClusterName(v, ips[k], batchip.TargetClusterName)
 	}
-	model.GenerateAnsibleHosts()
 	model.AppendAnsibleHosts(ips, batchip.TargetClusterName)
 	c.JSON(
 		http.StatusOK, gin.H{
@@ -116,12 +116,12 @@ func BatchIp(c *gin.Context) {
 func StorageMount(c *gin.Context) {
 	var storagemount = model.StorageMountStruct{}
 	if err := c.ShouldBindJSON(&storagemount); err != nil {
-		c.String(400, "格式不符合要求", err.Error())
+		errors(c, "格式不符合要求"+err.Error())
 		return
 	}
 	flag := ScriptIpVerfiy(storagemount.InitEndNumber, storagemount.InitStartIP)
 	if !flag {
-		c.String(400, "集群ip不存在数据库,请确认ip已录入")
+		errors(c, "集群ip不存在数据库，请确认ip")
 		return
 	}
 	tmp := model.OpsRecords{
@@ -225,7 +225,7 @@ func ScriptIpVerfiy(initNumber, initStartIp string) bool {
 func UpdateCluster(c *gin.Context) {
 	var cluster = model.UpdateClusterStruct{}
 	if err := c.ShouldBindJSON(&cluster); err != nil {
-		c.String(400, "格式不符合要求", err.Error())
+		errors(c, "格式不符合要求"+err.Error())
 		return
 	}
 	var ids = make([]int, 0)
@@ -235,14 +235,14 @@ func UpdateCluster(c *gin.Context) {
 	t := strings.Split(cluster.SourceStartIp, ".")
 	startPrefix := t[0] + "." + t[1] + "." + t[2] + "."
 	if id := model.CheckClusterName(cluster.TargetClusterName); id <= 0 {
-		c.String(400, "集群名不存在数据库，请确认后修改ip")
+		errors(c, "集群名不存在数据库，请确认集群名")
 		return
 	}
 	for i := sourceStartIpNumber; i <= tmpEndNumber; i++ {
 		tmp := strconv.Itoa(i)
 		id := model.CheckClusterIp(startPrefix + tmp)
 		if id <= 0 {
-			c.String(400, "集群ip不存在数据库，请确认后修改ip")
+			errors(c, "集群ip不存在数据库，请确认ip")
 			return
 		}
 		ids = append(ids, id)
@@ -271,4 +271,13 @@ func UpdateCluster(c *gin.Context) {
 		},
 	)
 
+}
+
+func errors(c *gin.Context, str string) {
+	c.JSON(
+		http.StatusOK, gin.H{
+			"status":  400,
+			"message": str,
+		},
+	)
 }
