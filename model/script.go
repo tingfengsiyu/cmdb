@@ -278,7 +278,7 @@ func SyncTargetHosts(ips []string, cluster string) error {
 	//
 	cmd := "scp.sh " + cluster + "-*miner " + tmpfile
 	ExecLocalShell(0, cmd)
-	cmd = "execshell.sh " + cluster + "-*miner " + " mv  " + tmpfile + "  " + utils.AnsibleHosts
+	cmd = "execshell.sh " + cluster + "-*miner " + "' mv  " + tmpfile + "  " + utils.AnsibleHosts + "'"
 	ExecLocalShell(0, cmd)
 	return err
 }

@@ -91,6 +91,11 @@ func BatchIp(c *gin.Context) {
 		ids = append(ids, id)
 		ips = append(ips, targetPrefix+strconv.Itoa(targetStartNumber))
 		targetStartNumber += 1
+		id = model.CheckClusterIp(targetPrefix + strconv.Itoa(targetStartNumber))
+		if id > 0 {
+			errors(c, "目标集群ip已存在数据库，冲突，请确认ip")
+			return
+		}
 	}
 	tmp := model.OpsRecords{
 		Object: "源操作：" + batchip.SourceStartIp + "-" + batchip.SourceEndNumber + "源网关" + batchip.SourceGateway + "\n目标操作：" + batchip.TargetStartIP + "目标网关" + batchip.TargetGateway + "目标集群" + batchip.TargetClusterName,
@@ -191,15 +196,17 @@ func GenerateAnsibleHosts(c *gin.Context) {
 func GenerateClustersHosts(c *gin.Context) {
 	var code int
 	clusters, _ := model.GetClusters()
+	c.Copy()
 	for _, v := range clusters {
 		var ips []string
-		if err := model.SyncTargetHosts(ips, v.Cluster); err != nil {
-			code = 4003
-		} else {
-			code = 200
-		}
+		go model.SyncTargetHosts(ips, v.Cluster)
+		//if err := model.SyncTargetHosts(ips, v.Cluster); err != nil {
+		//	code = 4003
+		//} else {
+		//	code = 200
+		//}
 	}
-
+	code = 200
 	c.JSON(
 		http.StatusOK, gin.H{
 			"status":  code,
