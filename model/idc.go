@@ -226,10 +226,7 @@ func InsertRecords(records OpsRecords) int {
 }
 
 func UpdateRecords(id, state int, success, errors string) {
-	//if err := db.Debug().Table("ops_records").Where("id =?", id).Updates(map[string]interface{}{"success": success, "error": errors, "state": state}).Error; err != nil {
-	//	middleware.SugarLogger.Errorf("sql update error", err)
-	//}
-	err := db.Debug().Exec("UPDATE ops_records SET error=?,state=?,success=? where id=?", errors, state, success, id).Error
+	err := db.Exec("UPDATE ops_records SET error=?,state=?,success=? where id=?", errors, state, success, id).Error
 	if err != nil {
 		middleware.SugarLogger.Errorf("sql update error", err)
 	}

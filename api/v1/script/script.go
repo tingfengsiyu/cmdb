@@ -102,14 +102,15 @@ func BatchIp(c *gin.Context) {
 		Action: "修改ip",
 	}
 	id := model.InsertRecords(tmp)
-	//sh batchip.sh sourceIP sourceGateway sourceEndNumber targetStartIP targetGateway
-	cmd := "batchip.sh " + batchip.SourceStartIp + " " + batchip.SourceGateway + " " +
-		batchip.SourceEndNumber + " " + batchip.TargetStartIP + " " + batchip.TargetGateway
-	go model.ExecLocalShell(id, cmd)
 	for k, v := range ids {
 		model.UpdateClusterName(v, ips[k], batchip.TargetClusterName)
 	}
 	model.AppendAnsibleHosts(ips, batchip.TargetClusterName)
+	GenerateAnsibleHosts(c)
+	//sh batchip.sh sourceIP sourceGateway sourceEndNumber targetStartIP targetGateway
+	cmd := "batchip.sh " + batchip.SourceStartIp + " " + batchip.SourceGateway + " " +
+		batchip.SourceEndNumber + " " + batchip.TargetStartIP + " " + batchip.TargetGateway
+	go model.ExecLocalShell(id, cmd)
 	c.JSON(
 		http.StatusOK, gin.H{
 			"status": 200,
@@ -194,9 +195,8 @@ func GenerateAnsibleHosts(c *gin.Context) {
 }
 
 func GenerateClustersHosts(c *gin.Context) {
-	var code int
+	code := 200
 	clusters, _ := model.GetClusters()
-	c.Copy()
 	for _, v := range clusters {
 		var ips []string
 		go model.SyncTargetHosts(ips, v.Cluster)
@@ -206,7 +206,6 @@ func GenerateClustersHosts(c *gin.Context) {
 		//	code = 200
 		//}
 	}
-	code = 200
 	c.JSON(
 		http.StatusOK, gin.H{
 			"status":  code,
@@ -270,7 +269,7 @@ func UpdateCluster(c *gin.Context) {
 	model.GenerateAnsibleHosts()
 	model.AppendAnsibleHosts(ips, cluster.TargetClusterName)
 	//追加生成 ansible hosts  worker
-
+	GenerateAnsibleHosts(c)
 	c.JSON(
 		http.StatusOK, gin.H{
 			"status": 200,

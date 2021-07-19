@@ -14,7 +14,7 @@
         <a-col :span="3">
           <a-button type="primary" @click="$router.push('/addserver')">新增</a-button>
         </a-col>
-        <a-col :span="2">
+        <a-col :span="3">
           <a-button type="primary" @click="batchaddServer = true">批量新增</a-button>
           <!-- 批量新增区域 -->
           <a-modal
@@ -31,7 +31,7 @@
           </a-modal>
 
         </a-col>
-        <a-col :span="2">
+        <a-col :span="4">
         <a-button type="primary" :headers="headers" @click="downloadAllServer">导出服务器</a-button>
         </a-col>
         <a-col :span="3">
@@ -39,7 +39,7 @@
             <a-select-option v-for="item in ClusterList" :key="item.id" :value="item.cluster">{{item.cluster}}</a-select-option>
           </a-select>
         </a-col>
-        <a-col :span="1">
+        <a-col :span="2">
           <a-button type="info" @click="getServerList()">显示全部</a-button>
         </a-col>
       </a-row>

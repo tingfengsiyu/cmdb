@@ -71,8 +71,8 @@ CREATE TABLE `ops_records` (
                                `object` varchar(1000) DEFAULT NULL,
                                `action` varchar(500) NOT NULL,
                                `state` bigint(20) NOT NULL DEFAULT '2',
-                               `success` varchar(1000) NOT NULL DEFAULT 'success' ,
-                               `error` varchar(1000) NOT NULL DEFAULT 'error' ,
+                               `success` longtext NOT NULL DEFAULT 'success' ,
+                               `error` longtext NOT NULL DEFAULT 'error' ,
                                PRIMARY KEY (`id`),
                                KEY `idx_ops_records_deleted_at` (`deleted_at`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8

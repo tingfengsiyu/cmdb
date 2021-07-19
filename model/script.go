@@ -225,7 +225,7 @@ func AppendAnsibleHosts(ips []string, cluster string) error {
 }
 
 func SyncTargetHosts(ips []string, cluster string) error {
-	tmpfile := utils.AnsibleHosts + ".tmp"
+	tmpfile := utils.AnsibleHosts + "-" + cluster
 	file, err := os.OpenFile(tmpfile, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0666)
 	if err != nil {
 		middleware.SugarLogger.Errorf("写入文件错误!!!%s", err)
@@ -276,9 +276,7 @@ func SyncTargetHosts(ips []string, cluster string) error {
 		file.WriteString(ip + sudostr + "\n")
 	}
 	//
-	cmd := "scp.sh " + cluster + "-*miner " + tmpfile
-	ExecLocalShell(0, cmd)
-	cmd = "execshell.sh " + cluster + "-*miner " + "' mv  " + tmpfile + "  " + utils.AnsibleHosts + "'"
-	ExecLocalShell(0, cmd)
+	cmd := "scp.sh " + cluster + "-*miner " + tmpfile + " " + utils.AnsibleHosts
+	go ExecLocalShell(0, cmd)
 	return err
 }

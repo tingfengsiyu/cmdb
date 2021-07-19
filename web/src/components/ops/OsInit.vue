@@ -17,7 +17,7 @@
             <a-form-model-item label="结束ip位" prop="StorageMount.init_end_number" :rules="opsRules.init_end_number">
               <a-input style="width:300px" v-model.number="ops.StorageMount.init_end_number"></a-input>
             </a-form-model-item>
-            <a-form-model-item label="存储开始ip" prop="StorageMount.storage_start_ip" :rules="opsRules.storage_start_ip">
+            <a-form-model-item label="需挂载的存储开始ip" prop="StorageMount.storage_start_ip" :rules="opsRules.storage_start_ip">
               <a-input style="width:300px" v-model="ops.StorageMount.storage_start_ip"></a-input>
             </a-form-model-item>
             <a-form-model-item label="存储结束位" prop="StorageMount.storage_stop_number" :rules="opsRules.storage_stop_number">
@@ -78,7 +78,7 @@ export default {
       },
       ClusterList: [],
       opsRules: {
-        init_start_ip: [{ required: true, message: '挂载机器开始ip', trigger: 'blur' }],
+        init_start_ip: [{ required: true, message: '初始化机器开始ip', trigger: 'blur' }],
         init_end_number: [{ validator: checkNumber, trigger: 'change' }],
         storage_start_ip: [{ required: true, message: '存储机器开始ip', trigger: 'blur' }],
         storage_stop_number: [{ validator: checkNumber, trigger: 'change' }],
