@@ -14,8 +14,8 @@ func UpdateHostName(c *gin.Context) {
 	go model.UpdateHostName()
 	c.JSON(
 		http.StatusOK, gin.H{
-			"status": 200,
-			"data":   "执行shell中",
+			"status":  200,
+			"message": "执行shell中",
 		},
 	)
 }
@@ -55,8 +55,8 @@ func ShellInit(c *gin.Context) {
 	//model.GenerateAnsibleHosts()
 	c.JSON(
 		http.StatusOK, gin.H{
-			"status": 200,
-			"data":   "初始化系统中",
+			"status":  200,
+			"message": "初始化系统中",
 		},
 	)
 }
@@ -106,15 +106,16 @@ func BatchIp(c *gin.Context) {
 		model.UpdateClusterName(v, ips[k], batchip.TargetClusterName)
 	}
 	model.AppendAnsibleHosts(ips, batchip.TargetClusterName)
-	GenerateAnsibleHosts(c)
+	model.GenerateAnsibleHosts()
+	model.GenerateClustersHosts()
 	//sh batchip.sh sourceIP sourceGateway sourceEndNumber targetStartIP targetGateway
 	cmd := "batchip.sh " + batchip.SourceStartIp + " " + batchip.SourceGateway + " " +
 		batchip.SourceEndNumber + " " + batchip.TargetStartIP + " " + batchip.TargetGateway
 	go model.ExecLocalShell(id, cmd)
 	c.JSON(
 		http.StatusOK, gin.H{
-			"status": 200,
-			"data":   "批量修改IP中",
+			"status":  200,
+			"message": "批量修改IP中",
 		},
 	)
 }
@@ -141,8 +142,8 @@ func StorageMount(c *gin.Context) {
 	go model.ExecLocalShell(id, cmd)
 	c.JSON(
 		http.StatusOK, gin.H{
-			"status": 200,
-			"data":   "存储生成并挂载中",
+			"status":  200,
+			"message": "存储生成并挂载中",
 		},
 	)
 }
@@ -196,16 +197,7 @@ func GenerateAnsibleHosts(c *gin.Context) {
 
 func GenerateClustersHosts(c *gin.Context) {
 	code := 200
-	clusters, _ := model.GetClusters()
-	for _, v := range clusters {
-		var ips []string
-		go model.SyncTargetHosts(ips, v.Cluster)
-		//if err := model.SyncTargetHosts(ips, v.Cluster); err != nil {
-		//	code = 4003
-		//} else {
-		//	code = 200
-		//}
-	}
+	model.GenerateClustersHosts()
 	c.JSON(
 		http.StatusOK, gin.H{
 			"status":  code,
@@ -269,11 +261,11 @@ func UpdateCluster(c *gin.Context) {
 	model.GenerateAnsibleHosts()
 	model.AppendAnsibleHosts(ips, cluster.TargetClusterName)
 	//追加生成 ansible hosts  worker
-	GenerateAnsibleHosts(c)
+	model.GenerateClustersHosts()
 	c.JSON(
 		http.StatusOK, gin.H{
-			"status": 200,
-			"data":   "ok",
+			"status":  200,
+			"message": "ok",
 		},
 	)
 

@@ -5,7 +5,6 @@ import (
 	"cmdb/middleware"
 	"cmdb/utils"
 	"context"
-	"fmt"
 	"golang.org/x/crypto/ssh"
 	"io"
 	"net"
@@ -114,9 +113,9 @@ func UpdateHostName() {
 			sudopasswd = utils.WorkerSudoPass
 			outs, err := SshCommands(user, passwd, v.PrivateIpAddress+":"+"22", sudopasswd, "hostnamectl set-hostname "+v.Name)
 			if err != nil {
-				fmt.Println("ssh exec commands error !!!  %s ", err)
+				middleware.SugarLogger.Errorf("ssh exec commands error !!!  %s ", err)
 			}
-			fmt.Println(string(outs))
+			middleware.SugarLogger.Errorf(string(outs))
 		}(v)
 	}
 }
@@ -125,7 +124,7 @@ func ExecLocalShell(id int, command string) {
 	timeout := 2
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeout+1)*time.Hour)
 	defer cancel()
-	cmdarray := []string{"-c", fmt.Sprintf("%s ", utils.ScriptDir+command)}
+	cmdarray := []string{"-c", utils.ScriptDir + command}
 	cmd := exec.CommandContext(ctx, "bash", cmdarray...)
 	out, err := cmd.CombinedOutput()
 	var cmd_err string
@@ -277,6 +276,14 @@ func SyncTargetHosts(ips []string, cluster string) error {
 	}
 	//
 	cmd := "scp.sh " + cluster + "-*miner " + tmpfile + " " + utils.AnsibleHosts
-	go ExecLocalShell(0, cmd)
+	ExecLocalShell(0, cmd)
 	return err
+}
+
+func GenerateClustersHosts() {
+	clusters, _ := GetClusters()
+	for _, v := range clusters {
+		var ips []string
+		go SyncTargetHosts(ips, v.Cluster)
+	}
 }
