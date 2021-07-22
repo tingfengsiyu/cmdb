@@ -15,14 +15,16 @@ var JwtKey = []byte(utils.JwtKey)
 
 type MyClaims struct {
 	Username string `json:"username"`
+	Role     int    `json:"role"`
 	jwt.StandardClaims
 }
 
 // 生成token
-func SetToken(username string) (string, int) {
+func SetToken(username string, role int) (string, int) {
 	expireTime := time.Now().Add(10 * time.Hour)
 	SetClaims := MyClaims{
 		username,
+		role,
 		jwt.StandardClaims{
 			ExpiresAt: expireTime.Unix(),
 			Issuer:    "cmdb",
@@ -111,6 +113,17 @@ func JwtToken() gin.HandlerFunc {
 			})
 			c.Abort()
 			return
+		}
+		if key.Role == 2 {
+			if c.Request.Method != "GET" {
+				code = 1008
+				c.JSON(http.StatusOK, gin.H{
+					"code":    code,
+					"message": errmsg.GetErrMsg(code),
+				})
+				c.Abort()
+				return
+			}
 		}
 		c.Set("username", key)
 		c.Next()

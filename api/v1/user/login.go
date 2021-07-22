@@ -18,7 +18,7 @@ func Login(c *gin.Context) {
 	formData, code = model.CheckLogin(formData.Username, formData.Password)
 
 	if code == errmsg.SUCCSE {
-		token, code = middleware.SetToken(formData.Username)
+		token, code = middleware.SetToken(formData.Username, formData.Role)
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"status":  code,

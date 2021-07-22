@@ -24,7 +24,7 @@
           bordered
           @change="handleTableChange"
       >
-        <span slot="role" slot-scope="data">{{data == 1 ? '管理员':'订阅者'}}</span>
+        <span slot="role" slot-scope="data">{{data == 1 ? '管理员':'只读用户'}}</span>
         <template slot="action" slot-scope="data">
           <div class="actionSlot">
             <a-button
