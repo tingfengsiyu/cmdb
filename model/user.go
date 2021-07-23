@@ -120,17 +120,3 @@ func CheckLogin(username string, password string) (User, int) {
 	//}
 	return user, errmsg.SUCCSE
 }
-
-func CheckLoginFront(username string, password string) (User, int) {
-	var user User
-
-	db.Where("username = ?", username).First(&user)
-
-	if user.ID == 0 {
-		return user, errmsg.ERROR_USER_NOT_EXIST
-	}
-	if ScryptPw(password) != user.Password {
-		return user, errmsg.ERROR_PASSWORD_WRONG
-	}
-	return user, errmsg.SUCCSE
-}
