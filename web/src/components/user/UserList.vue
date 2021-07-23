@@ -39,7 +39,6 @@
                 style="margin-right:15px"
                 @click="deleteUser(data.ID)"
             >删除</a-button>
-            <a-button type="info" icon="info" @click="updatePass(data.ID)">重置</a-button>
           </div>
         </template>
       </a-table>
@@ -81,6 +80,12 @@
       <a-form-model :model="userInfo" :rules="userRules" ref="addUserRef">
         <a-form-model-item label="用户名" prop="username">
           <a-input v-model="userInfo.username"></a-input>
+        </a-form-model-item>
+        <a-form-model-item has-feedback label="密码" prop="password">
+          <a-input-password v-model="userInfo.password"></a-input-password>
+        </a-form-model-item>
+        <a-form-model-item has-feedback label="确认密码" prop="checkpass">
+          <a-input-password v-model="userInfo.checkpass"></a-input-password>
         </a-form-model-item>
         <a-form-model-item label="是否为管理员">
           <a-switch
@@ -353,6 +358,7 @@ export default {
         if (!valid) return this.$message.error('参数不符合要求，请重新输入')
         const { data: res } = await this.$http.put(`user/edituser/${this.userInfo.id}`, {
           username: this.userInfo.username,
+          password: this.userInfo.password,
           role: this.userInfo.role,
         })
         if (res.status != 200) return this.$message.error(res.message)
