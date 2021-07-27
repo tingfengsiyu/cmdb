@@ -8,6 +8,7 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "@tinymce/tinymce-vue": "^4.0.4",
     "ant-design-vue": "^1.7.5",
     "axios": "^0.21.1",
     "babel-plugin-import": "^1.13.3",

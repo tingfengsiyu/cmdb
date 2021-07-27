@@ -15,6 +15,7 @@ const OsInit = () => import(/* webpackChunkName: "UserList" */ '../components/op
 const BatchIp = () => import(/* webpackChunkName: "UserList" */ '../components/ops/BatchIp')
 const InstallMonitorAgent = () => import(/* webpackChunkName: "UserList" */ '../components/ops/InstallMonitorAgent')
 const StorageMount = () => import(/* webpackChunkName: "UserList" */ '../components/ops/StorageMount')
+const ExecShell = () => import(/* webpackChunkName: "UserList" */ '../components/ops/ExecShell')
 
 // 路由重复点击捕获错误
 const originalPush = VueRouter.prototype.push
@@ -118,6 +119,13 @@ const routes = [
         component: UpdateCluster,
         meta: {
           title: '更新机器所属集群'
+        }
+      },
+      {
+        path: 'execShell',
+        component: ExecShell,
+        meta: {
+          title: '执行命令'
         }
       },
 

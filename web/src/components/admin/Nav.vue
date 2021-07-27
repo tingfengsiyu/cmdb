@@ -67,6 +67,10 @@
           <a-icon type="snippets" />
           <span>修改机器所属集群</span>
         </a-menu-item>
+        <a-menu-item key="ExecShell">
+          <a-icon type="snippets" />
+          <span>执行shell命令</span>
+        </a-menu-item>
       </a-sub-menu>
     </a-menu>
   </a-layout-sider>

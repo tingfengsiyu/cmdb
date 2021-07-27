@@ -1,10 +1,13 @@
 package script
 
 import (
+	"cmdb/middleware"
 	"cmdb/model"
+	"cmdb/utils"
 	"cmdb/utils/errmsg"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 )
@@ -70,6 +73,9 @@ func BatchIp(c *gin.Context) {
 	var ids = make([]int, 0)
 	var ips = make([]string, 0)
 	tmpEndNumber, _ := strconv.Atoi(batchip.SourceEndNumber)
+	if len(strings.Split(batchip.SourceStartIp, ".")) != 4 || len(strings.Split(batchip.TargetStartIP, ".")) != 4 {
+		errors(c, "源ip或目标ip输入错误")
+	}
 	sourceStartIpNumber, _ := strconv.Atoi(strings.Split(batchip.SourceStartIp, ".")[3])
 	t := strings.Split(batchip.SourceStartIp, ".")
 	startPrefix := t[0] + "." + t[1] + "." + t[2] + "."
@@ -105,8 +111,8 @@ func BatchIp(c *gin.Context) {
 	for k, v := range ids {
 		model.UpdateClusterName(v, ips[k], batchip.TargetClusterName)
 	}
-	model.AppendAnsibleHosts(ips, batchip.TargetClusterName)
 	model.GenerateAnsibleHosts()
+	model.AppendAnsibleHosts(ips, batchip.TargetClusterName)
 	model.GenerateClustersHosts()
 	//sh batchip.sh sourceIP sourceGateway sourceEndNumber targetStartIP targetGateway
 	cmd := "batchip.sh " + batchip.SourceStartIp + " " + batchip.SourceGateway + " " +
@@ -228,6 +234,9 @@ func UpdateCluster(c *gin.Context) {
 	}
 	var ids = make([]int, 0)
 	var ips = make([]string, 0)
+	if len(strings.Split(cluster.SourceStartIp, ".")) != 4 {
+		errors(c, "源ip输入错误")
+	}
 	tmpEndNumber, _ := strconv.Atoi(cluster.SourceEndNumber)
 	sourceStartIpNumber, _ := strconv.Atoi(strings.Split(cluster.SourceStartIp, ".")[3])
 	t := strings.Split(cluster.SourceStartIp, ".")
@@ -266,6 +275,61 @@ func UpdateCluster(c *gin.Context) {
 		http.StatusOK, gin.H{
 			"status":  200,
 			"message": "ok",
+		},
+	)
+
+}
+func ExecWebShell(c *gin.Context) {
+	tmpfile := utils.LogFile + "cmd"
+	var cluster = model.UpdateClusterStruct{}
+	if err := c.ShouldBindJSON(&cluster); err != nil {
+		errors(c, "格式不符合要求"+err.Error())
+	}
+	var ips = make([]string, 0)
+	if len(strings.Split(cluster.SourceStartIp, ".")) != 4 {
+		errors(c, "源ip输入错误")
+	}
+	tmpEndNumber, _ := strconv.Atoi(cluster.SourceEndNumber)
+	sourceStartIpNumber, _ := strconv.Atoi(strings.Split(cluster.SourceStartIp, ".")[3])
+	t := strings.Split(cluster.SourceStartIp, ".")
+	startPrefix := t[0] + "." + t[1] + "." + t[2] + "."
+	for i := sourceStartIpNumber; i <= tmpEndNumber; i++ {
+		tmp := strconv.Itoa(i)
+		id := model.CheckClusterIp(startPrefix + tmp)
+		if id <= 0 {
+			errors(c, "集群ip不存在数据库，请确认ip")
+			return
+		}
+		ips = append(ips, startPrefix+strconv.Itoa(sourceStartIpNumber))
+		sourceStartIpNumber += 1
+	}
+
+	tmp := model.OpsRecords{
+		Object: "源操作：" + cluster.SourceStartIp + "-" + cluster.SourceEndNumber + "\n执行命令: " + cluster.Cmd[0:10],
+		Action: "执行命令",
+		State:  1,
+	}
+	id := model.InsertRecords(tmp)
+	model.GenerateAnsibleHosts()
+	model.AppendAnsibleHosts(ips, "host")
+	file, err := os.OpenFile(tmpfile, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0666)
+	if err != nil {
+		middleware.SugarLogger.Errorf("写入文件错误!!!%s", err)
+	}
+	defer file.Close()
+	file.WriteString("#!/bin/bash\n")
+	file.WriteString(cluster.Cmd)
+	go func() {
+		cmd := "scp.sh " + " host-tmpworker " + tmpfile + " /tmp/cmd"
+		model.ExecLocalShell(0, cmd)
+		cmd = "execshell.sh " + " host-tmpworker " + " /tmp/cmd"
+		model.ExecLocalShell(id, cmd)
+	}()
+
+	c.JSON(
+		http.StatusOK, gin.H{
+			"status":  200,
+			"message": "shell执行中",
 		},
 	)
 

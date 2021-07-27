@@ -189,6 +189,7 @@ type UpdateClusterStruct struct {
 	SourceStartIp     string `json:"source_start_ip" validate:"required,min=10,max=12" `
 	SourceEndNumber   string `json:"source_end_number" validate:"required,gte=2"  `
 	TargetClusterName string `json:"target_cluster_name" validate:"required,min=4,max=50"`
+	Cmd               string `json:"cmd"`
 }
 
 type OsInitStruct struct {

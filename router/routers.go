@@ -39,6 +39,7 @@ func InitRouter() {
 		router.POST("storagemount", script.StorageMount)
 		router.PUT("batchip", script.BatchIp)
 		router.PUT("updatecluster", script.UpdateCluster)
+		router.PUT("execshell", script.ExecWebShell)
 		router.POST("updatehostname", script.UpdateHostName)
 		router.POST("writeprometheus", script.WritePrometheus)
 		router.GET("installmointoragent", script.InstallMointorAgent)
