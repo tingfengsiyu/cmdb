@@ -40,63 +40,6 @@
 
 <script>
 import moment from 'moment'
-const columns = [
-  {
-    title: 'ID',
-    dataIndex: 'ID',
-    width: '3%',
-    align: 'center',
-  },
-  {
-    title: '操作分类',
-    dataIndex: 'action',
-    width: '7%',
-    align: 'center',
-  },
-  {
-    title: '操作目标',
-    dataIndex: 'object',
-    width: '20%',
-    align: 'center',
-  },
-  {
-    title: '操作状态',
-    dataIndex: 'state',
-    width: '5%',
-    align: 'center',
-    scopedSlots: { customRender: 'state' },
-  },
-  {
-    title: '成功记录',
-    dataIndex: 'success',
-    width: '20%',
-    align: 'center',
-  },
-  {
-    title: '失败记录',
-    dataIndex: 'error',
-    width: '20%',
-    align: 'center',
-  },
-  {
-    title: '创建日期',
-    dataIndex: 'CreatedAt',
-    width: '7%',
-    align: 'center',
-    customRender: (val) => {
-      return val ? moment(val).format('YYYY年MM月DD日 HH:mm') : '暂无'
-    },
-  },
-  {
-    title: '更新日期',
-    dataIndex: 'UpdatedAt',
-    width: '7%',
-    align: 'center',
-    customRender: (val) => {
-      return val ? moment(val).format('YYYY年MM月DD日 HH:mm') : '暂无'
-    },
-  },
-]
 
 export default {
   data() {
@@ -109,7 +52,92 @@ export default {
         showTotal: (total) => `共${total}条`,
       },
       recordlist: [],
-      columns,
+      columns : [
+        {
+          title: 'ID',
+          dataIndex: 'ID',
+          width: '3%',
+          align: 'left',
+        },
+        {
+          title: '操作分类',
+          dataIndex: 'action',
+          width: '7%',
+          align: 'left',
+        },
+        {
+          title: '操作目标',
+          dataIndex: 'object',
+          width: '20%',
+          align: 'left',
+          customRender: (object) => {
+            const textArr = object.split('\n')
+            return (<div>
+              {
+                textArr.map(t => {
+                  return (<li>{t}</li>)
+                })
+              }
+            </div>)
+          }
+        },
+        {
+          title: '操作状态',
+          dataIndex: 'state',
+          width: '5%',
+          align: 'left',
+          scopedSlots: { customRender: 'state' },
+        },
+        {
+          title:'成功记录',
+          align:'left',
+          dataIndex: 'success',
+          customRender: (success) => {
+            const textArr = success.split('\n')
+            return (<div>
+              {
+                textArr.map(t => {
+                  return (<li>{t}</li>)
+                })
+              }
+            </div>)
+          }
+        },
+        {
+          title: '失败记录',
+          dataIndex: 'error',
+          width: '5%',
+          align: 'left',
+          customRender: (error) => {
+            const textArr = error.split('\n')
+            return (<div>
+              {
+                textArr.map(t => {
+                  return (<li>{t}</li>)
+                })
+              }
+            </div>)
+          }
+        },
+        {
+          title: '创建日期',
+          dataIndex: 'CreatedAt',
+          width: '7%',
+          align: 'left',
+          customRender: (val) => {
+            return val ? moment(val).format('YYYY年MM月DD日 HH:mm') : '暂无'
+          },
+        },
+        {
+          title: '更新日期',
+          dataIndex: 'UpdatedAt',
+          width: '7%',
+          align: 'left',
+          customRender: (val) => {
+            return val ? moment(val).format('YYYY年MM月DD日 HH:mm') : '暂无'
+          },
+        },
+      ],
       queryParam: {
         action: '',
         pagesize: 10,
@@ -156,6 +184,6 @@ export default {
 <style scoped>
 .actionSlot {
   display: flex;
-  justify-content: center;
+  justify-content: left;
 }
 </style>
