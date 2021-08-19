@@ -40,7 +40,7 @@
           </a-select>
         </a-col>
         <a-col :span="2">
-          <a-button type="info" @click="getServerList()">显示全部</a-button>
+          <a-button type="info" @click="getAllServerList()">显示全部</a-button>
         </a-col>
       </a-row>
 
@@ -192,6 +192,20 @@ export default {
           private_ip_address: this.queryParam.private_ip_address,
           pagesize: this.queryParam.pagesize,
           pagenum: this.queryParam.pagenum,
+          cluster: this.queryParam.cluster,
+        },
+      })
+      if (res.status != 200) return this.$message.error(res.message)
+
+      this.Artlist = res.data
+      this.pagination.total = res.total
+    },
+    async getAllServerList() {
+      const { data: res } = await this.$http.get('idc/getnetworktopology', {
+        params: {
+          private_ip_address: this.queryParam.private_ip_address,
+          pagesize: this.queryParam.pagesize,
+          pagenum: this.queryParam.pagenum,
         },
       })
       if (res.status != 200) return this.$message.error(res.message)
@@ -240,6 +254,7 @@ export default {
     },
     // 查询集群下的服务器
     ClusterChange(value) {
+      this.queryParam.cluster=value
       this.getClusterServer(value)
     },
     async getClusterServer(value) {

@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import axios from 'axios'
 import router from '@/router'
-let Url = 'http://172.22.0.20:5000/api/v1/'
+let Url = `http://${location.hostname}:5000/api/v1/`
 
 axios.defaults.baseURL = Url
 
