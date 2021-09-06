@@ -41,12 +41,13 @@ type Server struct {
 	Label            string `gorm:"type:varchar(30);not null" json:"label" binding:"required" validate:"required,min=4"`
 	Cluster          string `gorm:"type:varchar(30);not null" json:"cluster" binding:"required" validate:"required,min=4"`
 	LabelIpAddress   string `gorm:"type:varchar(30);not null" json:"label_ip_address" validate:"required,min=4"`
-	Cpu              string `gorm:"type:varchar(30);not null" json:"cpu" validate:"required,min=3"`
+	Cpu              string `gorm:"type:varchar(500);not null" json:"cpu" validate:"required,min=3"`
 	Memory           string `gorm:"type:varchar(30);not null" json:"memory" validate:"required,min=3"`
-	Disk             string `gorm:"type:varchar(30);not null" json:"disk" validate:"required,min=3"`
+	Disk             string `gorm:"type:varchar(500);not null" json:"disk" validate:"required,min=3"`
 	gorm.Model
 	User             string `gorm:"type:varchar(30);not null" json:"user" validate:"required,min=4"`
 	State            string `gorm:"type:varchar(10);not null" json:"state" validate:"required,min=4"`
+	Gpu              string `gorm:"type:varchar(500);not null" json:"gpu" validate:"required,min=4"`
 	ServerID         int    `gorm:"type:int;not null;unique" json:"server_id" validate:"required,min=1"`
 	IDC_ID           int    `gorm:"type:int;not null" json:"idc_id" validate:"required,min=4"`
 	Cabinet_NumberID int    `gorm:"type:int;not null" json:"cabinet_number_id" validate:"required,min=4"`
@@ -159,6 +160,7 @@ type ScanServers struct {
 	Disk             string `gorm:"type:varchar(30);not null" json:"disk" validate:"required,min=3"`
 	User             string `gorm:"type:varchar(30);not null" json:"user" validate:"required,min=4"`
 	State            string `gorm:"type:varchar(10);not null" json:"state" validate:"required,min=4"`
+	Gpu              string `gorm:"type:varchar(500);not null" json:"gpu" validate:"required,min=4"`
 	IDC_ID           int    `gorm:"type:int;not null" json:"idc_id" validate:"required,min=4"`
 	Cabinet_NumberID int    `gorm:"type:int;not null" json:"cabinet_number_id" validate:"required,min=4"`
 	City             string `gorm:"type:varchar(30);not null" json:"city" validate:"required,min=4"`
@@ -169,11 +171,11 @@ type ScanServers struct {
 type OpsRecords struct {
 	gorm.Model
 	User    string `gorm:"type:varchar(30);not null" json:"user"`
-	Object  string `gorm:"type:varchar(30);not null" json:"object"`
-	Action  string `gorm:"type:varchar(30);not null" json:"action"`
+	Object  string `gorm:"type:varchar(500);not null" json:"object"`
+	Action  string `gorm:"type:varchar(500);not null" json:"action"`
 	State   int    `gorm:"type:int;not null;default:2" json:"state"`
-	Success string `gorm:"type:varchar(1000);not null" json:"success"`
-	Error   string `gorm:"type:varchar(1000);not null" json:"error"`
+	Success string `gorm:"type:LONGTEXT;not null" json:"success"`
+	Error   string `gorm:"type:LONGTEXT;not null" json:"error"`
 }
 
 type BatchIpStruct struct {
@@ -211,4 +213,26 @@ type ansibleStruct struct {
 	PrivateIpAddress string `json:"private_ip_address"`
 	Label            string `json:"label"`
 	Cluster          string `json:"cluster"`
+}
+
+// SSH连接表
+type SSHUser struct {
+	gorm.Model
+	ServerID     int       `gorm:"type:int;not null;unique" json:"server_id" validate:"required,min=1"`
+	Port         int       `gorm:"type:int;not null;unique" json:"port" validate:"required,min=1"`
+	SSHUsername  string    `gorm:"type:varchar(50);not null;unique" json:"sshUsername" validate:"required,min=1"`
+	SSHPassword  string    `gorm:"type:varchar(50);not null;unique" json:"sshPassword" validate:"required,min=1"`
+	IdentityFile string    `gorm:"type:varchar(50);not null;unique" json:"identityFile" validate:"required,min=1"`
+	AllowUsers   *[]string `gorm:"type:varchar(50);not null;unique" json:"allowUsers,omitempty" validate:"required,min=1"`
+}
+
+type ScanSshd struct {
+	Name             string    `gorm:"type:varchar(42);not null" json:"name" validate:"required,min=4"`
+	PrivateIpAddress string    `json:"private_ip_address"`
+	ServerID         int       `gorm:"type:int;not null;unique" json:"server_id" validate:"required,min=1"`
+	Port             int       `gorm:"type:int;not null;unique" json:"port" validate:"required,min=1"`
+	SSHUsername      string    `gorm:"type:varchar(50);not null;unique" json:"sshUsername" validate:"required,min=1"`
+	SSHPassword      string    `gorm:"type:varchar(50);not null;unique" json:"sshPassword" validate:"required,min=1"`
+	IdentityFile     string    `gorm:"type:varchar(50);not null;unique" json:"identityFile" validate:"required,min=1"`
+	AllowUsers       *[]string `gorm:"type:varchar(50);not null;unique" json:"allowUsers,omitempty" validate:"required,min=1"`
 }

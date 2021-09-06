@@ -24,9 +24,17 @@
               <a-input style="width:300px" v-model.number="ops.storage_stop_number"></a-input>
             </a-form-model-item>
             <a-form-model-item label="执行操作" prop="operating">
-              <a-input style="width:300px" v-model="ops.operating"></a-input>
-            </a-form-model-item>
+<!--              <a-input style="width:300px" v-model="ops.operating"></a-input>-->
 
+            <a-select default-value="add" style="width: 120px" @change="handleChange">
+              <a-select-option value="add">
+                add
+              </a-select-option>
+              <a-select-option value="all">
+                all
+              </a-select-option>
+            </a-select>
+            </a-form-model-item>
           </a-col>
         </a-row>
         <a-form-model-item>
@@ -96,7 +104,9 @@ export default {
         this.$message.success(res.message)
       })
     },
-
+    handleChange(value) {
+      this.ops.operating = value
+    },
     addCancel() {
       this.$refs.opsRef.resetFields()
     },

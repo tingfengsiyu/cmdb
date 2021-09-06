@@ -28,6 +28,8 @@ var (
 	SR_File_Max_Bytes string
 	ScriptDir         string
 	AnsibleHosts      string
+	SshdPort          int
+	RootPath          string
 )
 
 func init() {
@@ -55,6 +57,8 @@ func LoadServer(file *ini.File) {
 	SR_File_Max_Bytes = file.Section("server").Key("SR_File_Max_Bytes").MustString("")
 	ScriptDir = file.Section("server").Key("ScriptDir").MustString("")
 	AnsibleHosts = file.Section("server").Key("AnsibleHosts").MustString("")
+	SshdPort = file.Section("server").Key("SshdPort").MustInt(2223)
+	RootPath = file.Section("server").Key("RootPath").MustString("")
 }
 func LoadData(file *ini.File) {
 	DbHost = file.Section("database").Key("DbHost").MustString("47.s.197.46")

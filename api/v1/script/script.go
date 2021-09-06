@@ -47,8 +47,10 @@ func ShellInit(c *gin.Context) {
 		return
 	}
 	c.Copy()
+	user := user(c)
 	//osinit.sh  initStartIP initStopNumber  initUser initPass  Role  storageStartIP  storageStopnumber
 	tmp := model.OpsRecords{
+		User: user,
 		Object: shellinit.StorageMount.InitStartIP + "-" + shellinit.StorageMount.InitEndNumber + "初始化用户名：" + shellinit.InitUser + "初始化密码" + shellinit.InitPass +
 			"角色：" + shellinit.Role + "存储ip" + shellinit.StorageMount.StorageStartIP + "-" + shellinit.StorageMount.StorageStopnumber,
 		Action: "系统初始化",
@@ -96,14 +98,16 @@ func BatchIp(c *gin.Context) {
 		}
 		ids = append(ids, id)
 		ips = append(ips, targetPrefix+strconv.Itoa(targetStartNumber))
-		targetStartNumber += 1
 		id = model.CheckClusterIp(targetPrefix + strconv.Itoa(targetStartNumber))
 		if id > 0 {
 			errors(c, "目标集群ip已存在数据库，冲突，请确认ip")
 			return
 		}
+		targetStartNumber += 1
 	}
+	user := user(c)
 	tmp := model.OpsRecords{
+		User:   user,
 		Object: "源操作：" + batchip.SourceStartIp + "-" + batchip.SourceEndNumber + "源网关" + batchip.SourceGateway + "\n目标操作：" + batchip.TargetStartIP + "目标网关" + batchip.TargetGateway + "目标集群" + batchip.TargetClusterName,
 		Action: "修改ip",
 	}
@@ -137,7 +141,9 @@ func StorageMount(c *gin.Context) {
 		errors(c, "集群ip不存在数据库，请确认ip")
 		return
 	}
+	user := user(c)
 	tmp := model.OpsRecords{
+		User:   user,
 		Object: "worker: " + storagemount.InitStartIP + "-" + storagemount.InitEndNumber + " 存储: " + storagemount.StorageStartIP + "-" + storagemount.StorageStopnumber + " worker操作: " + storagemount.Operating,
 		Action: "挂载存储",
 	}
@@ -170,13 +176,16 @@ func InstallMointorAgent(c *gin.Context) {
 		c.String(400, "clustername不能为空")
 		return
 	}
+	user := user(c)
 	tmp := model.OpsRecords{
+		User:   user,
 		Object: "cluster: " + clustername,
 		Action: "安装监控agent",
 	}
 	id := model.InsertRecords(tmp)
 	c.Copy()
 	model.GenerateAnsibleHosts()
+	model.ScanHardWareInfo()
 	go model.ExecLocalShell(id, "monitoragent.sh "+clustername)
 	c.JSON(
 		http.StatusOK, gin.H{
@@ -260,7 +269,9 @@ func UpdateCluster(c *gin.Context) {
 	for k, v := range ids {
 		model.UpdateClusterName(v, ips[k], cluster.TargetClusterName)
 	}
+	user := user(c)
 	tmp := model.OpsRecords{
+		User:   user,
 		Object: "源操作：" + cluster.SourceStartIp + "-" + cluster.SourceEndNumber + "\n目标集群: " + cluster.TargetClusterName,
 		Action: "修改机器所属集群",
 		State:  1,
@@ -303,8 +314,9 @@ func ExecWebShell(c *gin.Context) {
 		ips = append(ips, startPrefix+strconv.Itoa(sourceStartIpNumber))
 		sourceStartIpNumber += 1
 	}
-
-	tmp := model.OpsRecords{
+	user := user(c)
+	var tmp = model.OpsRecords{
+		User:   user,
 		Object: "源操作：" + cluster.SourceStartIp + "-" + cluster.SourceEndNumber + "\n执行命令: " + cluster.Cmd[0:10],
 		Action: "执行命令",
 		State:  1,
@@ -342,4 +354,9 @@ func errors(c *gin.Context, str string) {
 			"message": str,
 		},
 	)
+}
+
+func user(c *gin.Context) string {
+	user, _ := c.Get("username")
+	return user.(string)
 }

@@ -120,7 +120,7 @@ func UpdateHostName() {
 	}
 }
 
-func ExecLocalShell(id int, command string) {
+func ExecLocalShell(id int, command string) string {
 	timeout := 2
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeout+1)*time.Hour)
 	defer cancel()
@@ -132,8 +132,6 @@ func ExecLocalShell(id int, command string) {
 	if err != nil {
 		status = 0
 		cmd_err = err.Error()
-	} else {
-		cmd_err = "no error"
 	}
 	if ctx.Err() != nil {
 		status = 0
@@ -143,6 +141,7 @@ func ExecLocalShell(id int, command string) {
 	//fmt.Printf("out     : [%s]\n", string(out))
 	success := string(out)
 	UpdateRecords(id, status, success, cmd_err)
+	return success + cmd_err
 }
 
 func GenerateAnsibleHosts() error {

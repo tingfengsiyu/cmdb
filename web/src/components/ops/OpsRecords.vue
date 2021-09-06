@@ -12,28 +12,25 @@
           />
         </a-col>
       </a-row>
+    </a-card>
       <a-table
           rowKey="ID"
           :columns="columns"
           :pagination="pagination"
           :data-source="recordlist"
-
           @change="handleTableChange"
       >
-<!--        <span slot="state" slot-scope="state">{{ state == 1 ? '成功': '失败' }}</span>-->
         <span slot="state" slot-scope="state">
-           <div v-if="state===1">
-             成功
-    </div>
-           <div v-else-if="state===0">
-         失败
-     </div>
-          <div v-else>
-         执行中
-     </div>
+           <div v-if="state===1">成功</div>
+           <div v-else-if="state===0">失败</div>
+           <div v-else>执行中</div>
         </span>
+
+        <p slot="expandedRowRender" slot-scope="ops"  style="margin: 0 ;white-space: pre-wrap" >
+          {{ ops.success }}
+
+        </p>
       </a-table>
-    </a-card>
 
   </div>
 </template>
@@ -56,19 +53,25 @@ export default {
         {
           title: 'ID',
           dataIndex: 'ID',
-          width: '3%',
+          width: '5%',
+          align: 'left',
+        },
+        {
+          title: '用户',
+          dataIndex: 'user',
+          width: '5%',
           align: 'left',
         },
         {
           title: '操作分类',
           dataIndex: 'action',
-          width: '7%',
+          width: '10%',
           align: 'left',
         },
         {
           title: '操作目标',
           dataIndex: 'object',
-          width: '20%',
+          width: '30%',
           align: 'left',
           customRender: (object) => {
             const textArr = object.split('\n')
@@ -84,29 +87,29 @@ export default {
         {
           title: '操作状态',
           dataIndex: 'state',
-          width: '5%',
+          width: '15%',
           align: 'left',
           scopedSlots: { customRender: 'state' },
         },
-        {
-          title:'成功记录',
-          align:'left',
-          dataIndex: 'success',
-          customRender: (success) => {
-            const textArr = success.split('\n')
-            return (<div>
-              {
-                textArr.map(t => {
-                  return (<li>{t}</li>)
-                })
-              }
-            </div>)
-          }
-        },
+        // {
+        //   title:'成功记录',
+        //   align:'left',
+        //   dataIndex: 'success',
+        //   customRender: (success) => {
+        //     const textArr = success.split('\n')
+        //     return (<div>
+        //       {
+        //         textArr.map(t => {
+        //           return (<li>{t}</li>)
+        //         })
+        //       }
+        //     </div>)
+        //   }
+        // },
         {
           title: '失败记录',
           dataIndex: 'error',
-          width: '5%',
+          width: '15%',
           align: 'left',
           customRender: (error) => {
             const textArr = error.split('\n')
@@ -120,18 +123,9 @@ export default {
           }
         },
         {
-          title: '创建日期',
+          title: '日期',
           dataIndex: 'CreatedAt',
-          width: '7%',
-          align: 'left',
-          customRender: (val) => {
-            return val ? moment(val).format('YYYY年MM月DD日 HH:mm') : '暂无'
-          },
-        },
-        {
-          title: '更新日期',
-          dataIndex: 'UpdatedAt',
-          width: '7%',
+          width: '15%',
           align: 'left',
           customRender: (val) => {
             return val ? moment(val).format('YYYY年MM月DD日 HH:mm') : '暂无'

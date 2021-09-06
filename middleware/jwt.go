@@ -114,18 +114,17 @@ func JwtToken() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		if key.Role == 2 {
-			if c.Request.Method != "GET" {
-				code = 1008
-				c.JSON(http.StatusOK, gin.H{
-					"code":    code,
-					"message": errmsg.GetErrMsg(code),
-				})
-				c.Abort()
-				return
-			}
+		if key.Role == 2 && c.Request.Method != "GET" {
+			code = 1008
+			c.JSON(http.StatusOK, gin.H{
+				"code":    code,
+				"message": errmsg.GetErrMsg(code),
+			})
+			c.Abort()
+			return
+
 		}
-		c.Set("username", key)
+		c.Set("username", key.Username)
 		c.Next()
 	}
 }
