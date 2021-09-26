@@ -63,7 +63,7 @@
           </a-select>
         </a-form-model-item>
         <a-form-model-item  label="ip池" v-model="newPermission.Ips"  prop="ips">
-          <a-select mode="multiple"  placeholder="Please select"  default-value="all" style="width: 200px" @change="IpChange">
+          <a-select mode="multiple"  placeholder="Please select"  style="width: 200px" @change="IpChange">
             <a-select-option v-for="item in IpList" :key="item.id" :value="item.private_ip_address" >{{item.private_ip_address}}</a-select-option>
           </a-select>
         </a-form-model-item>
@@ -173,7 +173,7 @@ export default {
       },
       columns,
       queryParam: {
-        username: '',
+        group: '',
         pagesize: 5,
         pagenum: 1,
       },
@@ -234,7 +234,10 @@ export default {
         },
       })
       if (res.status != 200) return this.$message.error(res.message)
-      this.IpList = res.data
+      this.IpList = [
+        { id: 0, private_ip_address: 'all' },
+        ...(res.data || [])
+      ]
     },
     async getTermUserList() {
       const { data: res } = await this.$http.get('term/getusers', {
@@ -303,7 +306,7 @@ export default {
       this.$refs.addUserRef.validate(async (valid) => {
         if (!valid) return this.$message.error('参数不符合要求，请重新输入')
         console.log(this.newPermission)
-        const { data: res } = await this.$http.post('term/addpermission', {
+        const { data: res } = await this.$http.post('term/addpermissions', {
           group: this.newPermission.group,
           ips: this.newPermission.Ips,
           term_users:  this.newPermission.TermUsers,
