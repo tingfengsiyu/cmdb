@@ -16,6 +16,10 @@ const BatchIp = () => import(/* webpackChunkName: "UserList" */ '../components/o
 const InstallMonitorAgent = () => import(/* webpackChunkName: "UserList" */ '../components/ops/InstallMonitorAgent')
 const StorageMount = () => import(/* webpackChunkName: "UserList" */ '../components/ops/StorageMount')
 const ExecShell = () => import(/* webpackChunkName: "UserList" */ '../components/ops/ExecShell')
+const WebsSsh = () => import(/* webpackChunkName: "UserList" */ '../components/ops/console')
+const TermUserList = () => import(/* webpackChunkName: "UserList" */ '../components/user/TermUserList')
+const TermPermissionsList = () => import(/* webpackChunkName: "UserList" */ '../components/user/TermPermissions')
+const Alert = () => import(/* webpackChunkName: "UserList" */ '../components/alerts/alert')
 
 // 路由重复点击捕获错误
 const originalPush = VueRouter.prototype.push
@@ -128,14 +132,41 @@ const routes = [
           title: '执行命令'
         }
       },
-
+      {
+        path: 'webssh/:id',
+        component: WebsSsh,
+        meta: {
+          title: 'webssh'
+        }
+      },
       {
         path: 'userlist',
         component: UserList,
         meta: {
           title: '用户列表'
         }
-      }
+      },
+      {
+        path: 'termuserlist',
+        component: TermUserList,
+        meta: {
+          title: '终端用户列表'
+        }
+      },
+      {
+        path: 'termPermissionsList',
+        component: TermPermissionsList,
+        meta: {
+          title: '终端权限配置'
+        }
+      },
+      {
+        path: 'alert',
+        component: Alert,
+        meta: {
+          title: '业务告警展示'
+        }
+      },
     ]
   }
 ]

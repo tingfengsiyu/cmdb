@@ -5,6 +5,7 @@ import './plugin/http'
 import './plugin/antui'
 import './assets/css/style.css'
 
+import 'xterm/dist/xterm.css'
 
 Vue.config.productionTip = false
 new Vue({

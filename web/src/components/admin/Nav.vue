@@ -16,60 +16,83 @@
           <span>新增服务器</span>
         </a-menu-item>
         <a-menu-item key="listserver">
-          <a-icon type="snippets" />
+           
           <span>服务器列表</span>
         </a-menu-item>
       </a-sub-menu>
       <a-sub-menu>
         <span slot="title">
-          <a-icon type="file" />
-          <span>kubernetes集群管理</span>
+          <a-icon type="cloud" />
+          <span>K8S集群管理</span>
         </span>
         <a-menu-item key="addart">
-          <a-icon type="form" />
           <span>Pod</span>
         </a-menu-item>
         <a-menu-item key="artlist">
-          <a-icon type="snippets" />
           <span>SVC</span>
         </a-menu-item>
       </a-sub-menu>
-      <a-menu-item key="userlist">
-        <a-icon type="user" />
-        <span>用户列表</span>
-      </a-menu-item>
+      <a-sub-menu>
+        <span slot="title">
+          <a-icon type="user" />
+          <span>权限管理</span>
+        </span>
+        <a-menu-item key="userlist">
+          <span>系统用户</span>
+        </a-menu-item>
+        <a-menu-item key="termuserlist">
+          <span>终端用户</span>
+        </a-menu-item>
+        <a-menu-item key="termPermissionsList">
+          <span>资产授权</span>
+        </a-menu-item>
+      </a-sub-menu>
+
       <a-sub-menu>
         <span slot="title">
           <a-icon type="file" />
           <span>运维操作</span>
         </span>
         <a-menu-item key="OpsRecords">
-          <a-icon type="form" />
           <span>操作记录</span>
         </a-menu-item>
         <a-menu-item key="osinit">
-          <a-icon type="snippets" />
           <span>系统初始化</span>
         </a-menu-item>
         <a-menu-item key="batchip">
-          <a-icon type="snippets" />
           <span>修改ip</span>
         </a-menu-item>
         <a-menu-item key="storagemount">
-          <a-icon type="snippets" />
           <span>挂载存储</span>
         </a-menu-item>
         <a-menu-item key="installagent">
-          <a-icon type="snippets" />
           <span>安装监控agent</span>
         </a-menu-item>
         <a-menu-item key="UpdateCluster">
-          <a-icon type="snippets" />
           <span>修改机器所属集群</span>
         </a-menu-item>
         <a-menu-item key="ExecShell">
-          <a-icon type="snippets" />
+          <a-icon type="code" />
           <span>执行shell命令</span>
+        </a-menu-item>
+      </a-sub-menu>
+      <a-sub-menu>
+        <span slot="title">
+          <a-icon type="code" />
+          <span>终端操作</span>
+        </span>
+        <a-menu-item key="addserver">
+          <span>命令记录</span>
+        </a-menu-item>
+      </a-sub-menu>
+      <a-sub-menu>
+        <span slot="title">
+          <a-icon type="area-chart" />
+          <span>监控管理</span>
+        </span>
+        <a-menu-item key="alert">
+          <a-icon type="alert" />
+          <span>业务告警展示</span>
         </a-menu-item>
       </a-sub-menu>
     </a-menu>

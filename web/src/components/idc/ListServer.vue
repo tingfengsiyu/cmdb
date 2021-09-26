@@ -2,6 +2,16 @@
   <div>
     <a-card>
       <a-row :gutter="20">
+        <a-col :span="3">
+          <a-button type="primary" :disabled="!hasSelected" :loading="loading" @click="start">
+            批量删除
+          </a-button>
+          <span style="margin-left: 3px">
+        <template v-if="hasSelected">
+          {{ `Selected ${selectedRowKeys.length} items` }}
+        </template>
+      </span>
+        </a-col>
         <a-col :span="6">
           <a-input-search
               v-model="queryParam.private_ip_address"
@@ -43,9 +53,9 @@
           <a-button type="info" @click="getAllServerList()">显示全部</a-button>
         </a-col>
       </a-row>
-
       <a-table
           rowKey="id"
+          :row-selection="{ selectedRowKeys: selectedRowKeys, onChange: onSelectChange }"
           :columns="columns"
           :pagination="pagination"
           :dataSource="Artlist"
@@ -68,6 +78,13 @@
                 style="margin-right:15px"
                 @click="deleteArt(data.id)"
             >删除</a-button>
+            <a-button
+                size="small"
+                type="primary"
+                icon="code"
+                style="margin-right:15px"
+                @click="openWebConsole(data.id)"
+            >webConsole</a-button>
           </div>
         </template>
       </a-table>
@@ -90,7 +107,6 @@ const columns = [
   {
     title: '主机名',
     dataIndex: 'name',
-    width: '10%',
     key: 'name',
     align: 'center',
   },
@@ -112,7 +128,6 @@ const columns = [
     title: '所属集群',
     dataIndex: 'cluster',
     width: '10%',
-    //key: 'desc',
     align: 'center',
   },
   {
@@ -178,11 +193,18 @@ export default {
       headers: {
        Authorization: `Bearer ${localStorage.getItem('token')}`
       },
+      selectedRowKeys: [], // Check here to configure the default column
+      loading: false,
     }
   },
   created() {
     this.getServerList()
     this.getClusterList()
+  },
+  computed: {
+    hasSelected() {
+      return this.selectedRowKeys.length > 0;
+    },
   },
   methods: {
     // 获取服务器列表
@@ -235,6 +257,9 @@ export default {
       }
       this.pagination = pager
       this.getServerList()
+    },
+    openWebConsole(id){
+      window.open(`/#/webssh/${id}`)
     },
     // 删除服务器
     deleteArt(id) {
@@ -295,7 +320,33 @@ export default {
         this.$message.error(`${info.file.name} ${info.file.response.message}`);
       }
     },
-
+    start() {
+      this.$confirm({
+        title: '提示：请再次确认',
+        content: '确定要批量删除服务器吗？一旦删除，无法恢复',
+        onOk: async () => {
+          this.loading = true;
+          // ajax request after empty completing
+          console.log(this.selectedRowKeys)
+          // const { data: res } = await this.$http.delete(`idc/deleteserver/${id}`)
+          // if (res.status != 200) return this.$message.error(res.message)
+          // this.$message.success('删除成功')
+          // this.getServerList()
+        },
+        onCancel: () => {
+          this.$message.info('已取消删除')
+          this.loading = false;
+          this.selectedRowKeys = [];
+          setTimeout(() => {
+            this.loading = false;
+            this.selectedRowKeys = [];
+          }, 1000);
+        },
+      })
+    },
+    onSelectChange(selectedRowKeys) {
+      this.selectedRowKeys = selectedRowKeys;
+    },
   },
 }
 </script>

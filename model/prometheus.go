@@ -4,8 +4,11 @@ import (
 	"cmdb/middleware"
 	"cmdb/utils"
 	"encoding/json"
+	"io/ioutil"
+	"math/big"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -166,4 +169,47 @@ func ReadJsonfile(filePtr *os.File, targets string) (int, error) {
 		}
 	}
 	return code, err
+}
+
+type alert struct {
+	Status string `json:"status"`
+	Data   Data
+}
+type Data struct {
+	Data   string `json:"data"`
+	Alerts []Alerts
+}
+type Alerts struct {
+	Value  string `json:"value"`
+	Labels Label
+}
+type Label struct {
+	Alertname string `json:"alertname"`
+	Instance  string `json:"instance"`
+	Cluster   string `json:"cluster"`
+	Device    string `json:"device"`
+}
+type AlertInfo struct {
+	Alertname string `json:"alertname"`
+	Instance  string `json:"instance"`
+	Cluster   string `json:"cluster"`
+	Value     string `json:"value"`
+}
+
+func PrometheusAlerts() []AlertInfo {
+	client := &http.Client{Timeout: 200 * time.Millisecond}
+	resp, _ := client.Get("http://30.10.0.18:39090/api/v1/alerts")
+	body, _ := ioutil.ReadAll(resp.Body)
+	var a alert
+	var alertinfo = []AlertInfo{}
+	_ = make([]string, 0)
+	json.Unmarshal([]byte(body), &a)
+	for _, v := range a.Data.Alerts {
+		value, _ := strconv.ParseFloat(v.Value, 64)
+		number := big.NewRat(1, 1)
+		number.SetFloat64(value)
+		alertinfo = append(alertinfo, AlertInfo{
+			v.Labels.Alertname, v.Labels.Instance, v.Labels.Cluster, ""})
+	}
+	return alertinfo
 }

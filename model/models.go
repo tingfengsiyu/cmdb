@@ -48,6 +48,7 @@ type Server struct {
 	User             string `gorm:"type:varchar(30);not null" json:"user" validate:"required,min=4"`
 	State            string `gorm:"type:varchar(10);not null" json:"state" validate:"required,min=4"`
 	Gpu              string `gorm:"type:varchar(500);not null" json:"gpu" validate:"required,min=4"`
+	Mac              string `gorm:"type:varchar(500);not null" json:"mac" validate:"required,min=4"`
 	ServerID         int    `gorm:"type:int;not null;unique" json:"server_id" validate:"required,min=1"`
 	IDC_ID           int    `gorm:"type:int;not null" json:"idc_id" validate:"required,min=4"`
 	Cabinet_NumberID int    `gorm:"type:int;not null" json:"cabinet_number_id" validate:"required,min=4"`
@@ -143,6 +144,7 @@ type AwsServer struct {
 type Cluster struct {
 	ID      int    `gorm:"primary_key;auto_increment" json:"id"`
 	Cluster string `gorm:"type:varchar(30);not null" json:"cluster" binding:"required" validate:"required,min=4"`
+	Count   int    `gorm:"type:varchar(30);not null" json:"count" binding:"required" validate:"required,min=4"`
 }
 
 type ScanServers struct {
@@ -161,6 +163,7 @@ type ScanServers struct {
 	User             string `gorm:"type:varchar(30);not null" json:"user" validate:"required,min=4"`
 	State            string `gorm:"type:varchar(10);not null" json:"state" validate:"required,min=4"`
 	Gpu              string `gorm:"type:varchar(500);not null" json:"gpu" validate:"required,min=4"`
+	Mac              string `gorm:"type:varchar(500);not null" json:"mac" validate:"required,min=4"`
 	IDC_ID           int    `gorm:"type:int;not null" json:"idc_id" validate:"required,min=4"`
 	Cabinet_NumberID int    `gorm:"type:int;not null" json:"cabinet_number_id" validate:"required,min=4"`
 	City             string `gorm:"type:varchar(30);not null" json:"city" validate:"required,min=4"`
@@ -215,24 +218,56 @@ type ansibleStruct struct {
 	Cluster          string `json:"cluster"`
 }
 
-// SSH连接表
-type SSHUser struct {
+// 终端用户表
+type TermUser struct {
 	gorm.Model
-	ServerID     int       `gorm:"type:int;not null;unique" json:"server_id" validate:"required,min=1"`
-	Port         int       `gorm:"type:int;not null;unique" json:"port" validate:"required,min=1"`
-	SSHUsername  string    `gorm:"type:varchar(50);not null;unique" json:"sshUsername" validate:"required,min=1"`
-	SSHPassword  string    `gorm:"type:varchar(50);not null;unique" json:"sshPassword" validate:"required,min=1"`
-	IdentityFile string    `gorm:"type:varchar(50);not null;unique" json:"identityFile" validate:"required,min=1"`
-	AllowUsers   *[]string `gorm:"type:varchar(50);not null;unique" json:"allowUsers,omitempty" validate:"required,min=1"`
+	Port         int    `gorm:"type:int;not null" json:"port" validate:"required,min=1"`
+	Username     string `gorm:"type:varchar(50);not null;unique" json:"username" validate:"required,min=1"`
+	Password     string `gorm:"type:varchar(50);not null;unique" json:"password" validate:"required,min=1"`
+	IdentityFile string `gorm:"type:varchar(50);unique" json:"identityFile"`
+	Protocol     string `gorm:"type:int;not null;unique" json:"protocol" validate:"required,min=1"`
 }
 
-type ScanSshd struct {
-	Name             string    `gorm:"type:varchar(42);not null" json:"name" validate:"required,min=4"`
-	PrivateIpAddress string    `json:"private_ip_address"`
-	ServerID         int       `gorm:"type:int;not null;unique" json:"server_id" validate:"required,min=1"`
-	Port             int       `gorm:"type:int;not null;unique" json:"port" validate:"required,min=1"`
-	SSHUsername      string    `gorm:"type:varchar(50);not null;unique" json:"sshUsername" validate:"required,min=1"`
-	SSHPassword      string    `gorm:"type:varchar(50);not null;unique" json:"sshPassword" validate:"required,min=1"`
-	IdentityFile     string    `gorm:"type:varchar(50);not null;unique" json:"identityFile" validate:"required,min=1"`
-	AllowUsers       *[]string `gorm:"type:varchar(50);not null;unique" json:"allowUsers,omitempty" validate:"required,min=1"`
+type UserPermissions struct {
+	gorm.Model
+	Group      string `gorm:"type:varchar(50);not null" json:"group" validate:"required,min=1"`
+	ServerID   int    `gorm:"type:int;not null" json:"server_id" validate:"required,min=1"`
+	UserID     int    `gorm:"type:int;not null" json:"user_id" validate:"required,min=1"`
+	TermUserID int    `gorm:"type:int;not null" json:"term_user_id" validate:"required,min=1"`
+}
+
+type ScanTerm struct {
+	ID               int    `gorm:"primary_key;auto_increment;int" json:"id"`
+	Name             string `gorm:"type:varchar(42);not null" json:"name" validate:"required,min=4"`
+	PrivateIpAddress string `json:"private_ip_address"`
+	ServerID         int    `gorm:"type:int;not null;unique" json:"serverid" validate:"required,min=1"`
+	Port             int    `gorm:"type:int;not null;unique" json:"port" validate:"required,min=1"`
+	User             string `gorm:"type:varchar(50);not null;unique" json:"user" validate:"required,min=1"`
+	Username         string `gorm:"type:varchar(50);not null;unique" json:"username" validate:"required,min=1"`
+	Password         string `gorm:"type:varchar(50);not null;unique" json:"password" validate:"required,min=1"`
+	Protocol         string `gorm:"type:varchar(50);not null;unique" json:"protocol" validate:"required,min=1"`
+	IdentityFile     string `gorm:"type:varchar(50);unique" json:"identityFile" validate:"required,min=1"`
+	Group            string `gorm:"type:varchar(50);not null" json:"group" validate:"required,min=1"`
+}
+
+//  u.id = p.user_id and s.server_id =p.server_id and p.term_user_id=t.id
+
+type SshLog struct {
+	//gorm.Model
+	//UserId    uint      `gorm:"type:int" json:"user_id" form:"user_id"`
+	////StartTime time.Time `json:"started_at" `
+	//TermType uint      	`gorm:"type:varchar(50);not null;unique" json:"termtype"`
+	//SshUser   string    `gorm:"type:varchar(50);not null" json:"ssh_user" comment:"ssh账号"`
+	//ClientIp  string    `gorm:"type:varchar(50);not null" json:"client_ip" form:"client_ip"`
+	//Status    uint      `gorm:"type:varchar(50);not null" json:"status" comment:"0-未标记 2-正常 4-警告 8-危险 16-致命"`
+	Log string `gorm:"type:text" json:"log"`
+	//User      string    `gorm:"type:varchar(30);not null" json:"user" validate:"required,min=16"  comment:"系统登录用户"`
+	//PrivateIpAddress string `gorm:"type:varchar(30);not null" json:"private_ip_address" validate:"required,min=16"`
+}
+
+type AddPermissions struct {
+	Group     string   `json:"group"`
+	Ips       []string `json:"ips"`
+	TermUsers string   `json:"term_users"`
+	Users     []string `json:"users"`
 }

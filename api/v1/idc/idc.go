@@ -159,10 +159,10 @@ func ExportCsv(c *gin.Context) {
 	data, _ := model.NetworkTopology(0, "", "", "", "", "")
 	writer := csv.NewWriter(bytesBuffer)
 
-	writer.Write([]string{"id", "主机名", "型号", "位置U数", "私有地址", "公网地址", "角色标签", "集群名", "机房标签ip", "cpu", "内存", "磁盘", "用户", "状态已上架", "城市", "机房名", "机柜名"})
+	writer.Write([]string{"id", "主机名", "型号", "位置U数", "私有地址", "公网地址", "角色标签", "集群名", "机房标签ip", "cpu", "内存", "磁盘", "用户", "状态已上架", "城市", "机房名", "机柜名", "显卡", "MAC地址"})
 	for _, v := range data {
 		writer.Write([]string{strconv.Itoa(v.ID), v.Name, v.Models, v.Location, v.PrivateIpAddress, v.PublicIpAddress,
-			v.Label, v.Cluster, v.LabelIpAddress, v.Cpu, v.Memory, v.Disk, v.User, v.State, v.City, v.IDC_Name, v.Cabinet_Number})
+			v.Label, v.Cluster, v.LabelIpAddress, v.Cpu, v.Memory, v.Disk, v.User, v.State, v.City, v.IDC_Name, v.Cabinet_Number, v.Gpu, v.Mac})
 	}
 
 	writer.Flush() // 此时才会将缓冲区数据写入

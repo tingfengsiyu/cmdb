@@ -128,3 +128,50 @@ func JwtToken() gin.HandlerFunc {
 		c.Next()
 	}
 }
+func WsJwtToken() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var code int
+		tokenHeader, _ := c.GetQuery("_t")
+		if tokenHeader == "" {
+			code = errmsg.ERROR_TOKEN_EXIST
+			c.JSON(http.StatusOK, gin.H{
+				"code":    code,
+				"message": errmsg.GetErrMsg(code),
+			})
+			c.Abort()
+			return
+		}
+		checkToken := strings.Split(tokenHeader, " ")
+		if len(checkToken) == 0 {
+			code = errmsg.ERROR_TOKEN_TYPE_WRONG
+			c.JSON(http.StatusOK, gin.H{
+				"code":    code,
+				"message": errmsg.GetErrMsg(code),
+			})
+			c.Abort()
+			return
+		}
+
+		if len(checkToken) != 2 && checkToken[0] != "Bearer" {
+			code = errmsg.ERROR_TOKEN_TYPE_WRONG
+			c.JSON(http.StatusOK, gin.H{
+				"code":    code,
+				"message": errmsg.GetErrMsg(code),
+			})
+			c.Abort()
+			return
+		}
+		key, tCode := CheckToken(checkToken[1])
+		if tCode != errmsg.SUCCSE {
+			code = tCode
+			c.JSON(http.StatusOK, gin.H{
+				"code":    code,
+				"message": errmsg.GetErrMsg(code),
+			})
+			c.Abort()
+			return
+		}
+		c.Set("wsusername", key.Username)
+		c.Next()
+	}
+}

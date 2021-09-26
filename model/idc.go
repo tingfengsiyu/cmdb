@@ -85,13 +85,13 @@ func NetworkTopology(id int, name, cabinet_number, user, cluster, private_ip_add
 	var scan []ScanServers
 	if id != 0 {
 		err = db.Raw("select distinct server.id, city,idc_name,cabinet_number,name,models,location,private_ip_address,public_ip_address,label,cluster,label_ip_address,cpu,"+
-			"memory,disk,user,state,gpu from  server  left join cabinet on  cabinet.cabinet_number_id=server.cabinet_number_id "+
-			"left join idc on idc.idc_id =server.idc_id where private_ip_address like ? and  cabinet_number like ? and  user like ? and  cluster  like ?  and   server.id=?", private_ip_address+"%", cabinet_number+"%", user+"%", cluster+"%", id).Scan(&scan).Error
+			"memory,disk,user,state,gpu,mac from  server  left join cabinet on  cabinet.cabinet_number_id=server.cabinet_number_id "+
+			"left join idc on idc.idc_id =server.idc_id where name like ? and private_ip_address like ? and  cabinet_number like ? and  user like ? and  cluster  like ?  and   server.id=?", "%"+name+"%", "%"+private_ip_address+"%", "%"+cabinet_number+"%", "%"+user+"%", cluster+"%", id).Scan(&scan).Error
 
 	} else {
 		err = db.Raw("select distinct server.id, city,idc_name,cabinet_number,name,models,location,private_ip_address,public_ip_address,label,cluster,label_ip_address,cpu,"+
-			"memory,disk,user,state,gpu from  server  left join cabinet on  cabinet.cabinet_number_id=server.cabinet_number_id "+
-			"left join idc on idc.idc_id =server.idc_id where private_ip_address like ? and  cabinet_number like ? and  user like ? and  cluster  like ?  ", private_ip_address+"%", cabinet_number+"%", user+"%", cluster+"%").Scan(&scan).Error
+			"memory,disk,user,state,gpu,mac from  server  left join cabinet on  cabinet.cabinet_number_id=server.cabinet_number_id "+
+			"left join idc on idc.idc_id =server.idc_id where name like ? and private_ip_address like ? and  cabinet_number like ? and  user like ? and  cluster  like ?  ", "%"+name+"%", "%"+private_ip_address+"%", "%"+cabinet_number+"%", "%"+user+"%", cluster+"%").Scan(&scan).Error
 
 	}
 	if err != nil {

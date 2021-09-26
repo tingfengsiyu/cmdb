@@ -18,9 +18,9 @@
 -- Table structure for table `user`
 --
 create
-database cmdb ;
+    database cmdb ;
 use
-cmdb;
+    cmdb;
 DROP TABLE IF EXISTS `user`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -43,13 +43,13 @@ CREATE TABLE `user`
 --
 
 LOCK
-TABLES `user` WRITE;
+    TABLES `user` WRITE;
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
 INSERT INTO `user`
 VALUES (4, '2021-01-26 15:22:12.588', '2021-01-26 15:22:12.588', NULL, 'luofeng', 'rytBNnf2J2vciy+8', 1);
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
 UNLOCK
-TABLES;
+    TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -75,4 +75,29 @@ CREATE TABLE `ops_records` (
                                `error` longtext NOT NULL DEFAULT 'error' ,
                                PRIMARY KEY (`id`),
                                KEY `idx_ops_records_deleted_at` (`deleted_at`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+
+CREATE TABLE `user_permissions` (   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,   `created_at` datetime(3) DEFAULT NULL,
+                                    `updated_at` datetime(3) DEFAULT NULL,   `deleted_at` datetime(3) DEFAULT NULL,
+                                    `server_id` bigint(20) NOT NULL,
+                                    `user_id` bigint(20) NOT NULL,
+                                    `term_user_id` bigint(20) NOT NULL,
+                                    `group` varchar(50) NOT NULL,
+                                    PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `term_user` (
+                             `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+                             `created_at` datetime(3) DEFAULT NULL,
+                             `updated_at` datetime(3) DEFAULT NULL,
+                             `deleted_at` datetime(3) DEFAULT NULL,
+                             `port` bigint(20) NOT NULL,
+                             `username` varchar(50) NOT NULL,
+                             `password` varchar(50) NOT NULL,
+                             `identity_file` varchar(50) NOT NULL,
+                             `protocol` varchar(50) NOT NULL,
+                             PRIMARY KEY (`id`),
+                             UNIQUE KEY `username` (`username`),
+                             UNIQUE KEY `password` (`password`),
+                             KEY `idx_term_user_deleted_at` (`deleted_at`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8
+

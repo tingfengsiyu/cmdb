@@ -105,7 +105,8 @@ func GetServers(pageSize int, pageNum int) ([]Server, int64) {
 func GetClusters() ([]Cluster, int) {
 	var cluster []Cluster
 	var svc []Server
-	err = db.Distinct("cluster").Order("cluster desc").Find(&svc).Error
+	//err = db.Distinct("cluster,count(cluster) as count").Group("cluster").Find(&svc).Error
+	err = db.Model(&Server{}).Select("cluster,count(cluster) as count").Group("cluster").Find(&cluster).Error
 	for _, v := range svc {
 		cluster = append(cluster, Cluster{
 			ID:      v.ID,

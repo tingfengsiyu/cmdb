@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -32,10 +33,10 @@ func ShellInit(c *gin.Context) {
 	}
 	var cmd string
 	if shellinit.Role == "lotus-worker" {
-		cmd = "osinit.sh " + shellinit.StorageMount.InitStartIP + " " + shellinit.StorageMount.InitEndNumber + " " + shellinit.InitUser + " " +
+		cmd = "/data/ops/script/osinit.sh " + shellinit.StorageMount.InitStartIP + " " + shellinit.StorageMount.InitEndNumber + " " + shellinit.InitUser + " " +
 			shellinit.InitPass + " " + shellinit.Role + " " + shellinit.StorageMount.StorageStartIP + " " + shellinit.StorageMount.StorageStopnumber
 	} else if shellinit.Role == "lotus-storage" {
-		cmd = "osinit.sh " + shellinit.StorageMount.InitStartIP + " " + shellinit.StorageMount.InitEndNumber + " " + shellinit.InitUser + " " +
+		cmd = "/data/ops/script/osinit.sh " + shellinit.StorageMount.InitStartIP + " " + shellinit.StorageMount.InitEndNumber + " " + shellinit.InitUser + " " +
 			shellinit.InitPass + " " + shellinit.Role
 	} else {
 		errors(c, "role错误 lotus-worker|lotus-storage")
@@ -116,10 +117,9 @@ func BatchIp(c *gin.Context) {
 		model.UpdateClusterName(v, ips[k], batchip.TargetClusterName)
 	}
 	model.GenerateAnsibleHosts()
-	model.AppendAnsibleHosts(ips, batchip.TargetClusterName)
 	model.GenerateClustersHosts()
 	//sh batchip.sh sourceIP sourceGateway sourceEndNumber targetStartIP targetGateway
-	cmd := "batchip.sh " + batchip.SourceStartIp + " " + batchip.SourceGateway + " " +
+	cmd := "/data/ops/script/batchip.sh " + batchip.SourceStartIp + " " + batchip.SourceGateway + " " +
 		batchip.SourceEndNumber + " " + batchip.TargetStartIP + " " + batchip.TargetGateway
 	go model.ExecLocalShell(id, cmd)
 	c.JSON(
@@ -150,7 +150,7 @@ func StorageMount(c *gin.Context) {
 	id := model.InsertRecords(tmp)
 	c.Copy()
 	// batchStorage-mount.sh  sourceIP  sourceEndNumber storageStartIP storageEndNumber operating
-	cmd := "batchStorage-mount.sh  " + storagemount.InitStartIP + " " + storagemount.InitEndNumber + " " + storagemount.StorageStartIP + " " + storagemount.StorageStopnumber + " " + storagemount.Operating
+	cmd := "/data/ops/script/batchStorage-mount.sh  " + storagemount.InitStartIP + " " + storagemount.InitEndNumber + " " + storagemount.StorageStartIP + " " + storagemount.StorageStopnumber + " " + storagemount.Operating
 	go model.ExecLocalShell(id, cmd)
 	c.JSON(
 		http.StatusOK, gin.H{
@@ -185,8 +185,9 @@ func InstallMointorAgent(c *gin.Context) {
 	id := model.InsertRecords(tmp)
 	c.Copy()
 	model.GenerateAnsibleHosts()
+	model.GenerateClustersHosts()
 	model.ScanHardWareInfo()
-	go model.ExecLocalShell(id, "monitoragent.sh "+clustername)
+	go model.ExecLocalShell(id, "/data/ops/script/monitoragent.sh "+clustername)
 	c.JSON(
 		http.StatusOK, gin.H{
 			"status":  200,
@@ -279,7 +280,6 @@ func UpdateCluster(c *gin.Context) {
 	model.InsertRecords(tmp)
 
 	model.GenerateAnsibleHosts()
-	model.AppendAnsibleHosts(ips, cluster.TargetClusterName)
 	//追加生成 ansible hosts  worker
 	model.GenerateClustersHosts()
 	c.JSON(
@@ -323,7 +323,6 @@ func ExecWebShell(c *gin.Context) {
 	}
 	id := model.InsertRecords(tmp)
 	model.GenerateAnsibleHosts()
-	model.AppendAnsibleHosts(ips, "host")
 	file, err := os.OpenFile(tmpfile, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0666)
 	if err != nil {
 		middleware.SugarLogger.Errorf("写入文件错误!!!%s", err)
@@ -359,4 +358,16 @@ func errors(c *gin.Context, str string) {
 func user(c *gin.Context) string {
 	user, _ := c.Get("username")
 	return user.(string)
+}
+
+func PrometheusAlerts(c *gin.Context) {
+	alertinfo := model.PrometheusAlerts()
+	sort.Slice(alertinfo, func(i, j int) bool { return alertinfo[i].Cluster < alertinfo[j].Cluster })
+	c.JSON(
+		http.StatusOK, gin.H{
+			"status": 200,
+			"data":   alertinfo,
+			"total":  len(alertinfo),
+		},
+	)
 }

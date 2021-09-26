@@ -15,7 +15,8 @@ import (
 	"time"
 )
 
-var sudostr = " ansible_ssh_user=" + utils.WorkerUser + " ansible_ssh_pass=" + utils.WorkerPass + " ansible_sudo_pass=" + utils.WorkerSudoPass
+//var sudostr = " ansible_ssh_user=" + utils.WorkerUser + " ansible_ssh_pass=" + utils.WorkerPass + " ansible_sudo_pass=" + utils.WorkerSudoPass
+var sudostr = ""
 
 type Connection struct {
 	*ssh.Client
@@ -124,7 +125,7 @@ func ExecLocalShell(id int, command string) string {
 	timeout := 2
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeout+1)*time.Hour)
 	defer cancel()
-	cmdarray := []string{"-c", utils.ScriptDir + command}
+	cmdarray := []string{"-c", command}
 	cmd := exec.CommandContext(ctx, "bash", cmdarray...)
 	out, err := cmd.CombinedOutput()
 	var cmd_err string
@@ -145,144 +146,112 @@ func ExecLocalShell(id int, command string) string {
 }
 
 func GenerateAnsibleHosts() error {
+	file, err := os.OpenFile(utils.AnsibleHosts, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0666)
+	if err != nil {
+		middleware.SugarLogger.Errorf("写入文件错误!!!%s", err)
+	}
+	defer file.Close()
+	maps := allHosts()
+	for k, v := range maps {
+		file.WriteString("[" + k + "]\n")
+		for _, ip := range v {
+			file.WriteString(ip + sudostr + "\n")
+		}
+		file.WriteString("[" + k + ":vars]\n")
+		file.WriteString("ansible_ssh_user=" + utils.WorkerUser + "\n")
+		file.WriteString("ansible_ssh_pass=" + utils.WorkerPass + "\n")
+		file.WriteString("ansible_sudo_pass=" + utils.WorkerSudoPass + "\n")
+	}
+	return err
+}
 
-	var ansiblehost = []ansibleStruct{}
+func GenerateClustersHosts() {
+	maps := allHosts()
+	for k, v := range maps {
+		//reg := regexp.MustCompile("-(lotus|chia|tmp)-.*$");
+		//a := reg.ReplaceAllString(k, "")
+		tmpfile := utils.AnsibleHosts + "-" + k
+		//s, err := os.OpenFile(tmpfile, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0666)
+		//defer  s.Close()
+		t, err := os.OpenFile(tmpfile, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0666)
+		defer t.Close()
+		if err != nil {
+			middleware.SugarLogger.Errorf("写入文件错误!!!%s", err)
+		}
+		t.WriteString("[" + k + "]\n")
+		for _, s := range v {
+			t.WriteString(s + sudostr + "\n")
+		}
+		t.WriteString("[" + k + ":vars]\n")
+		t.WriteString("ansible_ssh_user=" + utils.WorkerUser + "\n")
+		t.WriteString("ansible_ssh_pass=" + utils.WorkerPass + "\n")
+		t.WriteString("ansible_sudo_pass=" + utils.WorkerSudoPass + "\n")
+	}
+}
 
-	err = db.Model(&Server{}).Select("private_ip_address,label,cluster").Scan(&ansiblehost).Error
+//func Hosts() map[string][]string {
+//	var maps = make(map[string][]string, 0)
+//	str := []string{}
+//	ss := ""
+//	clusters ,_:=GetClusters()
+//	for _,v := range  clusters {
+//		servers, _ := GetCluster(v.Cluster)
+//		sort.Slice(servers, func(i, j int) bool { return servers[i].Cluster < servers[j].Cluster })
+//		for _,s := range servers{
+//			ss= v.Cluster
+//			str = append(str,s.PrivateIpAddress+ " roles="+s.Label +" hostname="+s.Name)
+//		}
+//		maps[ss] = str
+//		str = []string{}
+//	}
+//	return maps
+//}
+
+func allHosts() map[string][]string {
+	ansiblehost, _ := GetServers(0, 0)
 	if err != nil {
 		middleware.SugarLogger.Errorf("sql查询错误%s", err)
 	}
 	type server struct {
 		PrivateIpAddress string `json:"private_ip_address"`
-		Role             string `json:"Role"` //cluster+Label
+		Role             string `json:"role"` //cluster+Label
+		Label            string `json:"label"`
+		Name             string `json:"name"`
 	}
 	servers := []server{}
 	for _, v := range ansiblehost {
-		servers = append(servers, server{v.PrivateIpAddress, v.Cluster + "-" + v.Label})
+		servers = append(servers, server{v.PrivateIpAddress, v.Cluster + "-" + v.Label, v.Label, v.Name})
 	}
 	sort.Slice(servers, func(i, j int) bool { return servers[i].Role < servers[j].Role })
-	var worker, miner, storage, none []string
 	var maps = make(map[string][]string, 0)
+	var worker, miner, storage, none []string
 	for _, v := range servers {
-		if _, ok := maps[v.Role]; !ok {
+		labels := v.Role
+		str := "" + " roles=" + v.Label + " hostname=" + v.Name
+		if _, ok := maps[labels]; !ok {
 			miner = []string{}
 			worker = []string{}
 			storage = []string{}
 			none = []string{}
 		}
-
-		switch v.Role {
+		switch labels {
 		case "lotus-worker":
-			worker = append(worker, v.PrivateIpAddress)
+			worker = append(worker, v.PrivateIpAddress+str)
 			sort.Strings(worker)
-			maps[v.Role] = worker
+			maps[labels] = worker
 		case "lotus-storage":
-			storage = append(storage, v.PrivateIpAddress)
+			storage = append(storage, v.PrivateIpAddress+str)
 			sort.Strings(storage)
-			maps[v.Role] = storage
+			maps[labels] = storage
 		case "lotus-miner":
-			miner = append(miner, v.PrivateIpAddress)
+			miner = append(miner, v.PrivateIpAddress+str)
 			sort.Strings(miner)
-			maps[v.Role] = miner
+			maps[labels] = miner
 		default:
-			none = append(none, v.PrivateIpAddress)
+			none = append(none, v.PrivateIpAddress+str)
 			sort.Strings(none)
-			maps[v.Role] = none
-		}
-
-	}
-	file, err := os.OpenFile(utils.AnsibleHosts, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0666)
-	if err != nil {
-		middleware.SugarLogger.Errorf("写入文件错误!!!%s", err)
-		return nil
-	}
-	defer file.Close()
-	for k, v := range maps {
-		file.WriteString("[" + k + "]\n")
-		for _, ip := range v {
-			file.WriteString(ip + sudostr + "\n")
+			maps[labels] = none
 		}
 	}
-	return err
-}
-
-func AppendAnsibleHosts(ips []string, cluster string) error {
-	file, err := os.OpenFile(utils.AnsibleHosts, os.O_WRONLY|os.O_APPEND, 0666)
-	if err != nil {
-		middleware.SugarLogger.Errorf("写入文件错误!!!%s", err)
-		return nil
-	}
-	defer file.Close()
-	file.WriteString("[" + cluster + "-tmpworker]\n")
-	for _, ip := range ips {
-		file.WriteString(ip + sudostr + "\n")
-	}
-	//sync  target cluster ansible hosts
-	SyncTargetHosts(ips, cluster)
-	return err
-}
-
-func SyncTargetHosts(ips []string, cluster string) error {
-	tmpfile := utils.AnsibleHosts + "-" + cluster
-	file, err := os.OpenFile(tmpfile, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0666)
-	if err != nil {
-		middleware.SugarLogger.Errorf("写入文件错误!!!%s", err)
-		return nil
-	}
-	defer file.Close()
-
-	//sync  target cluster ansible hosts
-	servers, _ := GetCluster(cluster)
-	sort.Slice(servers, func(i, j int) bool { return servers[i].Label < servers[j].Label })
-	var worker, miner, storage, none []string
-	var maps = make(map[string][]string, 0)
-	for _, v := range servers {
-		if _, ok := maps[v.Label]; !ok {
-			miner = []string{}
-			worker = []string{}
-			storage = []string{}
-			none = []string{}
-		}
-		switch v.Label {
-		case "lotus-worker":
-			worker = append(worker, v.PrivateIpAddress)
-			sort.Strings(worker)
-			maps[v.Label] = worker
-		case "lotus-storage":
-			storage = append(storage, v.PrivateIpAddress)
-			sort.Strings(storage)
-			maps[v.Label] = storage
-		case "lotus-miner":
-			miner = append(miner, v.PrivateIpAddress)
-			sort.Strings(miner)
-			maps[v.Label] = miner
-		default:
-			none = append(none, v.PrivateIpAddress)
-			sort.Strings(none)
-			maps[v.Label] = none
-		}
-	}
-	for k, v := range maps {
-		file.WriteString("[" + k + "]\n")
-		for _, ip := range v {
-			file.WriteString(ip + sudostr + "\n")
-		}
-	}
-	//
-	file.WriteString("[" + "addworker]\n")
-	for _, ip := range ips {
-		file.WriteString(ip + sudostr + "\n")
-	}
-	//
-	cmd := "scp.sh " + cluster + "-*miner " + tmpfile + " " + utils.AnsibleHosts
-	ExecLocalShell(0, cmd)
-	return err
-}
-
-func GenerateClustersHosts() {
-	clusters, _ := GetClusters()
-	for _, v := range clusters {
-		var ips []string
-		go SyncTargetHosts(ips, v.Cluster)
-	}
+	return maps
 }

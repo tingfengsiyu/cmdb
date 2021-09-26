@@ -101,17 +101,6 @@ func GetCluster(c *gin.Context) {
 	)
 }
 
-func Cron(c *gin.Context) {
-	c.Copy()
-	go model.CheckAgentStatus()
-	c.JSON(
-		http.StatusOK, gin.H{
-			"status": 200,
-			"total":  1,
-		},
-	)
-}
-
 func GetServers(c *gin.Context) {
 	pageSize, _ := strconv.Atoi(c.Query("pagesize"))
 	pageNum, _ := strconv.Atoi(c.Query("pagenum"))

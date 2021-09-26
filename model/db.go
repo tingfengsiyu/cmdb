@@ -35,7 +35,7 @@ func InitDb() {
 		middleware.SugarLogger.Infof("连接数据库失败，请检查参数%s", err)
 		panic(err)
 	}
-	_ = db.AutoMigrate(&Cabinet{}, &MonitorPrometheus{}, &CloudInstance{}, &Idc{}, &Server{}, &User{}, &OpsRecords{}, &SSHUser{})
+	_ = db.AutoMigrate(&Cabinet{}, &MonitorPrometheus{}, &CloudInstance{}, &Idc{}, &Server{}, &User{}, &OpsRecords{}, &UserPermissions{}, &SshLog{})
 
 	sqlDB, _ := db.DB()
 	// SetMaxIdleCons 设置连接池中的最大闲置连接数。

@@ -8,7 +8,7 @@
 
 
 .footer span {
-  height: 100%;
-  font-size: 18px;
+  height: 5px;
+  font-size: 5px;
 }
 </style>

@@ -5,6 +5,7 @@ import (
 	"cmdb/api/v1/idc"
 	"cmdb/api/v1/script"
 	"cmdb/api/v1/user"
+	"cmdb/api/v1/ws"
 	"cmdb/middleware"
 	"cmdb/utils"
 	"github.com/gin-gonic/gin"
@@ -42,6 +43,7 @@ func InitRouter() {
 		router.PUT("execshell", script.ExecWebShell)
 		router.POST("updatehostname", script.UpdateHostName)
 		router.POST("writeprometheus", script.WritePrometheus)
+		router.GET("prometheusalerts", script.PrometheusAlerts)
 		router.GET("installmointoragent", script.InstallMointorAgent)
 		router.POST("generateansiblehosts", script.GenerateAnsibleHosts)
 		router.POST("generateclustershosts", script.GenerateClustersHosts)
@@ -77,6 +79,26 @@ func InitRouter() {
 		u.GET("getuser/:id", user.GetUserInfo)
 		u.PUT("edituser/:id", user.EditUser)
 		u.DELETE("deleteuser/:id", user.DeleteUser)
+	}
+	//term_user 新增终端用户和对应机器权限配置
+	t := r.Group("api/v1/term")
+	router.Use(middleware.JwtToken())
+	{
+		t.POST("adduser", user.AddTermUser)
+		t.GET("getusers", user.GetTermUsers)
+		t.GET("getuser/:id", user.GetTermUserInfo)
+		t.PUT("edituser/:id", user.EditTermUser)
+		t.GET("permissions", user.ServerPermissions)
+		t.POST("addpermissions", user.AddPermissions)
+		t.DELETE("deletePermission/:id", user.DeletePermission)
+		t.PUT("editpermission/:id", user.EditPermission)
+		t.DELETE("deleteuser/:id", user.DeleteTermUser)
+	}
+
+	w := r.Group("api/v1/ws")
+	w.Use(middleware.WsJwtToken())
+	{
+		w.GET("console/:id", ws.WsSsh)
 	}
 	//k := r.Group("api/v1/k8s")
 	//{
