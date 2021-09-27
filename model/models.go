@@ -42,7 +42,7 @@ type Server struct {
 	Cluster          string `gorm:"type:varchar(30);not null" json:"cluster" binding:"required" validate:"required,min=4"`
 	LabelIpAddress   string `gorm:"type:varchar(30);not null" json:"label_ip_address" validate:"required,min=4"`
 	Cpu              string `gorm:"type:varchar(500);not null" json:"cpu" validate:"required,min=3"`
-	Memory           string `gorm:"type:varchar(30);not null" json:"memory" validate:"required,min=3"`
+	Memory           string `gorm:"type:varchar(200);not null" json:"memory" validate:"required,min=3"`
 	Disk             string `gorm:"type:varchar(500);not null" json:"disk" validate:"required,min=3"`
 	gorm.Model
 	User             string `gorm:"type:varchar(30);not null" json:"user" validate:"required,min=4"`
@@ -252,17 +252,15 @@ type ScanTerm struct {
 
 //  u.id = p.user_id and s.server_id =p.server_id and p.term_user_id=t.id
 
-type SshLog struct {
-	//gorm.Model
-	//UserId    uint      `gorm:"type:int" json:"user_id" form:"user_id"`
-	////StartTime time.Time `json:"started_at" `
-	//TermType uint      	`gorm:"type:varchar(50);not null;unique" json:"termtype"`
-	//SshUser   string    `gorm:"type:varchar(50);not null" json:"ssh_user" comment:"ssh账号"`
-	//ClientIp  string    `gorm:"type:varchar(50);not null" json:"client_ip" form:"client_ip"`
+type TermLog struct {
+	gorm.Model
+	Protocol string `gorm:"type:varchar(50);not null" json:"protocol"`
+	TermUser string `gorm:"type:varchar(50);not null" json:"term_user" comment:"ssh账号"`
+	ClientIp string `gorm:"type:varchar(50);not null" json:"client_ip" form:"client_ip"`
 	//Status    uint      `gorm:"type:varchar(50);not null" json:"status" comment:"0-未标记 2-正常 4-警告 8-危险 16-致命"`
-	Log string `gorm:"type:text" json:"log"`
-	//User      string    `gorm:"type:varchar(30);not null" json:"user" validate:"required,min=16"  comment:"系统登录用户"`
-	//PrivateIpAddress string `gorm:"type:varchar(30);not null" json:"private_ip_address" validate:"required,min=16"`
+	Log              string `gorm:"type:text" json:"log"`
+	User             string `gorm:"type:varchar(30);not null" json:"user" validate:"required,min=16"  comment:"系统登录用户"`
+	PrivateIpAddress string `gorm:"type:varchar(30);not null" json:"private_ip_address" validate:"required,min=16"  comment:"操作的机器"`
 }
 
 type AddPermissions struct {

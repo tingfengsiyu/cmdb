@@ -93,6 +93,7 @@ func InitRouter() {
 		t.DELETE("deletePermission/:id", user.DeletePermission)
 		t.PUT("editpermission/:id", user.EditPermission)
 		t.DELETE("deleteuser/:id", user.DeleteTermUser)
+		t.GET("consolelog", ws.GetTermLogs)
 	}
 
 	w := r.Group("api/v1/ws")

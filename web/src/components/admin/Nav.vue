@@ -81,8 +81,8 @@
           <a-icon type="code" />
           <span>终端操作</span>
         </span>
-        <a-menu-item key="addserver">
-          <span>命令记录</span>
+        <a-menu-item key="consolelog">
+          <span>操作记录</span>
         </a-menu-item>
       </a-sub-menu>
       <a-sub-menu>

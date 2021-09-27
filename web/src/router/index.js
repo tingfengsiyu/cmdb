@@ -16,7 +16,8 @@ const BatchIp = () => import(/* webpackChunkName: "UserList" */ '../components/o
 const InstallMonitorAgent = () => import(/* webpackChunkName: "UserList" */ '../components/ops/InstallMonitorAgent')
 const StorageMount = () => import(/* webpackChunkName: "UserList" */ '../components/ops/StorageMount')
 const ExecShell = () => import(/* webpackChunkName: "UserList" */ '../components/ops/ExecShell')
-const WebsSsh = () => import(/* webpackChunkName: "UserList" */ '../components/ops/console')
+const WebsSsh = () => import(/* webpackChunkName: "UserList" */ '../components/term/console')
+const ConsoleLog = () => import(/* webpackChunkName: "UserList" */ '../components/term/consoleLog')
 const TermUserList = () => import(/* webpackChunkName: "UserList" */ '../components/user/TermUserList')
 const TermPermissionsList = () => import(/* webpackChunkName: "UserList" */ '../components/user/TermPermissions')
 const Alert = () => import(/* webpackChunkName: "UserList" */ '../components/alerts/alert')
@@ -165,6 +166,13 @@ const routes = [
         component: Alert,
         meta: {
           title: '业务告警展示'
+        }
+      },
+      {
+        path: 'Consolelog',
+        component: ConsoleLog,
+        meta: {
+          title: '终端操作记录'
         }
       },
     ]
