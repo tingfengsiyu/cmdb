@@ -28,7 +28,7 @@
             <a-form-model-item has-feedback label="变量" prop="variable">
               <a-input style="width:300px" v-model="ops.variable" />
             </a-form-model-item>
-            <a-form-model-item label="playbook文件名" >
+            <a-form-model-item label="playbook文件名" prop="filename">
               <a-select placeholder="选择playbook文件名"  style="width:100%" @change="fileChange" >
                 <a-select-option v-for="item in FileList" :key="item.id" :value="item.filename" >{{item.filename}}</a-select-option>
               </a-select>
@@ -66,6 +66,7 @@ export default {
       opsRules: {
         tag: [{ required: true, message: '请输入tags', trigger: 'blur' }],
         variable: [{ required: true, message: '请输入ansible变量', trigger: 'blur' }],
+        filename: [{ required: true, message: '请选择ansiblePlaybbok文件', trigger: 'blur' }],
       },
     }
   },
