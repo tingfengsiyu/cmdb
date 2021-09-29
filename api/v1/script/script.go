@@ -5,6 +5,7 @@ import (
 	"cmdb/model"
 	"cmdb/utils"
 	"cmdb/utils/errmsg"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"io/ioutil"
 	"net/http"
@@ -245,8 +246,11 @@ func AnsiblePlaybook(c *gin.Context) {
 				}
 			}
 		}
-		//不连续ip
-		tmpip := strings.Split(ansiblePlaybook.DiscontinuousIp, ",")
+	}
+	//不连续ip
+	tmpip := strings.Split(ansiblePlaybook.DiscontinuousIp, ",")
+	fmt.Println(len(tmpip))
+	if len(tmpip) >= 2 {
 		for _, s := range tmpip {
 			server, _ := model.NetworkTopology(0, "", "", "", "", s)
 			for _, v := range server {
