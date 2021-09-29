@@ -17,19 +17,20 @@ var (
 	AccessKey string
 	SecretKey string
 
-	LogFile           string
-	LogLevel          string
-	ErrorLogFile      string
-	KubeFile          string
-	PrometheusConfDir string
-	WorkerUser        string
-	WorkerPass        string
-	WorkerSudoPass    string
-	SR_File_Max_Bytes string
-	ScriptDir         string
-	AnsibleHosts      string
-	SshdPort          int
-	RootPath          string
+	LogFile            string
+	LogLevel           string
+	ErrorLogFile       string
+	KubeFile           string
+	PrometheusConfDir  string
+	WorkerUser         string
+	WorkerPass         string
+	WorkerSudoPass     string
+	SR_File_Max_Bytes  string
+	ScriptDir          string
+	AnsibleHosts       string
+	SshdPort           int
+	RootPath           string
+	AnsiblePlaybookDir string
 )
 
 func init() {
@@ -59,7 +60,9 @@ func LoadServer(file *ini.File) {
 	AnsibleHosts = file.Section("server").Key("AnsibleHosts").MustString("")
 	SshdPort = file.Section("server").Key("SshdPort").MustInt(2223)
 	RootPath = file.Section("server").Key("RootPath").MustString("")
+	AnsiblePlaybookDir = file.Section("server").Key("AnsiblePlaybookDir").MustString("")
 }
+
 func LoadData(file *ini.File) {
 	DbHost = file.Section("database").Key("DbHost").MustString("47.s.197.46")
 	DbPort = file.Section("database").Key("DbPort").MustString("3306")

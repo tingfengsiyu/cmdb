@@ -328,10 +328,12 @@ export default {
           this.loading = true;
           // ajax request after empty completing
           console.log(this.selectedRowKeys)
-          // const { data: res } = await this.$http.delete(`idc/deleteserver/${id}`)
-          // if (res.status != 200) return this.$message.error(res.message)
-          // this.$message.success('删除成功')
-          // this.getServerList()
+          const { data: res } = await this.$http.delete(`idc/deleteserver`,{
+            ids: Number(this.selectedRowKeys)
+          })
+          if (res.status != 200) return this.$message.error(res.message)
+          this.$message.success('删除成功')
+          this.getServerList()
         },
         onCancel: () => {
           this.$message.info('已取消删除')

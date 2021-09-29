@@ -56,6 +56,9 @@
         <a-menu-item key="OpsRecords">
           <span>操作记录</span>
         </a-menu-item>
+        <a-menu-item key="ansiblePlaybook">
+          <span>ansiblePlaybook运行</span>
+        </a-menu-item>
         <a-menu-item key="osinit">
           <span>系统初始化</span>
         </a-menu-item>

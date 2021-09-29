@@ -151,7 +151,7 @@ func GenerateAnsibleHosts() error {
 		middleware.SugarLogger.Errorf("写入文件错误!!!%s", err)
 	}
 	defer file.Close()
-	maps := allHosts()
+	maps := AllHosts()
 	for k, v := range maps {
 		file.WriteString("[" + k + "]\n")
 		for _, ip := range v {
@@ -165,8 +165,25 @@ func GenerateAnsibleHosts() error {
 	return err
 }
 
+func AppendAnsibleHost(ips []string) error {
+	file, err := os.OpenFile(utils.AnsibleHosts, os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		middleware.SugarLogger.Errorf("追加文件错误!!!%s", err)
+	}
+	defer file.Close()
+	file.WriteString("[" + "tmplotus" + "]\n")
+	for _, v := range ips {
+		file.WriteString(v + "\n")
+	}
+	file.WriteString("[" + "tmplotus" + ":vars]\n")
+	file.WriteString("ansible_ssh_user=" + utils.WorkerUser + "\n")
+	file.WriteString("ansible_ssh_pass=" + utils.WorkerPass + "\n")
+	file.WriteString("ansible_sudo_pass=" + utils.WorkerSudoPass + "\n")
+	return err
+}
+
 func GenerateClustersHosts() {
-	maps := allHosts()
+	maps := AllHosts()
 	for k, v := range maps {
 		//reg := regexp.MustCompile("-(lotus|chia|tmp)-.*$");
 		//a := reg.ReplaceAllString(k, "")
@@ -207,7 +224,7 @@ func GenerateClustersHosts() {
 //	return maps
 //}
 
-func allHosts() map[string][]string {
+func AllHosts() map[string][]string {
 	ansiblehost, _ := GetServers(0, 0)
 	if err != nil {
 		middleware.SugarLogger.Errorf("sql查询错误%s", err)

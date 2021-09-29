@@ -241,7 +241,22 @@ func DeleteServer(c *gin.Context) {
 		"message": errmsg.GetErrMsg(code),
 	})
 }
+func DeleteAllServer(c *gin.Context) {
+	type Ids struct {
+		Ids []int `json :"ids"`
+	}
+	var ids Ids
+	var code int
+	_ = c.ShouldBindJSON(&ids)
+	for _, id := range ids.Ids {
+		code = model.DeleteServer(id)
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"status":  code,
+		"message": errmsg.GetErrMsg(code),
+	})
 
+}
 func GetIdcServers(c *gin.Context) {
 	pageSize, _ := strconv.Atoi(c.Query("pagesize"))
 	pageNum, _ := strconv.Atoi(c.Query("pagenum"))

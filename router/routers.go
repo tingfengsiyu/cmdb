@@ -45,6 +45,10 @@ func InitRouter() {
 		router.POST("writeprometheus", script.WritePrometheus)
 		router.GET("prometheusalerts", script.PrometheusAlerts)
 		router.GET("installmointoragent", script.InstallMointorAgent)
+		router.POST("ansibleplaybook", script.AnsiblePlaybook)
+		router.GET("getansiblehosts", script.AnsibleHosts)
+		router.GET("getplaybookfiles", script.AnsiblePlaybookFiles)
+
 		router.POST("generateansiblehosts", script.GenerateAnsibleHosts)
 		router.POST("generateclustershosts", script.GenerateClustersHosts)
 
@@ -56,6 +60,7 @@ func InitRouter() {
 		router.GET("getidcserver", idc.GetIdcServers)
 		router.GET("getcabinetserver", idc.GetCabinetServers)
 		router.DELETE("deleteserver/:id", idc.DeleteServer)
+		router.DELETE("deleteserver", idc.DeleteServer)
 		router.PUT("editservers/:id", idc.UpdateServer)
 		router.GET("getnetworktopology", idc.Networktopology)
 

@@ -21,6 +21,7 @@ const ConsoleLog = () => import(/* webpackChunkName: "UserList" */ '../component
 const TermUserList = () => import(/* webpackChunkName: "UserList" */ '../components/user/TermUserList')
 const TermPermissionsList = () => import(/* webpackChunkName: "UserList" */ '../components/user/TermPermissions')
 const Alert = () => import(/* webpackChunkName: "UserList" */ '../components/alerts/alert')
+const AnsiblePlaybook = () => import(/* webpackChunkName: "UserList" */ '../components/ops/ansiblePlaybook')
 
 // 路由重复点击捕获错误
 const originalPush = VueRouter.prototype.push
@@ -173,6 +174,13 @@ const routes = [
         component: ConsoleLog,
         meta: {
           title: '终端操作记录'
+        }
+      },
+      {
+        path: 'ansiblePlaybook',
+        component: AnsiblePlaybook,
+        meta: {
+          title: '执行ansiblePlayBook'
         }
       },
     ]

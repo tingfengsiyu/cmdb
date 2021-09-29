@@ -1,13 +1,15 @@
 package script
 
 import (
-	"cmdb/middleware"
+	logger "cmdb/middleware"
 	"cmdb/model"
 	"cmdb/utils"
 	"cmdb/utils/errmsg"
 	"github.com/gin-gonic/gin"
+	"io/ioutil"
 	"net/http"
 	"os"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -195,6 +197,96 @@ func InstallMointorAgent(c *gin.Context) {
 		},
 	)
 }
+func AnsiblePlaybook(c *gin.Context) {
+	type Playbook struct {
+		ContinuousIp    string   `json:"continuous_ip"`    //连续ip
+		DiscontinuousIp string   `json:"discontinuous_ip"` //不连续ip
+		Group           []string `json:"group"`
+		Variable        string   `json:"variable"`
+		Tag             string   `json:"tag"  binding:"required"`
+		FileName        string   `json:"filename" binding:"required"`
+	}
+	var ansiblePlaybook Playbook
+	err := c.ShouldBindJSON(&ansiblePlaybook)
+	if err != nil {
+		c.JSON(
+			http.StatusOK, gin.H{
+				"status":  404,
+				"message": "必选字段不存在",
+			},
+		)
+		return
+	}
+	//Generate ip list
+
+	user := user(c)
+	var group, cmd string
+	ips := make([]string, 0)
+	for _, v := range ansiblePlaybook.Group {
+		group = group + " " + v
+	}
+	//连续ip
+	tmpips := strings.Split(ansiblePlaybook.ContinuousIp, ",")
+	if len(tmpips) >= 1 {
+		for _, s := range tmpips {
+			tmp := strings.Split(s, "-")
+			if len(tmp) >= 2 {
+				t := strings.Split(tmp[0], ".")
+				prefix := t[0] + "." + t[1] + "." + t[2] + "."
+				tmpEnd, _ := strconv.Atoi((tmp[1]))
+				tmpStart, _ := strconv.Atoi(t[3])
+				for i := tmpStart; i <= tmpEnd; i++ {
+					server, _ := model.NetworkTopology(0, "", "", "", "", prefix+strconv.Itoa(i))
+					for _, v := range server {
+						str := v.PrivateIpAddress + " roles=" + v.Label + " hostname=" + v.Name
+						ips = append(ips, str)
+					}
+
+				}
+			}
+		}
+		//不连续ip
+		tmpip := strings.Split(ansiblePlaybook.DiscontinuousIp, ",")
+		for _, s := range tmpip {
+			server, _ := model.NetworkTopology(0, "", "", "", "", s)
+			for _, v := range server {
+				str := v.PrivateIpAddress + " roles=" + v.Label + " hostname=" + v.Name
+				ips = append(ips, str)
+			}
+		}
+	}
+	if len(ips)+len(group) == 0 {
+		c.JSON(
+			http.StatusOK, gin.H{
+				"status":  404,
+				"message": "操作ip不存在或组未选中",
+			},
+		)
+		return
+	}
+	id := model.InsertRecords(model.OpsRecords{
+		User:   user,
+		Object: ansiblePlaybook.ContinuousIp + ansiblePlaybook.DiscontinuousIp + "  " + ansiblePlaybook.Variable,
+		Action: "执行ansible" + ansiblePlaybook.FileName + " " + ansiblePlaybook.Tag,
+	})
+
+	model.GenerateAnsibleHosts()
+	model.GenerateClustersHosts()
+	model.AppendAnsibleHost(ips)
+	if group == "" {
+		cmd = "cd  " + utils.AnsiblePlaybookDir + "; ansible-playbook   tmplotus " + " -t " + ansiblePlaybook.Tag + " " + ansiblePlaybook.FileName + " -e " + "'" + ansiblePlaybook.Variable + "'"
+	} else {
+		cmd = "cd  " + utils.AnsiblePlaybookDir + "; ansible-playbook   " + "'" + group + "'" + " -t " + ansiblePlaybook.Tag + " " + ansiblePlaybook.FileName + " -e " + "'" + ansiblePlaybook.Variable + "'"
+	}
+	c.Copy()
+	go model.ExecLocalShell(id, cmd)
+	c.JSON(
+		http.StatusOK, gin.H{
+			"status":  200,
+			"message": "任务执行中",
+		},
+	)
+}
 
 func GenerateAnsibleHosts(c *gin.Context) {
 	var code int
@@ -206,6 +298,52 @@ func GenerateAnsibleHosts(c *gin.Context) {
 	c.JSON(
 		http.StatusOK, gin.H{
 			"status":  code,
+			"message": errmsg.GetErrMsg(code),
+		},
+	)
+}
+func AnsibleHosts(c *gin.Context) {
+	maps := model.AllHosts()
+	code := 200
+	type cluster struct {
+		Id    int    `json:"id"`
+		Group string `json:"cluster"`
+	}
+	var host = []cluster{}
+	for k, _ := range maps {
+		host = append(host, cluster{Id: 0, Group: k})
+	}
+
+	c.JSON(
+		http.StatusOK, gin.H{
+			"status":  code,
+			"data":    host,
+			"message": errmsg.GetErrMsg(code),
+		},
+	)
+}
+func AnsiblePlaybookFiles(c *gin.Context) {
+	code := 200
+	type cluster struct {
+		Id       int    `json:"id"`
+		FileName string `json:"filename"`
+	}
+	var yamls = []cluster{}
+	files, err := ioutil.ReadDir(utils.AnsiblePlaybookDir)
+	if err != nil {
+		logger.SugarLogger.Error(err)
+	}
+
+	for _, file := range files {
+		if ok, _ := regexp.MatchString(".yml|.yaml", file.Name()); ok {
+			yamls = append(yamls, cluster{0,
+				file.Name()})
+		}
+	}
+	c.JSON(
+		http.StatusOK, gin.H{
+			"status":  code,
+			"data":    yamls,
 			"message": errmsg.GetErrMsg(code),
 		},
 	)
@@ -325,7 +463,7 @@ func ExecWebShell(c *gin.Context) {
 	model.GenerateAnsibleHosts()
 	file, err := os.OpenFile(tmpfile, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0666)
 	if err != nil {
-		middleware.SugarLogger.Errorf("写入文件错误!!!%s", err)
+		logger.SugarLogger.Errorf("写入文件错误!!!%s", err)
 	}
 	defer file.Close()
 	file.WriteString("#!/bin/bash\n")

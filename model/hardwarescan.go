@@ -4,7 +4,7 @@ import (
 	"strings"
 )
 
-var mac = ""
+var mac = "null"
 
 func ScanHardWareInfo() {
 	servers, _ := GetServers(0, 0)
@@ -15,7 +15,7 @@ fdisk -l  |grep Disk  |grep dev |egrep -v "md|mapper"  |awk "{print \$2,\$3,\$4}
 if [ -f /usr/bin/nvidia-smi  ]; then nvidia-smi -L |awk "{print \$5}" ; else echo nogpu; fi '`
 			outs := ExecLocalShell(0, cmd)
 			s := strings.Split(outs, "\n")
-			db.Model(&Server{}).Where("private_ip_address =? ", ip).Updates(Server{Memory: s[3], Cpu: strings.TrimSpace(s[4]), Disk: s[5], Mac: mac, Gpu: s[6] + " " + s[len(s)-1]})
+			db.Model(&Server{}).Where("private_ip_address =? ", ip).Updates(Server{Memory: s[3], Cpu: strings.TrimSpace(s[4]), Disk: s[5], Mac: mac, Gpu: s[6] + " " + s[7]})
 		}(v.PrivateIpAddress)
 	}
 }
