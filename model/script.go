@@ -136,6 +136,7 @@ func ExecLocalShell(id int, command string) string {
 	}
 	if ctx.Err() != nil {
 		status = 0
+		cmd_err = cmd_err + ctx.Err().Error()
 	}
 	//fmt.Printf("ctx.Err : [%v]\n", ctx.Err())
 	//fmt.Printf("error   : [%v]\n", err)

@@ -278,9 +278,9 @@ func AnsiblePlaybook(c *gin.Context) {
 	model.GenerateClustersHosts()
 	model.AppendAnsibleHost(ips)
 	if group == "" {
-		cmd = "cd  " + utils.AnsiblePlaybookDir + "; ansible-playbook   tmplotus " + " -t " + ansiblePlaybook.Tag + " " + ansiblePlaybook.FileName + " -e " + "'" + ansiblePlaybook.Variable + "'"
+		cmd = "cd  " + utils.AnsiblePlaybookDir + "; ansible-playbook --limit     tmplotus " + " -t " + ansiblePlaybook.Tag + " " + ansiblePlaybook.FileName + " -e " + "'" + ansiblePlaybook.Variable + "'"
 	} else {
-		cmd = "cd  " + utils.AnsiblePlaybookDir + "; ansible-playbook   " + "'" + group + "'" + " -t " + ansiblePlaybook.Tag + " " + ansiblePlaybook.FileName + " -e " + "'" + ansiblePlaybook.Variable + "'"
+		cmd = "cd  " + utils.AnsiblePlaybookDir + "; ansible-playbook --limit    " + "'" + group + "'" + " -t " + ansiblePlaybook.Tag + " " + ansiblePlaybook.FileName + " -e " + "'" + ansiblePlaybook.Variable + "'"
 	}
 	c.Copy()
 	go model.ExecLocalShell(id, cmd)
