@@ -12,10 +12,10 @@
         <a-row :gutter="24">
           <a-col :span="10">
             <a-form-model-item label="连续ip">
-              <a-input style="width:300px" v-model="ops.continuous_ip"></a-input>
+              <a-input style="width:300px" v-model="ops.continuous_ip" placeholder="127.0.0.1-2,127.0.0.2-3"></a-input>
             </a-form-model-item>
             <a-form-model-item has-feedback label="不连续ip" >
-              <a-input style="width:300px" v-model="ops.discontinuous_ip" />
+              <a-input style="width:300px" v-model="ops.discontinuous_ip" placeholder="127.0.0.1,127.0.0.2" />
             </a-form-model-item>
             <a-form-model-item label="目标主机组" >
               <a-select placeholder="请选择组名"  mode="multiple"  style="width:100%" @change="handleChange" >

@@ -60,7 +60,7 @@ func InitRouter() {
 		router.GET("getidcserver", idc.GetIdcServers)
 		router.GET("getcabinetserver", idc.GetCabinetServers)
 		router.DELETE("deleteserver/:id", idc.DeleteServer)
-		router.DELETE("deleteserver", idc.DeleteServer)
+		router.DELETE("deleteallserver", idc.DeleteAllServer)
 		router.PUT("editservers/:id", idc.UpdateServer)
 		router.GET("getnetworktopology", idc.Networktopology)
 
