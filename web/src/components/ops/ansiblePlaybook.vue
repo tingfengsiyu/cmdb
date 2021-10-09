@@ -22,11 +22,11 @@
                 <a-select-option v-for="item in ClusterList" :key="item.id" :value="item.cluster" >{{item.cluster}}</a-select-option>
               </a-select>
             </a-form-model-item>
-            <a-form-model-item has-feedback label="标签" prop="tag">
-              <a-input style="width:300px" v-model="ops.tag" />
+            <a-form-model-item has-feedback label="标签任务" prop="tag">
+              <a-input style="width:300px" v-model="ops.tag" @change="clearChange" />
             </a-form-model-item>
-            <a-form-model-item has-feedback label="变量" prop="variable">
-              <a-input style="width:300px" v-model="ops.variable" />
+            <a-form-model-item has-feedback label="变量" prop="variable" >
+              <a-input style="width:300px" v-model="tips"  />
             </a-form-model-item>
             <a-form-model-item label="playbook文件名" prop="filename">
               <a-select placeholder="选择playbook文件名"  style="width:100%" @change="fileChange" >
@@ -64,10 +64,26 @@ export default {
       FileList:[],
       headers: {},
       opsRules: {
-        tag: [{ required: true, message: '请输入tags', trigger: 'blur' }],
+        tag: [{ required: true, message: '请输入tags应用', trigger: 'blur' }],
         variable: [{ required: true, message: '请输入ansible变量', trigger: 'blur' }],
         filename: [{ required: true, message: '请选择ansiblePlaybbok文件', trigger: 'blur' }],
       },
+    }
+  },
+  computed:{
+    tips: {
+      get(){
+        if(this.ops.variable) return this.ops.variable
+        switch(this.ops.tag){
+          case 'worker': return "miner=minerip,roles=lotus-worker"
+          case 'del': return "del=all"
+          case 'api': return "a=null"
+          default: return this.ops.variable || 'a=b'
+        }
+      },
+      set(val){
+        this.$set(this.ops, 'variable', val)
+      }
     }
   },
   created() {
@@ -90,6 +106,9 @@ export default {
 
     handleChange(value) {
       this.ops.group = value;
+    },
+    clearChange(){
+      this.ops.variable = '' 
     },
     fileChange(value) {
       this.ops.filename=value
