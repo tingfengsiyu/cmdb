@@ -5,7 +5,6 @@ import (
 	"cmdb/model"
 	"cmdb/utils"
 	"cmdb/utils/errmsg"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"io/ioutil"
 	"net/http"
@@ -237,25 +236,28 @@ func AnsiblePlaybook(c *gin.Context) {
 				tmpEnd, _ := strconv.Atoi((tmp[1]))
 				tmpStart, _ := strconv.Atoi(t[3])
 				for i := tmpStart; i <= tmpEnd; i++ {
-					server, _ := model.NetworkTopology(0, "", "", "", "", prefix+strconv.Itoa(i))
-					for _, v := range server {
-						str := v.PrivateIpAddress + " roles=" + v.Label + " hostname=" + v.Name
-						ips = append(ips, str)
+					ip := strings.TrimSpace(prefix + strconv.Itoa(i))
+					if len(ip) > 2 {
+						server, _ := model.NetworkTopology(0, "", "", "", "", ip)
+						for _, v := range server {
+							str := v.PrivateIpAddress + " roles=" + v.Label + " hostname=" + v.Name
+							ips = append(ips, str)
+						}
 					}
-
 				}
 			}
 		}
 	}
 	//不连续ip
 	tmpip := strings.Split(ansiblePlaybook.DiscontinuousIp, ",")
-	fmt.Println(len(tmpip))
-	if len(tmpip) >= 2 {
+	if len(tmpip) >= 1 {
 		for _, s := range tmpip {
-			server, _ := model.NetworkTopology(0, "", "", "", "", s)
-			for _, v := range server {
-				str := v.PrivateIpAddress + " roles=" + v.Label + " hostname=" + v.Name
-				ips = append(ips, str)
+			if len(strings.TrimSpace(s)) > 2 {
+				server, _ := model.NetworkTopology(0, "", "", "", "", strings.TrimSpace(s))
+				for _, v := range server {
+					str := v.PrivateIpAddress + " roles=" + v.Label + " hostname=" + v.Name
+					ips = append(ips, str)
+				}
 			}
 		}
 	}
@@ -270,7 +272,7 @@ func AnsiblePlaybook(c *gin.Context) {
 	}
 	id := model.InsertRecords(model.OpsRecords{
 		User:   user,
-		Object: ansiblePlaybook.ContinuousIp + ansiblePlaybook.DiscontinuousIp + "  " + ansiblePlaybook.Variable,
+		Object: ansiblePlaybook.ContinuousIp + "," + ansiblePlaybook.DiscontinuousIp + "  " + ansiblePlaybook.Variable,
 		Action: "执行ansible" + ansiblePlaybook.FileName + " " + ansiblePlaybook.Tag,
 	})
 
@@ -278,7 +280,7 @@ func AnsiblePlaybook(c *gin.Context) {
 	model.GenerateClustersHosts()
 	model.AppendAnsibleHost(ips)
 	if group == "" {
-		cmd = "cd  " + utils.AnsiblePlaybookDir + "; ansible-playbook --limit     tmplotus " + " -t " + ansiblePlaybook.Tag + " " + ansiblePlaybook.FileName + " -e " + "'" + ansiblePlaybook.Variable + "'"
+		cmd = "cd  " + utils.AnsiblePlaybookDir + "; ansible-playbook --limit   tmplotus  -i " + utils.AnsibleHosts + "-tmplotus  -t " + ansiblePlaybook.Tag + " " + ansiblePlaybook.FileName + " -e " + "'" + ansiblePlaybook.Variable + "'"
 	} else {
 		cmd = "cd  " + utils.AnsiblePlaybookDir + "; ansible-playbook --limit    " + "'" + group + "'" + " -t " + ansiblePlaybook.Tag + " " + ansiblePlaybook.FileName + " -e " + "'" + ansiblePlaybook.Variable + "'"
 	}
