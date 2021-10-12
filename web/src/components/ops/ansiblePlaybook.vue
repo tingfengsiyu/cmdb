@@ -75,10 +75,15 @@ export default {
       get(){
         if(this.ops.variable) return this.ops.variable
         switch(this.ops.tag){
-          case 'worker': return "miner=minerip,roles=lotus-worker"
-          case 'del': return "del=all"
+          case 'worker': return "miner=minerip roles=lotus-worker"
+          case 'worker1': return "miner=minerip roles=lotus-worker"
+          case 'del': return "null=null"
           case 'api': return "a=null"
-          default: return this.ops.variable || 'a=b'
+          case 'qiniu': return "id=1234 roles=lotus-worker"
+          case 'init': return "ansible_ssh_user=username ansible_ssh_pass=pass ansible_sudo_pass=sudopass"
+          case 'nfs-init': return "ansible_ssh_user=username ansible_ssh_pass=pass ansible_sudo_pass=sudopass"
+          case 'nfs-mount': return "sip=startip dip=stop_ip_number opt=all|add "
+          default: return this.ops.variable || 'var=value'
         }
       },
       set(val){
