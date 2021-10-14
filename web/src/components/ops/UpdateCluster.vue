@@ -28,9 +28,9 @@
           <a-button
               type="danger"
               style="margin-right:15px"
-              @click.once="artOk"
+              @click="artOk"
           >"提交"</a-button>
-          <a-button type="primary" @click.once="addCancel">取消</a-button>
+          <a-button type="primary" @click="addCancel">取消</a-button>
         </a-form-model-item>
       </a-form-model>
     </a-card>

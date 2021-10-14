@@ -46,7 +46,7 @@
     <!-- 新增终端用户区域 -->
     <a-modal
         closable
-        title="新增终端用户"
+        title="新增用户权限"
         :visible="addUserVisible"
         width="60%"
         @ok="addPermissionsOk"

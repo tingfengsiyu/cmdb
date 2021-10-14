@@ -68,9 +68,9 @@
           <a-button
               type="danger"
               style="margin-right:15px"
-              @click.once="artOk(serverInfo.id)"
+              @click="artOk(serverInfo.id)"
           >{{serverInfo.id ? '更新':"提交"}}</a-button>
-          <a-button type="primary" @click.once="addCancel">取消</a-button>
+          <a-button type="primary" @click="addCancel">取消</a-button>
         </a-form-model-item>
       </a-form-model>
     </a-card>
