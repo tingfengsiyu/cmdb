@@ -26,7 +26,7 @@
             <a-form-model-item label="执行操作" prop="operating">
 <!--              <a-input style="width:300px" v-model="ops.operating"></a-input>-->
 
-            <a-select default-value="add" style="width: 120px" @change="handleChange">
+            <a-select  style="width: 120px" @change="handleChange">
               <a-select-option value="add">
                 add
               </a-select-option>

@@ -26,7 +26,7 @@ var (
 	WorkerPass         string
 	WorkerSudoPass     string
 	SR_File_Max_Bytes  string
-	ScriptDir          string
+	PrometheusAddr     string
 	AnsibleHosts       string
 	SshdPort           int
 	RootPath           string
@@ -56,7 +56,7 @@ func LoadServer(file *ini.File) {
 	WorkerPass = file.Section("server").Key("WorkerPass").MustString("xxxx/cmdb")
 	WorkerSudoPass = file.Section("server").Key("WorkerSudoPass").MustString("xxxx/cmdb")
 	SR_File_Max_Bytes = file.Section("server").Key("SR_File_Max_Bytes").MustString("")
-	ScriptDir = file.Section("server").Key("ScriptDir").MustString("")
+	PrometheusAddr = file.Section("server").Key("PrometheusAddr").MustString("127.0.0.1:9090")
 	AnsibleHosts = file.Section("server").Key("AnsibleHosts").MustString("")
 	SshdPort = file.Section("server").Key("SshdPort").MustInt(2223)
 	RootPath = file.Section("server").Key("RootPath").MustString("")

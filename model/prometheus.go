@@ -198,7 +198,7 @@ type AlertInfo struct {
 
 func PrometheusAlerts() []AlertInfo {
 	client := &http.Client{Timeout: 200 * time.Millisecond}
-	resp, _ := client.Get("http://30.10.0.18:39090/api/v1/alerts")
+	resp, _ := client.Get("http://" + utils.PrometheusAddr + "/api/v1/alerts")
 	body, _ := ioutil.ReadAll(resp.Body)
 	var a alert
 	var alertinfo = []AlertInfo{}
