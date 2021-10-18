@@ -30,13 +30,13 @@
                 type="primary"
                 icon="edit"
                 style="margin-right:15px"
-                @click="editPermission(data.ID)"
+                @click="editPermission(data.id)"
             >编辑</a-button>
             <a-button
                 type="danger"
                 icon="delete"
                 style="margin-right:15px"
-                @click="deleteUserPermissions(data.ID)"
+                @click="deleteUserPermissions(data.id)"
             >删除</a-button>
           </div>
         </template>
